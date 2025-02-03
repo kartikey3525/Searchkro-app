@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "872169733649",
+    "project_id": "searchkro-d6ff3",
+    "storage_bucket": "searchkro-d6ff3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872169733649:android:e8c6ff5c1811008b663bb0",
+        "android_client_info": {
+          "package_name": "com.searchkro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872169733649-7j0kae17vh4i7b7991f30c4pkon8mmlc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.searchkro",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpzgc1rCN8ASXDMSzCxoB0f-IhOyI0ZFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
