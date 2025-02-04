@@ -1,31 +1,27 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
-  TextInput,
   StyleSheet,
   Text,
   FlatList,
   TouchableOpacity,
   Image,
   Pressable,
-  Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
-import Feather from 'react-native-vector-icons/Feather';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 import {ScrollView} from 'react-native-gesture-handler';
-import {Slider} from '@miblanchard/react-native-slider';
-import RatingButtons from '../components/RatingButtons';
 
 export default function PostHistory({navigation}) {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [value, setValue] = useState([0, 2]);
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -64,6 +60,7 @@ export default function PostHistory({navigation}) {
             {
               overflow: 'hidden',
               flexDirection: 'row',
+              backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
             },
           ]}>
           <Image
@@ -88,6 +85,7 @@ export default function PostHistory({navigation}) {
                   fontSize: 14,
                   margin: 5,
                   marginTop: 10,
+                  color: isDark ? 'white' : 'rgba(29, 30, 32, 1)',
                   marginLeft: 0,
                   width: Width * 0.45,
                 },
@@ -108,7 +106,7 @@ export default function PostHistory({navigation}) {
                   styles.recListText,
                   {
                     marginTop: 0,
-                    color: 'rgba(29, 30, 32, 1)',
+                    color: isDark ? 'white' : 'rgba(29, 30, 32, 1)',
                     fontWeight: 'bold',
                     fontSize: 12,
                     width: 130,
@@ -123,7 +121,7 @@ export default function PostHistory({navigation}) {
             onPress={() => toggleModal(item.id)} // Use toggleModal instead of setModalVisible
             name="dots-three-vertical"
             size={24}
-            color="rgb(0, 0, 0)"
+            color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
             style={{alignSelf: 'flex-start', marginTop: 10}}
           />
         </View>
@@ -136,7 +134,11 @@ export default function PostHistory({navigation}) {
               right: 24,
             }}
             onPress={() => toggleModal(item.id)}>
-            <View style={styles.modalContent}>
+            <View
+              style={[
+                styles.modalContent,
+                {backgroundColor: isDark ? '#121212' : 'white'},
+              ]}>
               <TouchableOpacity
                 style={{
                   padding: 4,
@@ -148,12 +150,17 @@ export default function PostHistory({navigation}) {
                 <Ionicons
                   name={'trash-outline'}
                   size={16}
-                  color="rgba(94, 95, 96, 1)"
+                  color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
                 />
                 <Text
                   style={[
                     styles.bigText,
-                    {fontSize: 16, marginLeft: 5, fontWeight: '500'},
+                    {
+                      fontSize: 16,
+                      marginLeft: 5,
+                      fontWeight: '500',
+                      color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                    },
                   ]}>
                   Delete
                 </Text>
@@ -180,12 +187,17 @@ export default function PostHistory({navigation}) {
                 <Ionicons
                   name={'trash-outline'}
                   size={16}
-                  color="rgba(94, 95, 96, 1)"
+                  color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
                 />
                 <Text
                   style={[
                     styles.bigText,
-                    {fontSize: 16, marginLeft: 5, fontWeight: '500'},
+                    {
+                      fontSize: 16,
+                      marginLeft: 5,
+                      fontWeight: '500',
+                      color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                    },
                   ]}>
                   Delete all
                 </Text>
@@ -198,7 +210,7 @@ export default function PostHistory({navigation}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -211,7 +223,7 @@ export default function PostHistory({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -222,6 +234,7 @@ export default function PostHistory({navigation}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               width: Width * 0.72,
+              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
               textAlign: 'center',
             },
           ]}>

@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 // import {TextInput} from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
+import {ThemeContext} from '../context/themeContext';
 
 export default function AddressScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [suggestedLocations, setSuggestedLocations] = useState([
     {id: 1, location: 'New York'},
     {id: 2, location: 'Los Angeles'},
@@ -22,19 +26,43 @@ export default function AddressScreen({navigation}) {
   ]);
 
   return (
-    <View style={styles.screen}>
-      <Text style={[styles.bigText, {left: 10}]}>Choose location</Text>
+    <View
+      style={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000000' : '#FFFFFF'},
+      ]}>
+      <Text
+        style={[
+          styles.bigText,
+          {left: 10, color: isDark ? '#FFFFFF' : '#000000'},
+        ]}>
+        Choose location
+      </Text>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderBottomcolor: isDark
+              ? 'rgba(255, 255, 255, 1)'
+              : 'rgba(42, 43, 43, 1)',
+          },
+        ]}>
         <Octicons
           name="location"
           size={25}
-          color="rgba(42, 43, 43, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(42, 43, 43, 1)'}
           style={{marginLeft: 0}}
         />
         <TextInput
           // value={'text'}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              color: isDark ? '#FFFFFF' : '#000000',
+              backgroundColor: isDark ? '#000000' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}
           // onChangeText={setText}
           placeholderTextColor={'black'}
           autoCapitalize="none"
@@ -87,6 +115,7 @@ export default function AddressScreen({navigation}) {
                   textAlign: 'left',
                   fontSize: 20,
                   left: 8,
+                  color: isDark ? '#FFFFFF' : '#000000',
                 },
               ]}>
               {item.location}
@@ -95,7 +124,7 @@ export default function AddressScreen({navigation}) {
               style={[
                 styles.smallText,
                 {
-                  color: 'rgba(99, 99, 99, 1)',
+                  color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
                   textAlign: 'left',
                   fontSize: 17,
                   left: 8,
@@ -177,6 +206,7 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 20,
     alignItems: 'center',
+    alignSelf: 'center',
     justifyContent: 'center',
   },
   whiteBotton: {

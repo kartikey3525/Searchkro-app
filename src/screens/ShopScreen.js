@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   TextInput,
@@ -14,6 +14,7 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Rating} from 'react-native-ratings';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
@@ -24,6 +25,8 @@ import {Slider} from '@miblanchard/react-native-slider';
 import RatingButtons from '../components/RatingButtons';
 
 export default function ShopScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState([0, 2]);
   const [value1, setValue1] = useState();
@@ -57,6 +60,7 @@ export default function ShopScreen({navigation}) {
           style={[
             styles.rectangle2,
             {
+              backgroundColor: isDark ? 'rgba(39, 39, 39, 1)' : '#fff',
               overflow: 'hidden',
               flexDirection: 'row',
             },
@@ -80,6 +84,7 @@ export default function ShopScreen({navigation}) {
                 styles.recListText,
                 {
                   fontWeight: 'bold',
+                  color: isDark ? '#fff' : '#000',
                   fontSize: 14,
                   margin: 5,
                   marginTop: 10,
@@ -98,7 +103,13 @@ export default function ShopScreen({navigation}) {
                 numberOfLines={1}
                 style={[
                   styles.recListText,
-                  {fontWeight: 'bold', marginTop: 0, fontSize: 13, width: 30},
+                  {
+                    fontWeight: 'bold',
+                    marginTop: 0,
+                    fontSize: 13,
+                    width: 30,
+                    color: isDark ? '#fff' : '#000',
+                  },
                 ]}>
                 4.5
               </Text>
@@ -126,7 +137,7 @@ export default function ShopScreen({navigation}) {
                   styles.recListText,
                   {
                     marginTop: 0,
-                    color: 'rgba(29, 30, 32, 1)',
+                    color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                     fontWeight: 'bold',
                     fontSize: 10,
                   },
@@ -139,7 +150,7 @@ export default function ShopScreen({navigation}) {
                   styles.recListText,
                   {
                     marginTop: 0,
-                    color: 'rgba(29, 30, 32, 1)',
+                    color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                     fontWeight: '500',
                     fontSize: 10,
                     width: 95,
@@ -158,7 +169,11 @@ export default function ShopScreen({navigation}) {
                 marginTop: 2,
               }}>
               <Image
-                source={require('../assets/location.png')}
+                source={
+                  isDark
+                    ? require('../assets/locatin-dark.png')
+                    : require('../assets/location.png')
+                }
                 style={{
                   width: 12,
                   height: 15,
@@ -171,7 +186,7 @@ export default function ShopScreen({navigation}) {
                   styles.recListText,
                   {
                     marginTop: 0,
-                    color: 'rgba(29, 30, 32, 1)',
+                    color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                     fontWeight: '500',
                     fontSize: 10,
                     width: 200,
@@ -298,7 +313,7 @@ export default function ShopScreen({navigation}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -311,7 +326,7 @@ export default function ShopScreen({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -319,6 +334,7 @@ export default function ShopScreen({navigation}) {
             styles.bigText,
             {
               fontSize: 20,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
               fontWeight: 'bold',
               alignSelf: 'center',
               width: Width * 0.72,
@@ -338,7 +354,11 @@ export default function ShopScreen({navigation}) {
             alignItems: 'center',
           }}>
           <Image
-            source={require('../assets/location.png')}
+            source={
+              isDark
+                ? require('../assets/locatin-dark.png')
+                : require('../assets/location.png')
+            }
             style={{
               width: 24,
               height: 22,
@@ -361,7 +381,11 @@ export default function ShopScreen({navigation}) {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {backgroundColor: isDark ? 'rgba(39, 39, 39, 1)' : '#fff'},
+            ]}>
             <Image
               source={require('../assets/search-icon.png')}
               style={{
@@ -374,9 +398,18 @@ export default function ShopScreen({navigation}) {
             />
             <TextInput
               // value={'text'}
-              style={styles.searchInput}
+              style={[
+                styles.searchInput,
+                {
+                  color: isDark
+                    ? 'rgba(255, 255, 255, 1)'
+                    : 'rgba(94, 95, 96, 1)',
+                },
+              ]}
               // onChangeText={setText}
-              placeholderTextColor={'rgba(94, 95, 96, 1)'}
+              placeholderTextColor={
+                isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+              }
               placeholder="Search here"
               autoCapitalize="none"
               onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
@@ -386,12 +419,14 @@ export default function ShopScreen({navigation}) {
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? 'rgba(39, 39, 39, 1)' : 'white',
               height: 50,
               width: '13%',
               alignSelf: 'center',
               borderRadius: 10,
-              borderColor: 'rgb(0, 0, 0)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.31)'
+                : 'rgb(0, 0, 0)',
               justifyContent: 'center',
               alignItems: 'center',
               borderWidth: 1,
@@ -430,11 +465,17 @@ export default function ShopScreen({navigation}) {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}>
         <Pressable
-          style={styles.modalContainer}
+          style={[styles.modalContainer]}
           // onPress={() => setModalVisible(false)}
         >
-          <View style={styles.modalContent}>
-            <View
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)',
+              },
+            ]}>
+            <Pressable
               style={{
                 height: 5,
                 backgroundColor: 'lightgrey',
@@ -444,6 +485,7 @@ export default function ShopScreen({navigation}) {
                 borderRadius: 10,
                 top: 10,
               }}
+              onPress={() => setModalVisible(false)}
             />
             <View
               style={{
@@ -459,6 +501,9 @@ export default function ShopScreen({navigation}) {
                     fontSize: 17,
                     fontWeight: 'bold',
                     width: Width * 0.76,
+                    color: isDark
+                      ? 'rgba(255, 255, 255, 1)'
+                      : 'rgba(0, 0, 0, 1)',
                   },
                 ]}>
                 Quick sort
@@ -468,6 +513,9 @@ export default function ShopScreen({navigation}) {
                 style={[
                   styles.bigText,
                   {
+                    color: isDark
+                      ? 'rgba(255, 255, 255, 1)'
+                      : 'rgba(0, 0, 0, 1)',
                     fontSize: 17,
                     fontWeight: 'bold',
                   },
@@ -497,8 +545,9 @@ export default function ShopScreen({navigation}) {
                 <Octicons
                   name={'star-fill'}
                   size={22}
-                  color="rgba(94, 95, 96, 1)"
-                  style={{}}
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
                 />
 
                 <Text
@@ -508,6 +557,7 @@ export default function ShopScreen({navigation}) {
                       fontSize: 18,
                       fontWeight: 'bold',
                       marginLeft: 6,
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     },
                   ]}>
                   Top Rated
@@ -527,7 +577,9 @@ export default function ShopScreen({navigation}) {
                 <Octicons
                   name={'star-fill'}
                   size={22}
-                  color="rgba(94, 95, 96, 1)"
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
                 />
 
                 <Text
@@ -537,6 +589,7 @@ export default function ShopScreen({navigation}) {
                       fontSize: 18,
                       fontWeight: 'bold',
                       marginLeft: 6,
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     },
                   ]}>
                   Quick Response
@@ -563,6 +616,7 @@ export default function ShopScreen({navigation}) {
                   fontSize: 17,
                   fontWeight: 'bold',
                   alignSelf: 'flex-start',
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                 },
               ]}>
               Rating
@@ -586,6 +640,7 @@ export default function ShopScreen({navigation}) {
                   fontSize: 17,
                   fontWeight: 'bold',
                   alignSelf: 'flex-start',
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                 },
               ]}>
               Distance to me

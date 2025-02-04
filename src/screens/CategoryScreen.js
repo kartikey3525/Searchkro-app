@@ -9,8 +9,6 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
@@ -19,9 +17,13 @@ const Height = Dimensions.get('window').height;
 import {ScrollView} from 'react-native-gesture-handler';
 import {useIsFocused} from '@react-navigation/native';
 import {AuthContext} from '../context/authcontext';
+import {ThemeContext} from '../context/themeContext';
 
 export default function CategoryScreen({navigation, route}) {
   const isFocused = useIsFocused();
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const {isposting, setisposting} = useContext(AuthContext);
 
   const {getCategories, fullCategorydata, nearbyPosts} =
     useContext(AuthContext);
@@ -54,14 +56,20 @@ export default function CategoryScreen({navigation, route}) {
           borderWidth: 1,
           flexDirection: 'row',
           alignSelf: 'center',
+          backgroundColor: isDark
+            ? 'rgba(29, 30, 32, 1)'
+            : 'rgba(255, 255, 255, 1)',
           borderRadius: 10,
+          borderColor: isDark
+            ? 'rgba(109, 109, 109, 0.43)'
+            : 'rgba(0, 0, 0, 1)',
           height: Height * 0.08,
           justifyContent: 'flex-start',
         }}
         onPress={() => [
           navigation.navigate('Subcategory', {
             item: item.subCategories,
-            isposting: route?.params?.isposting,
+            isposting: isposting,
             selectedcategory: [item.name],
           }),
         ]}>
@@ -77,13 +85,19 @@ export default function CategoryScreen({navigation, route}) {
           />
         </View>
 
-        <Text style={{marginLeft: 10, fontWeight: 'bold', width: Width * 0.64}}>
+        <Text
+          style={{
+            marginLeft: 10,
+            fontWeight: 'bold',
+            width: Width * 0.64,
+            color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
+          }}>
           {item.name}
         </Text>
         <Entypo
           name="chevron-thin-right"
           size={22}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginRight: 5}}
         />
       </TouchableOpacity>
@@ -91,7 +105,13 @@ export default function CategoryScreen({navigation, route}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgba(255, 255, 255, 1)',
+        },
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -104,7 +124,7 @@ export default function CategoryScreen({navigation, route}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -115,6 +135,7 @@ export default function CategoryScreen({navigation, route}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '26%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
             },
           ]}>
           Categories
@@ -134,7 +155,15 @@ export default function CategoryScreen({navigation, route}) {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(29, 30, 32, 1)'
+                  : 'rgba(255, 255, 255, 1)',
+              },
+            ]}>
             <Image
               source={require('../assets/search-icon.png')}
               style={{
@@ -147,7 +176,14 @@ export default function CategoryScreen({navigation, route}) {
             />
             <TextInput
               // value={'text'}
-              style={styles.searchInput}
+              style={[
+                styles.searchInput,
+                {
+                  color: isDark
+                    ? 'rgba(255, 255, 255, 1)'
+                    : 'rgba(94, 95, 96, 1)',
+                },
+              ]}
               // onChangeText={setText}
               placeholderTextColor={'rgba(94, 95, 96, 1)'}
               placeholder="Search Categories"

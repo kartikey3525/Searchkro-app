@@ -6,9 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import {HelperText} from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
@@ -16,20 +16,21 @@ import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 import {launchImageLibrary} from 'react-native-image-picker';
-import Octicons from 'react-native-vector-icons/Octicons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {useContext} from 'react';
 import DatePicker from 'react-native-date-picker';
+import {ThemeContext} from '../context/themeContext';
+
 // import PhoneInput from 'react-phone-number-input/input';
 // import PhoneTextInput from '../components/PhoneTextInput';
 export default function EditProfile({navigation}) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [date, setDate] = useState(new Date());
-
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(false);
   const [media, setMedia] = useState([]);
   const [open, setOpen] = useState('');
@@ -121,7 +122,11 @@ export default function EditProfile({navigation}) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? 'black' : 'white'},
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -135,7 +140,7 @@ export default function EditProfile({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -146,6 +151,7 @@ export default function EditProfile({navigation}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '25%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)',
             },
           ]}>
           Edit profile
@@ -160,30 +166,57 @@ export default function EditProfile({navigation}) {
             marginBottom: 30,
           },
         ]}>
-        <Image
-          source={require('../assets/User-image.png')}
-          style={{
-            width: 120,
-            height: 120,
-            alignSelf: 'center',
-            overflow: 'hidden',
-            borderRadius: 100,
-            top: 15,
-            borderWidth: 5,
-            borderColor: 'rgba(0, 0, 0, 0.14)',
-          }}
-        />
-        <Image
-          source={require('../assets/edit.png')}
-          style={{
-            width: 50,
-            height: 35,
-            right: 35,
-            bottom: 20,
-            alignSelf: 'flex-end',
-          }}
-          resizeMode="contain"
-        />
+        {media && media.length > 0 ? (
+          <>
+            <Image
+              source={{uri: media[0].uri}}
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: 'center',
+                overflow: 'hidden',
+                borderRadius: 100,
+                top: 15,
+                borderWidth: 5,
+                borderColor: 'rgba(0, 0, 0, 0.14)',
+              }}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMedia([])} // Properly reset media array
+            >
+              <Entypo name="cross" size={25} color="black" />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Image
+            source={require('../assets/User-image.png')}
+            style={{
+              width: 120,
+              height: 120,
+              alignSelf: 'center',
+              overflow: 'hidden',
+              borderRadius: 100,
+              top: 15,
+              borderWidth: 5,
+              borderColor: 'rgba(0, 0, 0, 0.14)',
+            }}
+          />
+        )}
+
+        <Pressable onPress={selectMedia}>
+          <Image
+            source={require('../assets/edit.png')}
+            style={{
+              width: 50,
+              height: 35,
+              right: 35,
+              bottom: 20,
+              alignSelf: 'flex-end',
+            }}
+            resizeMode="contain"
+          />
+        </Pressable>
         <View style={{alignSelf: 'center'}}>
           <Text
             style={[
@@ -192,7 +225,7 @@ export default function EditProfile({navigation}) {
                 fontSize: 15,
                 width: 200,
                 fontWeight: 'bold',
-                color: 'black',
+                color: isDark ? 'white' : 'black',
                 alignSelf: 'center',
                 textAlign: 'center',
               },
@@ -204,7 +237,7 @@ export default function EditProfile({navigation}) {
             style={[
               styles.recListText,
               {
-                color: 'rgba(23, 23, 23, 0.59)',
+                color: isDark ? 'white' : 'rgba(23, 23, 23, 0.59)',
                 alignSelf: 'center',
                 textAlign: 'center',
               },
@@ -226,11 +259,17 @@ export default function EditProfile({navigation}) {
         />
         <TextInput
           value={email}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? 'black' : 'white',
+              color: isDark ? 'white' : 'black',
+            },
+          ]}
           onChangeText={setEmail}
           placeholder="Name"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? 'white' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -257,11 +296,17 @@ export default function EditProfile({navigation}) {
 
         <TextInput
           value={formatDate(date)}
-          style={styles.textInput}
           onChangeText={setEmail}
           placeholder="Date"
           mode="outlined"
-          placeholderTextColor={'black'}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? 'black' : 'white',
+              color: isDark ? 'white' : 'black',
+            },
+          ]}
+          placeholderTextColor={isDark ? 'white' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -285,11 +330,17 @@ export default function EditProfile({navigation}) {
         />
         <TextInput
           value={email}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? 'black' : 'white',
+              color: isDark ? 'white' : 'black',
+            },
+          ]}
+          placeholderTextColor={isDark ? 'white' : 'black'}
           onChangeText={setEmail}
           placeholder="Email"
           mode="outlined"
-          placeholderTextColor={'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -317,15 +368,28 @@ export default function EditProfile({navigation}) {
           withFlag: true,
           withCallingCode: true,
         }}
-        textInputStyle={{height: 50}}
+        textContainerStyle={{
+          backgroundColor: isDark ? '#121212' : '#fff',
+        }}
+        textInputStyle={{
+          height: 50,
+          backgroundColor: isDark ? '#121212' : '#fff',
+          color: isDark ? '#fff' : '#000',
+          fontSize: 16,
+        }}
+        codeTextStyle={{
+          color: isDark ? '#fff' : '#000',
+        }}
+        flagButtonStyle={{
+          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          borderTopLeftRadius: 10,
+          borderBottomLeftRadius: 10,
+        }}
         defaultCode="IN"
         style={{}}
         layout="second"
         onChangeText={text => {
           setValue(text);
-        }}
-        onChangeFormattedText={text => {
-          setFormattedValue(text);
         }}
       />
 
@@ -343,15 +407,18 @@ export default function EditProfile({navigation}) {
               marginBottom: 0,
             },
           ]}>
-          Submit profile
+          Update profile
         </Text>
       </TouchableOpacity>
 
       <DatePicker
         modal
+        theme={isDark ? 'dark' : 'light'} // Set theme dynamically
         open={open}
         date={date}
         mode="date"
+        textColor={isDark ? '#fff' : '#000'} // Adjust text color
+        androidVariant="iosClone" // Ensures better dark mode support on Android
         minimumDate={new Date('1900-01-01')}
         onConfirm={date => {
           setOpen(false);
@@ -380,8 +447,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: 14,
+    right: 50,
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
     padding: 1,

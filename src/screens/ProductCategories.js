@@ -1,23 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
-  TextInput,
   StyleSheet,
   Text,
   FlatList,
   TouchableOpacity,
   Image,
   ScrollView,
-  Pressable,
-  Linking,
 } from 'react-native';
-import Octicons from 'react-native-vector-icons/Octicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {Rating} from 'react-native-ratings';
 import {useIsFocused} from '@react-navigation/native';
 
 import {Dimensions} from 'react-native';
@@ -25,10 +16,7 @@ import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-import {BarChart, YAxis, Grid} from 'react-native-svg-charts';
-import {G, Rect} from 'react-native-svg'; // Use G and Rect for custom SVG if necessary
-import * as scale from 'd3-scale';
-import HorizontalRatingButtons from '../components/HorizontalRating';
+import {ThemeContext} from '../context/themeContext';
 
 export default function ProductCategories({navigation}) {
   const [numColumns, setNumColumns] = useState(4);
@@ -39,6 +27,9 @@ export default function ProductCategories({navigation}) {
   useEffect(() => {
     // getCategories();
   }, [isFocused]);
+
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const data = [
     {value: 100, label: '5'},
@@ -62,14 +53,6 @@ export default function ProductCategories({navigation}) {
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
 
-  const dynamicRatings = [
-    {label: '3.5', value: '3.5'},
-    {label: '4.0', value: '4.0'},
-    {label: '4.5', value: '4.5'},
-    {label: '5.0', value: '5.0'},
-    {label: '4.0', value: '4.0'},
-  ];
-
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     {key: 'jacket', title: 'jacket'},
@@ -90,7 +73,7 @@ export default function ProductCategories({navigation}) {
             key={flatListKey}
             horizontal={false}
             scrollEnabled={false}
-            numColumns={4}
+            numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             data={recentPostList}
@@ -114,7 +97,7 @@ export default function ProductCategories({navigation}) {
             key={flatListKey}
             horizontal={false}
             scrollEnabled={false}
-            numColumns={4}
+            numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             data={recentPostList}
@@ -137,7 +120,7 @@ export default function ProductCategories({navigation}) {
             key={flatListKey}
             horizontal={false}
             scrollEnabled={false}
-            numColumns={4}
+            numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             data={recentPostList}
@@ -161,7 +144,7 @@ export default function ProductCategories({navigation}) {
             key={flatListKey}
             horizontal={false}
             scrollEnabled={false}
-            numColumns={4}
+            numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             data={recentPostList}
@@ -194,11 +177,20 @@ export default function ProductCategories({navigation}) {
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('details', {item: item})}>
-        <View style={[styles.rectangle, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <Image source={item.img} style={{width: '100%', height: '100%'}} />
         </View>
 
-        <Text numberOfLines={1} style={styles.recListText}>
+        <Text
+          numberOfLines={1}
+          style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -208,21 +200,23 @@ export default function ProductCategories({navigation}) {
   const getTabHeight = () => {
     switch (index) {
       case 0:
-        return 600; // Height for Tab 1
+        return 550; // Height for Tab 1
       case 1:
-        return 600; // Height for Tab 2
+        return 550; // Height for Tab 2
       case 2:
-        return 600; // Height for Tab 3
+        return 550; // Height for Tab 3
       case 3:
-        return 600; // Height for Tab 3
+        return 550; // Height for Tab 3
       default:
-        return 200;
+        return 550;
     }
   };
 
   return (
     <View style={{flex: 1}}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}
+        showsVerticalScrollIndicator={false}>
         <View
           style={{
             marginTop: '2%',
@@ -242,7 +236,7 @@ export default function ProductCategories({navigation}) {
               onPress={() => navigation.goBack()}
               name="chevron-thin-left"
               size={20}
-              color="rgba(94, 95, 96, 1)"
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
               style={{marginLeft: 20, padding: 5}}
             />
             <Text
@@ -253,12 +247,17 @@ export default function ProductCategories({navigation}) {
                   alignSelf: 'center',
                   marginLeft: '25%',
                   width: Width * 0.5,
+                  color: isDark ? '#fff' : '#000',
                 },
               ]}>
               Categories
             </Text>
             <Image
-              source={require('../assets/search-icon.png')}
+              source={
+                isDark
+                  ? require('../assets/search-icon-dark.png')
+                  : require('../assets/search-icon.png')
+              }
               style={{
                 width: 20,
                 height: 20,
@@ -279,19 +278,19 @@ export default function ProductCategories({navigation}) {
               renderTabBar={props => (
                 <TabBar
                   {...props}
-                  indicatorStyle={{backgroundColor: 'black'}} // Active tab indicator
+                  indicatorStyle={{backgroundColor: isDark ? 'white' : 'black'}} // Active tab indicator
                   style={{
-                    backgroundColor: 'white', // Tab bar background color
+                    backgroundColor: isDark ? 'black' : 'white', // Tab bar background color
                     borderTopWidth: 1, // Top border
                     borderBottomWidth: 1, // Bottom border
-                    borderColor: 'rgba(0, 0, 0, 0.1)', // Border color
+                    borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)', // Border color
                   }}
                   labelStyle={{
                     fontWeight: 'bold', // Ensure bold label
-                    color: 'black', // Force black color for labels
+                    color: isDark ? 'white' : 'black', // Force black color for labels
                     textTransform: 'none', // Disable any text transformation (like uppercase)
                   }}
-                  activeColor="black"
+                  activeColor={isDark ? 'white' : 'black'}
                   inactiveColor="grey"
                   pressColor="rgba(0, 0, 0, 0.1)"
                 />

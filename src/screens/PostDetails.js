@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -9,21 +8,19 @@ import {
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
 import {Dimensions} from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import axios from 'axios';
 import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 import {useEffect} from 'react';
 import {useIsFocused} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
-import useValidateMobileNumber from '../context/hooks/useValidateMobileNumber';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 export default function PostDetails({navigation, route}) {
   const [email, setEmail] = useState('');
@@ -36,7 +33,9 @@ export default function PostDetails({navigation, route}) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const {handleMobileNumberValidation} = useValidateMobileNumber();
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const {isposting, setisposting} = useContext(AuthContext);
 
   const requestLocationPermission = async () => {
     try {
@@ -104,7 +103,7 @@ export default function PostDetails({navigation, route}) {
   useEffect(() => {
     getCategories();
     requestLocationPermission();
-
+    setisposting(false);
     setSelectedCategories(route?.params?.selectedcategory); // Set the selected category by ID
   }, [isFocused]);
 
@@ -200,7 +199,7 @@ export default function PostDetails({navigation, route}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -214,7 +213,7 @@ export default function PostDetails({navigation, route}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -224,6 +223,7 @@ export default function PostDetails({navigation, route}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '22%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
             },
           ]}>
           Post Details
@@ -255,14 +255,27 @@ export default function PostDetails({navigation, route}) {
         {errors.category}
       </HelperText>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: isDark ? '#121212' : '#fff',
+            borderColor: isDark ? '121212' : '#fff',
+          },
+        ]}>
         <TextInput
           value={email}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              color: isDark ? '#fff' : '#000',
+              backgroundColor: isDark ? '#000' : '#fff',
+            },
+          ]}
           onChangeText={setEmail}
           placeholder="Email"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? '#fff' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -281,16 +294,38 @@ export default function PostDetails({navigation, route}) {
           width: Width * 0.9,
           height: 60,
           borderWidth: 1,
-          borderColor: errors.phone ? 'red' : 'rgba(231, 231, 231, 1)',
+          backgroundColor: isDark ? '#000' : '#fff',
+          borderColor: errors.phone
+            ? 'red'
+            : isDark
+            ? '#333'
+            : 'rgba(231, 231, 231, 1)',
           marginBottom: 5,
           borderRadius: 10,
         }}
-        textInputStyle={{height: 50}}
+        textContainerStyle={{
+          backgroundColor: isDark ? '#121212' : '#fff',
+        }}
+        textInputStyle={{
+          height: 50,
+          backgroundColor: isDark ? '#121212' : '#fff',
+          color: isDark ? '#fff' : '#000',
+          fontSize: 16,
+        }}
+        codeTextStyle={{
+          color: isDark ? '#fff' : '#000',
+        }}
+        flagButtonStyle={{
+          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          borderTopLeftRadius: 10,
+          borderBottomLeftRadius: 10,
+        }}
         defaultCode="IN"
         layout="second"
         onChangeText={text => setphone(text)}
         onChangeFormattedText={text => setFormattedphone(text)}
       />
+
       <HelperText type="error" visible={!!errors.phone} style={{height: 10}}>
         {errors.phone}
       </HelperText>
@@ -311,13 +346,20 @@ export default function PostDetails({navigation, route}) {
         ]}>
         <TextInput
           value={description}
-          style={[styles.textInput, {height: 93}]}
+          style={[
+            styles.textInput,
+            {
+              height: 93,
+              color: isDark ? '#fff' : 'black',
+              backgroundColor: isDark ? '#000' : '#fff',
+            },
+          ]}
           onChangeText={setdescription}
           numberOfLines={5}
           multiline={true}
           placeholder="Product description"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? '#fff' : 'black'}
           autoCapitalize="none"
         />
       </View>
@@ -363,7 +405,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderColor: 'rgba(231, 231, 231, 1)',
+    borderColor: 'rgba(231, 231, 231, 0.49)',
     width: '90%',
     borderWidth: 1,
     borderRadius: 8,

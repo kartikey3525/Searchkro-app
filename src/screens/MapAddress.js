@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   TextInput,
@@ -12,8 +12,11 @@ import Geolocation from '@react-native-community/geolocation';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {ThemeContext} from '../context/themeContext';
 
 export default function MapAddress({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -51,7 +54,7 @@ export default function MapAddress({navigation}) {
   ]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <MapView style={styles.map} region={region} onRegionChange={setRegion}>
         {marker && <Marker coordinate={marker} title="Searched Location" />}
       </MapView>
@@ -70,18 +73,25 @@ export default function MapAddress({navigation}) {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {backgroundColor: isDark ? '#000000' : '#FFFFFF'},
+            ]}>
             <Octicons
               name="location"
               size={22}
-              color="rgba(94, 95, 96, 1)"
+              color={isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'}
               style={{marginRight: 5}}
             />
             <TextInput
               // value={'text'}
-              style={styles.searchInput}
+              style={[
+                styles.searchInput,
+                {color: isDark ? '#FFFFFF' : '#000000'},
+              ]}
               // onChangeText={setText}
-              placeholderTextColor={'rgba(94, 95, 96, 1)'}
+              placeholderTextColor={isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'}
               placeholder="Search Location"
               autoCapitalize="none"
               onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
@@ -90,18 +100,24 @@ export default function MapAddress({navigation}) {
 
           <View
             style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#000000' : 'white',
               height: 45,
               width: '12%',
               alignSelf: 'center',
               borderRadius: 10,
-              borderColor: 'rgba(233, 233, 233, 1)',
+              borderColor: isDark
+                ? 'rgba(233, 233, 233, 1)'
+                : 'rgba(233, 233, 233, 1)',
               justifyContent: 'center',
               alignItems: 'center',
               borderWidth: 1.5,
               marginLeft: 10,
             }}>
-            <Entypo name="cross" size={28} color="black" />
+            <Entypo
+              name="cross"
+              size={28}
+              color={isDark ? '#FFFFFF' : 'black'}
+            />
           </View>
         </View>
 
@@ -109,7 +125,7 @@ export default function MapAddress({navigation}) {
           style={{
             width: '86%',
             alignSelf: 'center',
-            backgroundColor: 'white',
+            backgroundColor: isDark ? '#000000' : 'white',
             borderRadius: 10,
             marginTop: 10,
           }}>
@@ -123,13 +139,14 @@ export default function MapAddress({navigation}) {
                   padding: 2,
                   margin: 10,
                   marginRight: 0,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? '#000000' : 'white',
                 }}>
                 <Text
                   style={[
                     styles.smallText,
                     {
                       textAlign: 'left',
+                      color: isDark ? '#FFFFFF' : '#000000',
                       fontSize: 20,
                       left: 8,
                     },
@@ -140,7 +157,7 @@ export default function MapAddress({navigation}) {
                   style={[
                     styles.smallText,
                     {
-                      color: 'rgba(99, 99, 99, 1)',
+                      color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
                       textAlign: 'left',
                       fontSize: 17,
                       left: 8,

@@ -1,14 +1,19 @@
-import React from 'react';
+import React, {useContext, useState} from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
+import {ThemeContext} from '../context/themeContext';
+import {AuthContext} from '../context/authcontext';
 
 const FloatingButton = ({}) => {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const navigation = useNavigation();
+  const {setisposting} = useContext(AuthContext);
 
   const handlePress = () => {
-    console.log('Floating Button Pressed');
-    navigation.navigate('Categories', {isposting: true});
+    setisposting(true);
+    navigation.navigate('Categories');
   };
 
   return (
@@ -16,7 +21,7 @@ const FloatingButton = ({}) => {
       <FontAwesome
         name="plus-square-o"
         size={25}
-        color="white"
+        color={isDark ? 'black' : 'white'}
         style={{top: 1}}
       />
     </TouchableOpacity>

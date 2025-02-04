@@ -11,12 +11,17 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useIsFocused} from '@react-navigation/native';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
+import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 export default function ProfileScreen({navigation}) {
+  const {theme, changeTheme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [selectedtheme, setselectedtheme] = useState('SystemDefault');
+  const {userRole} = useContext(AuthContext);
 
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,7 +30,7 @@ export default function ProfileScreen({navigation}) {
   useEffect(() => {}, [isFocused]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <Image
         source={require('../assets/profilebg.png')}
         style={{width: Width, height: Height, bottom: 20}}
@@ -34,7 +39,14 @@ export default function ProfileScreen({navigation}) {
       <View
         style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}>
         <View
-          style={styles.modalContainer}
+          style={[
+            styles.modalContainer,
+            {
+              backgroundColor: isDark
+                ? 'rgba(0, 0, 0, 0.8)'
+                : 'rgba(255, 255, 255, 0.79)',
+            },
+          ]}
           // onPress={() => navigation.navigate('Home')}
         >
           <View style={styles.modalContent}>
@@ -42,7 +54,7 @@ export default function ProfileScreen({navigation}) {
               style={[
                 styles.recListText,
                 {
-                  color: 'black',
+                  color: isDark ? 'white' : 'black',
                   fontSize: 24,
                   marginTop: '10%',
                   alignSelf: 'flex-start',
@@ -59,7 +71,7 @@ export default function ProfileScreen({navigation}) {
                 flexDirection: 'row',
                 width: Width * 0.9,
                 height: Height * 0.12,
-                backgroundColor: 'white',
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                 alignSelf: 'center',
                 alignItems: 'center',
                 elevation: 10,
@@ -83,7 +95,7 @@ export default function ProfileScreen({navigation}) {
                     {
                       fontSize: 14,
                       width: Width * 0.5,
-                      color: 'black',
+                      color: isDark ? 'white' : 'black',
                       marginLeft: 2,
                     },
                   ]}>
@@ -94,7 +106,9 @@ export default function ProfileScreen({navigation}) {
                   style={[
                     styles.recListText,
                     {
-                      color: 'rgba(23, 23, 23, 0.59)',
+                      color: isDark
+                        ? 'rgba(253, 253, 253, 0.59)'
+                        : 'rgba(23, 23, 23, 0.59)',
                       marginLeft: 2,
                     },
                   ]}>
@@ -102,10 +116,14 @@ export default function ProfileScreen({navigation}) {
                 </Text>
               </View>
               <Feather
-                onPress={() => navigation.navigate('editProfile')}
+                onPress={() =>
+                  userRole === 'buyer'
+                    ? navigation.navigate('editProfile')
+                    : null
+                }
                 name="edit"
                 size={24}
-                color="rgba(0, 0, 0, 0.34)"
+                color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                 style={{marginLeft: 20, padding: 5}}
               />
             </View>
@@ -113,26 +131,29 @@ export default function ProfileScreen({navigation}) {
             <View
               style={{
                 width: Width * 0.9,
-                height: Height * 0.63,
+                height: Height * userRole === 'buyer' ? 0.63 : 0.63,
                 marginTop: 14,
                 elevation: 5,
+                shadowColor: isDark ? '#fff' : '#000',
                 borderRadius: 5,
               }}>
               <Pressable
                 style={{
                   width: Width * 0.9,
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'rgba(0, 0, 0, 0.1)',
                   borderTopStartRadius: 5,
                   borderTopRightRadius: 5,
                 }}>
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -153,7 +174,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '600',
                         letterSpacing: 0.5,
@@ -166,7 +187,7 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
@@ -176,7 +197,7 @@ export default function ProfileScreen({navigation}) {
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -185,7 +206,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -206,7 +227,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '600',
                         letterSpacing: 0.5,
@@ -219,7 +240,7 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
@@ -229,7 +250,7 @@ export default function ProfileScreen({navigation}) {
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -238,7 +259,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -259,7 +280,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
                       },
@@ -271,7 +292,7 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
@@ -281,7 +302,7 @@ export default function ProfileScreen({navigation}) {
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -290,7 +311,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -311,7 +332,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
                         letterSpacing: 0.5,
@@ -324,122 +345,126 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
               </Pressable>
 
-              <Pressable
-                style={{
-                  width: '100%',
-                  height: Height * 0.065,
-                  backgroundColor: 'white',
-                  justifyContent: 'center',
-                  borderBottomWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
-                }}
-                onPress={() => navigation.navigate('payments')}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    backgroundColor: 'white',
-                    alignSelf: 'flex-start',
-                    alignItems: 'center',
-                    borderRadius: 5,
-                  }}>
-                  <Image
-                    source={require('../assets/payment.png')}
+              {userRole === 'buyer' ? (
+                <>
+                  <Pressable
                     style={{
-                      width: 25,
-                      height: 20,
-                      marginLeft: 15,
+                      width: '100%',
+                      height: Height * 0.065,
+                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                      justifyContent: 'center',
+                      borderBottomWidth: 1,
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
                     }}
-                    resizeMode="contain"
-                  />
+                    onPress={() => navigation.navigate('payments')}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                        alignSelf: 'flex-start',
+                        alignItems: 'center',
+                        borderRadius: 5,
+                      }}>
+                      <Image
+                        source={require('../assets/payment.png')}
+                        style={{
+                          width: 25,
+                          height: 20,
+                          marginLeft: 15,
+                        }}
+                        resizeMode="contain"
+                      />
 
-                  <Text
-                    style={[
-                      styles.recListText,
-                      {
-                        fontSize: 15,
-                        width: Width * 0.69,
-                        color: 'black',
-                        marginLeft: 15,
-                        fontWeight: '500',
-                      },
-                    ]}>
-                    Payments
-                  </Text>
+                      <Text
+                        style={[
+                          styles.recListText,
+                          {
+                            fontSize: 15,
+                            width: Width * 0.69,
+                            color: isDark ? 'white' : 'black',
+                            marginLeft: 15,
+                            fontWeight: '500',
+                          },
+                        ]}>
+                        Payments
+                      </Text>
 
-                  <AntDesign
-                    onPress={() => navigation.goBack()}
-                    name="right"
-                    size={16}
-                    color="rgba(0, 0, 0, 0.34)"
-                    style={{padding: 5}}
-                  />
-                </View>
-              </Pressable>
+                      <AntDesign
+                        onPress={() => navigation.goBack()}
+                        name="right"
+                        size={16}
+                        color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
+                        style={{padding: 5}}
+                      />
+                    </View>
+                  </Pressable>
 
-              <Pressable
-                style={{
-                  width: '100%',
-                  height: Height * 0.065,
-                  backgroundColor: 'white',
-                  justifyContent: 'center',
-                  borderBottomWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
-                }}
-                onPress={() => navigation.navigate('referandearn')}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    backgroundColor: 'white',
-                    alignSelf: 'flex-start',
-                    alignItems: 'center',
-                    borderRadius: 5,
-                  }}>
-                  <Image
-                    source={require('../assets/refer.png')}
+                  <Pressable
                     style={{
-                      width: 25,
-                      height: 25,
-                      marginLeft: 15,
+                      width: '100%',
+                      height: Height * 0.065,
+                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                      justifyContent: 'center',
+                      borderBottomWidth: 1,
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
                     }}
-                    resizeMode="contain"
-                  />
+                    onPress={() => navigation.navigate('referandearn')}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                        alignSelf: 'flex-start',
+                        alignItems: 'center',
+                        borderRadius: 5,
+                      }}>
+                      <Image
+                        source={require('../assets/refer.png')}
+                        style={{
+                          width: 25,
+                          height: 25,
+                          marginLeft: 15,
+                        }}
+                        resizeMode="contain"
+                      />
 
-                  <Text
-                    style={[
-                      styles.recListText,
-                      {
-                        fontSize: 15,
-                        width: Width * 0.69,
-                        color: 'black',
-                        marginLeft: 15,
-                        fontWeight: '500',
-                        letterSpacing: 0.5,
-                      },
-                    ]}>
-                    Refer and Earn
-                  </Text>
+                      <Text
+                        style={[
+                          styles.recListText,
+                          {
+                            fontSize: 15,
+                            width: Width * 0.69,
+                            color: isDark ? 'white' : 'black',
+                            marginLeft: 15,
+                            fontWeight: '500',
+                            letterSpacing: 0.5,
+                          },
+                        ]}>
+                        Refer and Earn
+                      </Text>
 
-                  <AntDesign
-                    onPress={() => navigation.goBack()}
-                    name="right"
-                    size={16}
-                    color="rgba(0, 0, 0, 0.34)"
-                    style={{padding: 5}}
-                  />
-                </View>
-              </Pressable>
+                      <AntDesign
+                        onPress={() => navigation.goBack()}
+                        name="right"
+                        size={16}
+                        color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
+                        style={{padding: 5}}
+                      />
+                    </View>
+                  </Pressable>
+                </>
+              ) : null}
 
               <Pressable
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -448,7 +473,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -469,7 +494,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
                         letterSpacing: 0.5,
@@ -482,70 +507,72 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
               </Pressable>
 
-              <Pressable
-                style={{
-                  width: '100%',
-                  height: Height * 0.065,
-                  backgroundColor: 'white',
-                  justifyContent: 'center',
-                  borderBottomWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
-                }}
-                onPress={() => navigation.navigate('preferences')}>
-                <View
+              {userRole === 'buyer' ? (
+                <Pressable
                   style={{
-                    flexDirection: 'row',
-                    backgroundColor: 'white',
-                    alignSelf: 'flex-start',
-                    alignItems: 'center',
-                    borderRadius: 5,
-                  }}>
-                  <Image
-                    source={require('../assets/prefernce.png')}
+                    width: '100%',
+                    height: Height * 0.065,
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                    justifyContent: 'center',
+                    borderBottomWidth: 1,
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                  }}
+                  onPress={() => navigation.navigate('preferences')}>
+                  <View
                     style={{
-                      width: 25,
-                      height: 25,
-                      marginLeft: 15,
-                    }}
-                    resizeMode="contain"
-                  />
-
-                  <Text
-                    style={[
-                      styles.recListText,
-                      {
-                        fontSize: 15,
-                        width: Width * 0.69,
-                        color: 'black',
+                      flexDirection: 'row',
+                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                      alignSelf: 'flex-start',
+                      alignItems: 'center',
+                      borderRadius: 5,
+                    }}>
+                    <Image
+                      source={require('../assets/prefernce.png')}
+                      style={{
+                        width: 25,
+                        height: 25,
                         marginLeft: 15,
-                        fontWeight: '500',
-                        letterSpacing: 0.5,
-                      },
-                    ]}>
-                    Prefernces
-                  </Text>
+                      }}
+                      resizeMode="contain"
+                    />
 
-                  <AntDesign
-                    onPress={() => navigation.goBack()}
-                    name="right"
-                    size={16}
-                    color="rgba(0, 0, 0, 0.34)"
-                    style={{padding: 5}}
-                  />
-                </View>
-              </Pressable>
+                    <Text
+                      style={[
+                        styles.recListText,
+                        {
+                          fontSize: 15,
+                          width: Width * 0.69,
+                          color: isDark ? 'white' : 'black',
+                          marginLeft: 15,
+                          fontWeight: '500',
+                          letterSpacing: 0.5,
+                        },
+                      ]}>
+                      Prefernces
+                    </Text>
+
+                    <AntDesign
+                      onPress={() => navigation.goBack()}
+                      name="right"
+                      size={16}
+                      color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
+                      style={{padding: 5}}
+                    />
+                  </View>
+                </Pressable>
+              ) : null}
 
               <Pressable
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -554,7 +581,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -575,7 +602,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
                         letterSpacing: 0.5,
@@ -588,7 +615,7 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
@@ -598,7 +625,7 @@ export default function ProfileScreen({navigation}) {
                 style={{
                   width: '100%',
                   height: Height * 0.065,
-                  backgroundColor: 'white',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
                   borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -609,7 +636,7 @@ export default function ProfileScreen({navigation}) {
                 <View
                   style={{
                     flexDirection: 'row',
-                    backgroundColor: 'white',
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                     alignSelf: 'flex-start',
                     alignItems: 'center',
                     borderRadius: 5,
@@ -630,7 +657,7 @@ export default function ProfileScreen({navigation}) {
                       {
                         fontSize: 15,
                         width: Width * 0.69,
-                        color: 'black',
+                        color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
                         letterSpacing: 0.5,
@@ -643,7 +670,7 @@ export default function ProfileScreen({navigation}) {
                     onPress={() => navigation.goBack()}
                     name="right"
                     size={16}
-                    color="rgba(0, 0, 0, 0.34)"
+                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
                     style={{padding: 5}}
                   />
                 </View>
@@ -685,7 +712,9 @@ export default function ProfileScreen({navigation}) {
             />
 
             <Pressable
-              onPress={() => setselectedtheme('SystemDefault')}
+              onPress={() => {
+                setselectedtheme('SystemDefault'), changeTheme('SystemDefault');
+              }}
               style={{
                 flexDirection: 'row',
                 marginLeft: 30,
@@ -741,7 +770,7 @@ export default function ProfileScreen({navigation}) {
             </Pressable>
 
             <Pressable
-              onPress={() => setselectedtheme('Dark')}
+              onPress={() => [setselectedtheme('Dark'), changeTheme('dark')]}
               style={{
                 flexDirection: 'row',
                 marginLeft: 30,
@@ -797,7 +826,7 @@ export default function ProfileScreen({navigation}) {
             </Pressable>
 
             <Pressable
-              onPress={() => setselectedtheme('Light')}
+              onPress={() => [setselectedtheme('Light'), changeTheme('light')]}
               style={{
                 flexDirection: 'row',
                 marginLeft: 30,

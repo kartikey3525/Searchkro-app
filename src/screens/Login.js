@@ -15,6 +15,7 @@ import {AuthContext} from '../context/authcontext';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 export default function Login({navigation}) {
   const [email, setEmail] = useState('');
@@ -30,6 +31,9 @@ export default function Login({navigation}) {
   });
   const {handleRegister, handleLogin, handleResetPassword} =
     useContext(AuthContext);
+
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -133,7 +137,10 @@ export default function Login({navigation}) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.screen}>
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? 'black' : 'white'},
+      ]}>
       <Image
         source={require('../assets/logo.png')}
         style={{width: 100, height: 100, alignSelf: 'center', top: 30}}
@@ -142,15 +149,23 @@ export default function Login({navigation}) {
 
       {!isnew ? (
         <>
-          <Text style={styles.bigText}>Welcome Back</Text>
-          <Text style={styles.smallText}>
+          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+            Welcome Back
+          </Text>
+          <Text style={[styles.smallText, {color: isDark ? '#ccc' : '#000'}]}>
             Log in to your account using email or social networks
           </Text>
         </>
       ) : (
         <>
-          <Text style={[styles.bigText]}>Create an account</Text>
-          <Text style={[styles.smallText, {marginBottom: 40}]}>
+          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+            Create an account
+          </Text>
+          <Text
+            style={[
+              styles.smallText,
+              {marginBottom: 40, color: isDark ? '#fff' : '#000'},
+            ]}>
             create your account using email or social networks
           </Text>
         </>
@@ -158,14 +173,24 @@ export default function Login({navigation}) {
 
       {isnew ? (
         <>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {backgroundColor: isDark ? '#000' : '#fff'},
+            ]}>
             <TextInput
               value={username}
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: isDark ? '#000' : '#fff',
+                  color: isDark ? '#fff' : '#000',
+                },
+              ]}
               onChangeText={setusername}
               placeholder="Username"
               mode="outlined"
-              placeholderTextColor={'black'}
+              placeholderTextColor={isDark ? 'white' : 'black'}
               keyboardType="default"
               autoCapitalize="none"
             />
@@ -182,11 +207,17 @@ export default function Login({navigation}) {
       <View style={styles.inputContainer}>
         <TextInput
           value={email}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#000' : '#fff',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setEmail}
           placeholder="Email or phone number"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? 'white' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -201,12 +232,18 @@ export default function Login({navigation}) {
       <View style={styles.inputContainer}>
         <TextInput
           value={password}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#000' : '#fff',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setPassword}
           placeholder="Password"
           mode="outlined"
           secureTextEntry={!showPassword}
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? 'white' : 'black'}
           keyboardType="password"
           autoCapitalize="none"
         />
@@ -214,7 +251,7 @@ export default function Login({navigation}) {
           <Ionicons
             name={showPassword ? 'eye-off' : 'eye'}
             size={24}
-            color="black"
+            color={isDark ? 'white' : 'black'}
             style={{marginRight: 10}}
           />
         </TouchableOpacity>
@@ -236,7 +273,7 @@ export default function Login({navigation}) {
         <Ionicons
           name="checkmark-circle-outline"
           size={25}
-          color="#949090"
+          color={'#949090'}
           style={{marginRight: 8}}
         />
         <Text
@@ -255,8 +292,9 @@ export default function Login({navigation}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        // onPress={() => navigation.navigate('BottomTabs')}
-        onPress={() => handlePress()}>
+        onPress={() => navigation.navigate('OTPScreen')}
+        // onPress={() => handlePress()}
+      >
         <Text
           style={[
             styles.smallText,
@@ -274,7 +312,10 @@ export default function Login({navigation}) {
         <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
       </View>
       <TouchableOpacity
-        style={styles.whiteBotton}
+        style={[
+          styles.whiteBotton,
+          {backgroundColor: isDark ? '#000' : '#fff'},
+        ]}
         onPress={() => navigation.navigate('BottomTabs')}>
         <Image
           source={require('../assets/Google.png')}
@@ -288,7 +329,7 @@ export default function Login({navigation}) {
         <Text
           style={[
             {
-              color: '#1D1E20',
+              color: isDark ? '#fff' : '#1D1E20',
               fontSize: 18,
               textAlign: 'center',
               marginBottom: 0,
@@ -302,7 +343,10 @@ export default function Login({navigation}) {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.whiteBotton}
+        style={[
+          styles.whiteBotton,
+          {backgroundColor: isDark ? '#000' : '#fff'},
+        ]}
         onPress={() => navigation.navigate('BottomTabs')}>
         <Image
           source={require('../assets/Facebook.png')}
@@ -316,7 +360,7 @@ export default function Login({navigation}) {
         <Text
           style={[
             {
-              color: '#1D1E20',
+              color: isDark ? '#fff' : '#1D1E20',
               fontSize: 18,
               textAlign: 'center',
               marginBottom: 0,
@@ -330,14 +374,26 @@ export default function Login({navigation}) {
       </TouchableOpacity>
 
       <Text
-        style={[styles.smallText, {width: 350, margin: 10, marginBottom: 0}]}>
+        style={[
+          styles.smallText,
+          {
+            width: 350,
+            margin: 10,
+            marginBottom: 0,
+            color: isDark ? '#B2BACD' : '#1D1E20',
+          },
+        ]}>
         {isnew ? '' : ' Dont'} have an account ?
         <Text onPress={() => setIsnew(!isnew)} style={{color: '#43E2F3'}}>
           {isnew ? ' Login' : ' Sign up'}
         </Text>
       </Text>
 
-      <Text style={[styles.smallText, {width: 350, margin: 20}]}>
+      <Text
+        style={[
+          styles.smallText,
+          {width: 350, margin: 20, color: isDark ? '#B2BACD' : '#1D1E20'},
+        ]}>
         By signing up you agree to our
         <Text style={{color: '#43E2F3'}}> Terms & Conditions </Text>
         and

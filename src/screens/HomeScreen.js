@@ -16,6 +16,7 @@ import {
 import {Rating} from 'react-native-ratings';
 import {useIsFocused} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
@@ -23,6 +24,9 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function HomeScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [numColumns, setNumColumns] = useState(4);
@@ -46,6 +50,7 @@ export default function HomeScreen({navigation}) {
     userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
     // console.log('userRole data ', userRole);
   }, [isFocused]);
+
   const requestLocationPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -136,7 +141,11 @@ export default function HomeScreen({navigation}) {
             ? navigation.navigate('Categories', {item: item})
             : navigation.navigate('Subcategory', {item: item.subCategories})
         }>
-        <View style={[styles.square]}>
+        <View
+          style={[
+            styles.square,
+            {backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)'},
+          ]}>
           <Image
             source={{uri: item.image}}
             // source={item.image}
@@ -148,7 +157,10 @@ export default function HomeScreen({navigation}) {
           />
         </View>
 
-        <Text style={styles.newsDescription}>{item.name}</Text>
+        <Text
+          style={[styles.newsDescription, {color: isDark ? '#fff' : '#000'}]}>
+          {item.name}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -162,7 +174,14 @@ export default function HomeScreen({navigation}) {
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('shopdetails', {item: item})}>
-        <View style={[styles.rectangle, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <Image
             source={{uri: item.images[0]}}
             // source={item.img}
@@ -170,7 +189,9 @@ export default function HomeScreen({navigation}) {
           />
         </View>
 
-        <Text numberOfLines={1} style={styles.recListText}>
+        <Text
+          numberOfLines={1}
+          style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -186,7 +207,14 @@ export default function HomeScreen({navigation}) {
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('shopdetails', {item: item})}>
-        <View style={[styles.rectangle2, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle2,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <View
             style={{
               width: '90%',
@@ -206,7 +234,12 @@ export default function HomeScreen({navigation}) {
             numberOfLines={1}
             style={[
               styles.recListText,
-              {fontWeight: 'bold', fontSize: 12, marginLeft: 12},
+              {
+                fontWeight: 'bold',
+                fontSize: 12,
+                marginLeft: 12,
+                color: isDark ? '#fff' : '#000',
+              },
             ]}>
             {item.title}
           </Text>
@@ -218,16 +251,32 @@ export default function HomeScreen({navigation}) {
               numberOfLines={1}
               style={[
                 styles.recListText,
-                {fontWeight: 'bold', marginTop: 0, fontSize: 13, width: 25},
+                {
+                  fontWeight: 'bold',
+                  marginTop: 0,
+                  fontSize: 13,
+                  width: 25,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               {item?.rating?.averageRating}
             </Text>
             <Rating
               startingValue={item?.rating?.averageRating}
               type="star"
+              // type="custom"
               ratingColor="#FFD700"
               isDisabled={true}
-              ratingBackgroundColor="#ccc"
+              // starContainerStyle={{
+              //   backgroundColor: isDark ? 'black' : '#fff',
+              // }}
+              // ratingContainerStyle={{
+              //   backgroundColor: isDark ? 'black' : '#fff',
+              // }}
+              // style={{
+              //   backgroundColor: isDark ? 'black' : '#fff',
+              // }}
+              // ratingBackgroundColor={isDark ? 'black' : '#fff'}
               readonly
               imageSize={15}
             />
@@ -241,7 +290,11 @@ export default function HomeScreen({navigation}) {
               marginTop: -2,
             }}>
             <Image
-              source={require('../assets/location.png')}
+              source={
+                isDark
+                  ? require('../assets/locatin-dark.png')
+                  : require('../assets/location.png')
+              }
               style={{
                 width: 12,
                 height: 15,
@@ -254,7 +307,7 @@ export default function HomeScreen({navigation}) {
                 styles.recListText,
                 {
                   marginTop: 0,
-                  color: 'rgba(29, 30, 32, 1)',
+                  color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                   fontWeight: '500',
                   fontSize: 10,
                   width: 95,
@@ -299,7 +352,8 @@ export default function HomeScreen({navigation}) {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       {/* {location ? (
         <Text style={styles.text}>
           Latitude: {location.latitude}, Longitude: {location.longitude}
@@ -330,11 +384,19 @@ export default function HomeScreen({navigation}) {
             }}
             resizeMode="contain"
           />
-          <View style={[styles.inputContainer, {borderWidth: 0}]}>
+          <View
+            style={[
+              styles.inputContainer,
+              {borderWidth: 0, backgroundColor: isDark ? '#000' : '#fff'},
+            ]}>
             <View
               style={[
                 styles.searchInput,
-                {width: userRole === 'buyer' ? '52%' : '62%', left: 1},
+                {
+                  width: userRole === 'buyer' ? '52%' : '62%',
+                  left: 1,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               {location ? (
                 <Text
@@ -343,6 +405,7 @@ export default function HomeScreen({navigation}) {
                     fontSize: 12,
                     fontWeight: 'bold',
                     marginTop: 6,
+                    color: isDark ? '#fff' : '#000',
                   }}>
                   Latitude: {location.latitude}, Longitude: {location.longitude}
                 </Text>
@@ -351,6 +414,7 @@ export default function HomeScreen({navigation}) {
                   style={{
                     fontSize: 16,
                     fontWeight: 'bold',
+                    color: isDark ? '#fff' : '#000',
                     marginTop: 2,
                   }}>
                   {errorMessage || 'Your Locaiton'}
@@ -363,9 +427,10 @@ export default function HomeScreen({navigation}) {
                   fontSize: 13,
                   fontWeight: '500',
                   marginTop: 0,
-                  color: 'rgba(0, 0, 0, 0.4)',
+                  color: isDark
+                    ? 'rgba(252, 252, 252, 0.4)'
+                    : 'rgba(0, 0, 0, 0.4)',
                 }}>
-                {' '}
                 6391 Elgin St. Celina, Delaware 10299...
               </Text>
             </View>
@@ -418,7 +483,11 @@ export default function HomeScreen({navigation}) {
               alignItems: 'center',
             }}>
             <Image
-              source={require('../assets/chat-icon.png')}
+              source={
+                isDark
+                  ? require('../assets/chat-icon-dark.png')
+                  : require('../assets/chat-icon.png')
+              }
               style={{
                 width: 28,
                 height: 26,
@@ -435,7 +504,14 @@ export default function HomeScreen({navigation}) {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDark ? '#000' : '#fff',
+                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
+              },
+            ]}>
             <Image
               source={require('../assets/search-icon.png')}
               style={{
@@ -448,7 +524,7 @@ export default function HomeScreen({navigation}) {
             />
             <TextInput
               // value={'text'}
-              style={styles.searchInput}
+              style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
               // onChangeText={setText}
               placeholderTextColor={'rgba(94, 95, 96, 1)'}
               placeholder="Search here"
@@ -457,14 +533,14 @@ export default function HomeScreen({navigation}) {
             />
           </View>
 
-          <View
+          {/* <View
             style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#000' : 'white',
               height: 45,
               width: '12%',
               alignSelf: 'center',
               borderRadius: 10,
-              borderColor: 'rgb(0, 0, 0)',
+              borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
               justifyContent: 'center',
               alignItems: 'center',
               borderWidth: 1,
@@ -479,7 +555,7 @@ export default function HomeScreen({navigation}) {
               }}
               resizeMode="contain"
             />
-          </View>
+          </View> */}
         </View>
 
         {userRole === 'buyer' ? (
@@ -510,6 +586,8 @@ export default function HomeScreen({navigation}) {
                     fontSize: 16,
                     left: 25,
                     marginTop: 5,
+                    color: isDark ? 'white' : 'black',
+
                     marginBottom: 0,
                   },
                 ]}>
@@ -536,6 +614,7 @@ export default function HomeScreen({navigation}) {
                     fontSize: 16,
                     left: 25,
                     marginTop: 5,
+                    color: isDark ? 'white' : 'black',
                     marginBottom: 0,
                   },
                 ]}>
@@ -583,6 +662,7 @@ export default function HomeScreen({navigation}) {
                     fontSize: 16,
                     left: 25,
                     marginTop: 5,
+                    color: isDark ? 'white' : 'black',
                     marginBottom: 0,
                   },
                 ]}>
@@ -724,7 +804,7 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   searchInput: {
-    width: '68%',
+    width: Width * 0.8,
     alignSelf: 'center',
     fontSize: 17,
     fontWeight: '500',

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,14 @@ import {
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function NotificationScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [recentPostList, setRecentPostList] = useState([
     {
       id: 1,
@@ -67,9 +70,19 @@ export default function NotificationScreen({navigation}) {
         justifyContent: 'center',
         marginBottom: 10,
         alignItems: 'center',
+        borderColor: isDark ? '#ccc' : '#fff',
+        borderBottomWidth: 1,
       }}
       onLongPress={() => handleLongPress(item)}>
-      <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
+      <View
+        style={[
+          styles.rectangle2,
+          {
+            flexDirection: 'row',
+
+            backgroundColor: isDark ? '#121212' : '#fff',
+          },
+        ]}>
         <Image
           source={item.img}
           style={{
@@ -84,7 +97,12 @@ export default function NotificationScreen({navigation}) {
             numberOfLines={2}
             style={[
               styles.recListText,
-              {fontWeight: 'bold', fontSize: 14, width: 180},
+              {
+                fontWeight: 'bold',
+                fontSize: 14,
+                width: 180,
+                color: isDark ? '#fff' : '#000',
+              },
             ]}>
             {item.title}
           </Text>
@@ -92,7 +110,13 @@ export default function NotificationScreen({navigation}) {
             numberOfLines={2}
             style={[
               styles.recListText,
-              {fontWeight: '500', fontSize: 14, width: 180, marginTop: 5},
+              {
+                fontWeight: '500',
+                fontSize: 14,
+                width: 180,
+                marginTop: 5,
+                color: isDark ? '#fff' : '#000',
+              },
             ]}>
             {item.time}
           </Text>
@@ -110,7 +134,9 @@ export default function NotificationScreen({navigation}) {
   );
 
   return (
-    <View showsVerticalScrollIndicator={false} style={styles.screen}>
+    <View
+      showsVerticalScrollIndicator={false}
+      style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
@@ -119,39 +145,68 @@ export default function NotificationScreen({navigation}) {
           color="rgba(94, 95, 96, 1)"
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>Notifications</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          Notifications
+        </Text>
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{height: Height * 0.8, flexGrow: 1}}>
-        <Text style={styles.sectionHeader}>Today</Text>
+        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+          Today
+        </Text>
         {recentPostList.map((item, index) => render2RectangleList(item, index))}
 
-        <Text style={styles.sectionHeader}>Yesterday</Text>
+        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+          Yesterday
+        </Text>
         {recentPostList.map((item, index) => render2RectangleList(item, index))}
 
-        <Text style={styles.sectionHeader}>This week</Text>
+        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+          This week
+        </Text>
         {recentPostList.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>
       {/* Confirmation Modal */}
       <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              {backgroundColor: isDark ? '#121212' : '#fff'},
+            ]}>
             <Text
               style={[
                 styles.modalText,
-                {fontWeight: 'bold', marginBottom: 10},
+                {
+                  fontWeight: 'bold',
+                  marginBottom: 10,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               Delete ?
             </Text>
-            <Text style={styles.modalText}>Are you sure want Delete?</Text>
+            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
+              Are you sure want Delete?
+            </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 onPress={() => {
-                  setModalVisible(false), handleLongPress();
+                  setModalVisible(false), handleLongPress;
                 }}
-                style={styles.cancelButton}>
-                <Text style={[styles.buttonText, {color: 'black'}]}>
+                style={[
+                  styles.cancelButton,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(51, 51, 51, 1)'
+                      : 'rgba(217, 217, 217, 1)',
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {color: isDark ? '#fff' : 'black'},
+                  ]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -170,8 +225,9 @@ export default function NotificationScreen({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingVertical: 10,
+    flex: 1,
     backgroundColor: '#fff',
+    paddingVertical: 10,
   },
   sectionHeader: {
     fontWeight: 'bold',

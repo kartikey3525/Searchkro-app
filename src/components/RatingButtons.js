@@ -1,9 +1,12 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
+import {ThemeContext} from '../context/themeContext';
 
 const RatingButtons = () => {
   const [selectedRating, setSelectedRating] = useState(null); // State for selected rating
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const ratings = [
     {label: '3.5 +', value: '3.5+'},
@@ -26,13 +29,13 @@ const RatingButtons = () => {
           <TouchableOpacity
             key={rating.value}
             style={[
-              styles.button,
+              [styles.button, {backgroundColor: isDark ? 'black' : 'white'}],
               selectedRating === rating.value && styles.selectedButton,
             ]}
             onPress={() => handlePress(rating.value)}>
             <Text
               style={[
-                styles.text,
+                [styles.text, {color: isDark ? 'white' : 'black'}],
                 selectedRating === rating.value && styles.selectedText,
               ]}>
               {rating.label}
@@ -57,13 +60,13 @@ const RatingButtons = () => {
           <TouchableOpacity
             key={rating.value}
             style={[
-              styles.button,
+              [styles.button, {backgroundColor: isDark ? 'black' : 'white'}],
               selectedRating === rating.value && styles.selectedButton,
             ]}
             onPress={() => handlePress(rating.value)}>
             <Text
               style={[
-                styles.text,
+                [styles.text, {color: isDark ? 'white' : 'black'}],
                 selectedRating === rating.value && styles.selectedText,
               ]}>
               {rating.label}

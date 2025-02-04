@@ -46,7 +46,10 @@ const Stack = createStackNavigator();
 
 const MainScreens = () => {
   return (
-    <Stack.Navigator initialRouteName="Welcome">
+    <Stack.Navigator
+      initialRouteName="Welcome"
+      //  initialRouteName="Profile"
+    >
       {/* < screens for new user /> */}
       <Stack.Screen
         name="Welcome"
@@ -96,7 +99,7 @@ const MainScreens = () => {
         options={{title: 'Home', headerShown: false}}
       />
       <Stack.Screen
-        name="Profile"
+        name="Profilescreen"
         component={ProfileScreen}
         options={{title: 'Profile', headerShown: false}}
       />

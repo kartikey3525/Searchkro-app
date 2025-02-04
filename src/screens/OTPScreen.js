@@ -14,8 +14,11 @@ import {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
 import {OtpInput} from 'react-native-otp-entry';
 import {useEffect} from 'react';
+import {ThemeContext} from '../context/themeContext';
 
 export default function OTPScreen({navigation, route}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
@@ -88,7 +91,7 @@ export default function OTPScreen({navigation, route}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           flexDirection: 'row',
@@ -102,7 +105,7 @@ export default function OTPScreen({navigation, route}) {
             top: 50,
             right: '50%',
           }}>
-          <AntDesign name="left" size={25} color="#000" />
+          <AntDesign name="left" size={25} color={isDark ? '#fff' : '#000'} />
         </TouchableOpacity>
 
         <Image
@@ -112,8 +115,14 @@ export default function OTPScreen({navigation, route}) {
         />
       </View>
 
-      <Text style={styles.bigText}>Enter OTP</Text>
-      <Text style={[styles.smallText, {fontSize: 16}]}>
+      <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+        Enter OTP
+      </Text>
+      <Text
+        style={[
+          styles.smallText,
+          {fontSize: 16, color: isDark ? '#fff' : '#1D1E20'},
+        ]}>
         A verification codes has been sent to {route?.params?.emailPhone}
       </Text>
 
@@ -195,7 +204,9 @@ export default function OTPScreen({navigation, route}) {
       <TouchableOpacity
         style={styles.blueBotton}
         // onPress={() => setModalVisible(true)}
-        onPress={() => handlePress()}>
+        onPress={() => navigation.navigate('AddressScreen')}
+        // onPress={() => handlePress()}
+      >
         <Text
           style={[
             styles.smallText,
@@ -215,8 +226,9 @@ export default function OTPScreen({navigation, route}) {
           <View style={styles.modalContent}>
             <Image
               source={
-                require('../assets/error-popup.png')
-                // source={require('../assets/success-popup.png')
+                isDark
+                  ? require('../assets/error-popup-dark.png')
+                  : require('../assets/error-popup.png')
               }
               style={{width: 380, height: 400, borderRadius: 10}}
             />

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   TextInput,
@@ -9,16 +9,18 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 import {ScrollView} from 'react-native-gesture-handler';
 
 export default function InSubCategory({navigation, route}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'shirt', img: require('../assets/phone.png')},
     {id: 2, title: 'pent', img: require('../assets/Laptop.png')},
@@ -32,7 +34,9 @@ export default function InSubCategory({navigation, route}) {
           marginBottom: 15,
           alignItems: 'center',
           width: Width * 0.9,
-          backgroundColor: 'rgba(249, 249, 249, 1)',
+          backgroundColor: isDark
+            ? 'rgba(26, 26, 26, 1)'
+            : 'rgba(249, 249, 249, 1)',
           flexDirection: 'row',
           alignSelf: 'center',
           borderRadius: 10,
@@ -61,6 +65,7 @@ export default function InSubCategory({navigation, route}) {
             marginLeft: 20,
             fontWeight: '600',
             width: Width * 0.74,
+            color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
           }}>
           {/* {item.name} */}
           {item.title}
@@ -68,7 +73,7 @@ export default function InSubCategory({navigation, route}) {
         <Entypo
           name="chevron-thin-right"
           size={22}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginRight: 5}}
         />
       </TouchableOpacity>
@@ -76,7 +81,7 @@ export default function InSubCategory({navigation, route}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -89,7 +94,7 @@ export default function InSubCategory({navigation, route}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -100,6 +105,7 @@ export default function InSubCategory({navigation, route}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '21%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
             },
           ]}>
           Sub Categories
@@ -119,7 +125,14 @@ export default function InSubCategory({navigation, route}) {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDark ? '#121212' : '#fff',
+                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : '#fff',
+              },
+            ]}>
             <Image
               source={require('../assets/search-icon.png')}
               style={{

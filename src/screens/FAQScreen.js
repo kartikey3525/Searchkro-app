@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,15 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function FAQScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [selectedItemId, setSelectedItemId] = useState(null);
 
   const [recentPostList, setRecentPostList] = useState([
@@ -57,7 +61,14 @@ export default function FAQScreen({navigation}) {
         flexDirection: 'row',
       }}>
       <View style={{marginLeft: 16}}>
-        <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
+        <View
+          style={[
+            styles.rectangle2,
+            {
+              flexDirection: 'row',
+              backgroundColor: isDark ? '#121212' : '#fff',
+            },
+          ]}>
           <Text
             onPress={() => toggleDescription(item.id)}
             numberOfLines={1}
@@ -67,7 +78,7 @@ export default function FAQScreen({navigation}) {
                 fontWeight: 'bold',
                 fontSize: 18,
                 textAlign: 'left',
-                color: 'rgba(0, 0, 0, 0.67)',
+                color: isDark ? '#fff' : 'rgba(0, 0, 0, 0.67)',
               },
             ]}>
             {item.title}
@@ -77,7 +88,7 @@ export default function FAQScreen({navigation}) {
             onPress={() => toggleDescription(item.id)}
             name={selectedItemId === item.id ? 'angle-up' : 'angle-down'}
             size={18}
-            color="rgb(0, 0, 0)"
+            color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
             style={{padding: 5}}
           />
         </View>
@@ -93,7 +104,7 @@ export default function FAQScreen({navigation}) {
                 width: Width * 0.9,
                 marginLeft: '4%',
                 textAlign: 'left',
-                color: 'rgba(94, 95, 96, 1)',
+                color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
               },
             ]}>
             {item.description}
@@ -104,7 +115,8 @@ export default function FAQScreen({navigation}) {
   );
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
@@ -113,7 +125,9 @@ export default function FAQScreen({navigation}) {
           color="rgba(94, 95, 96, 1)"
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>FAQS</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          FAQS
+        </Text>
       </View>
 
       <View
@@ -123,7 +137,14 @@ export default function FAQScreen({navigation}) {
           justifyContent: 'center',
           marginBottom: 15,
         }}>
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? '#121212' : '#fff',
+              borderColor: isDark ? '#333' : '#000',
+            },
+          ]}>
           <Image
             source={require('../assets/search-icon.png')}
             style={{
@@ -136,7 +157,13 @@ export default function FAQScreen({navigation}) {
           />
           <TextInput
             // value={'text'}
-            style={styles.searchInput}
+            style={[
+              styles.searchInput,
+              {
+                color: isDark ? '#fff' : '#000',
+                backgroundColor: isDark ? '#121212' : '#fff',
+              },
+            ]}
             // onChangeText={setText}
             placeholderTextColor={'rgba(94, 95, 96, 1)'}
             placeholder="Search for help"

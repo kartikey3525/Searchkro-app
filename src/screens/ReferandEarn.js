@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -12,9 +12,8 @@ import {
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
+import {ThemeContext} from '../context/themeContext';
+
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -70,7 +69,8 @@ export default function ReferandEarn({navigation}) {
       status: 'Invite',
     },
   ]);
-
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -82,7 +82,14 @@ export default function ReferandEarn({navigation}) {
         marginBottom: 10,
         alignItems: 'center',
       }}>
-      <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
+      <View
+        style={[
+          styles.rectangle2,
+          {
+            flexDirection: 'row',
+            backgroundColor: isDark ? '#121212' : '#fff',
+          },
+        ]}>
         <Image
           source={item.img}
           style={{
@@ -97,7 +104,13 @@ export default function ReferandEarn({navigation}) {
             numberOfLines={1}
             style={[
               styles.recListText,
-              {fontWeight: 'bold', fontSize: 16, letterSpacing: 1, width: 180},
+              {
+                fontWeight: 'bold',
+                fontSize: 16,
+                letterSpacing: 1,
+                width: 180,
+                color: isDark ? '#fff' : 'rgba(0, 0, 0, 0.67)',
+              },
             ]}>
             {item.title}
           </Text>
@@ -110,7 +123,7 @@ export default function ReferandEarn({navigation}) {
                 fontSize: 16,
                 width: 180,
                 marginTop: 0,
-                color: 'rgba(94, 95, 96, 1)',
+                color: isDark ? 'rgb(187, 187, 187)' : 'rgba(94, 95, 96, 1)',
               },
             ]}>
             {item.time}
@@ -132,7 +145,7 @@ export default function ReferandEarn({navigation}) {
                 fontSize: 16,
                 marginTop: 0,
                 paddingHorizontal: 10,
-                color: 'rgba(94, 95, 96, 1)',
+                color: isDark ? 'rgb(187, 187, 187)' : 'rgba(94, 95, 96, 1)',
               },
             ]}>
             {item.status}
@@ -145,16 +158,21 @@ export default function ReferandEarn({navigation}) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.screen}>
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>Refer and Earn</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          Refer and Earn
+        </Text>
       </View>
 
       <Image
@@ -168,7 +186,11 @@ export default function ReferandEarn({navigation}) {
         resizeMode="contain"
       />
 
-      <Text style={[styles.headerText, {fontSize: 26, marginLeft: '20%'}]}>
+      <Text
+        style={[
+          styles.headerText,
+          {fontSize: 26, marginLeft: '20%', color: isDark ? '#fff' : '#000'},
+        ]}>
         Earn Money by Refer{' '}
       </Text>
 
@@ -180,7 +202,11 @@ export default function ReferandEarn({navigation}) {
           marginTop: 20,
           alignSelf: 'center',
         }}>
-        <Pressable style={styles.iconStyle}>
+        <Pressable
+          style={[
+            styles.iconStyle,
+            {backgroundColor: isDark ? '#121212' : '#fff'},
+          ]}>
           <Image
             source={require('../assets/whatsapp.png')}
             style={{
@@ -191,7 +217,11 @@ export default function ReferandEarn({navigation}) {
           />
         </Pressable>
 
-        <Pressable style={[styles.iconStyle]}>
+        <Pressable
+          style={[
+            styles.iconStyle,
+            {backgroundColor: isDark ? '#121212' : '#fff'},
+          ]}>
           <Image
             source={require('../assets/fb.png')}
             style={{
@@ -202,7 +232,11 @@ export default function ReferandEarn({navigation}) {
           />
         </Pressable>
 
-        <Pressable style={[styles.iconStyle]}>
+        <Pressable
+          style={[
+            styles.iconStyle,
+            {backgroundColor: isDark ? '#121212' : '#fff'},
+          ]}>
           <Image
             source={require('../assets/Instagram.png')}
             style={{
@@ -213,9 +247,17 @@ export default function ReferandEarn({navigation}) {
           />
         </Pressable>
 
-        <Pressable style={[styles.iconStyle]}>
+        <Pressable
+          style={[
+            styles.iconStyle,
+            {backgroundColor: isDark ? '#121212' : '#fff'},
+          ]}>
           <Image
-            source={require('../assets/more.png')}
+            source={
+              isDark
+                ? require('../assets/more-dark.png')
+                : require('../assets/more-dark.png')
+            }
             style={{
               width: 30,
               height: 30,
@@ -230,6 +272,7 @@ export default function ReferandEarn({navigation}) {
           borderTopRightRadius: 40,
           borderTopLeftRadius: 40,
           elevation: 5,
+          shadowColor: isDark ? '#fff' : '#000',
           marginTop: 30,
           padding: 20,
           paddingBottom: 0,
@@ -241,17 +284,23 @@ export default function ReferandEarn({navigation}) {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-          <Text style={[styles.sectionHeader, {}]}>Invite a friend</Text>
+          <Text
+            style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+            Invite a friend
+          </Text>
           <Ionicons
             name="search"
             size={26}
-            color="rgb(0, 0, 0)"
+            color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
             style={{marginRight: 16, marginTop: 20}}
           />
         </View>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{flexGrow: 1}}
+          contentContainerStyle={{
+            flexGrow: 1,
+            backgroundColor: isDark ? '#000' : '#fff',
+          }}
           style={{
             flex: 1, // Allows the ScrollView to expand within the parent
           }}>

@@ -1,8 +1,11 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
+import {ThemeContext} from '../context/themeContext';
 
 const HorizontalRatingButtons = ({ratings}) => {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [selectedRating, setSelectedRating] = useState(null); // State for selected rating
 
   const handlePress = value => {
@@ -11,7 +14,8 @@ const HorizontalRatingButtons = ({ratings}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, {backgroundColor: isDark ? 'black' : 'white'}]}>
       {ratings.map((rating, index) => (
         <TouchableOpacity
           disabled
@@ -19,12 +23,15 @@ const HorizontalRatingButtons = ({ratings}) => {
           style={[
             styles.button,
             selectedRating === rating.value && styles.selectedButton,
+            ,
+            {backgroundColor: isDark ? 'black' : 'white'},
           ]}
           onPress={() => handlePress(rating.value)}>
           <Text
             style={[
               styles.text,
               selectedRating === rating.value && styles.selectedText,
+              {color: isDark ? 'white' : 'black'},
             ]}>
             {rating.label}
           </Text>

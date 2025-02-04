@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -12,10 +12,16 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 import {ScrollView} from 'react-native-gesture-handler';
+import {AuthContext} from '../context/authcontext';
 
 export default function SubCategory({navigation, route}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const {isposting} = useContext(AuthContext);
+
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'men', img: require('../assets/phone.png')},
     {id: 2, title: 'women', img: require('../assets/Laptop.png')},
@@ -29,7 +35,9 @@ export default function SubCategory({navigation, route}) {
           marginBottom: 15,
           alignItems: 'center',
           width: Width * 0.9,
-          backgroundColor: 'rgba(249, 249, 249, 1)',
+          backgroundColor: isDark
+            ? 'rgba(26, 26, 26, 1)'
+            : 'rgba(249, 249, 249, 1)',
           flexDirection: 'row',
           alignSelf: 'center',
           borderRadius: 10,
@@ -37,15 +45,13 @@ export default function SubCategory({navigation, route}) {
           justifyContent: 'flex-start',
         }}
         onPress={() =>
-          item.subCategories
+          !isposting
             ? navigation.navigate('Insubcategory', {
                 item: item.subCategories,
-                isposting: route?.params?.isposting,
                 selectedcategory: route?.params?.selectedcategory,
               })
             : navigation.navigate('postdetails', {
                 item: item,
-                isposting: route?.params?.isposting,
                 selectedcategory: route?.params?.selectedcategory,
               })
         }>
@@ -55,13 +61,14 @@ export default function SubCategory({navigation, route}) {
             marginLeft: 20,
             fontWeight: '600',
             width: Width * 0.74,
+            color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
           }}>
           {item.name}
         </Text>
         <Entypo
           name="chevron-thin-right"
           size={22}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgb(255, 255, 255)' : 'rgba(94, 95, 96, 1)'}
           style={{marginRight: 5}}
         />
       </TouchableOpacity>
@@ -69,7 +76,7 @@ export default function SubCategory({navigation, route}) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -82,7 +89,7 @@ export default function SubCategory({navigation, route}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgb(255, 255, 255)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -93,6 +100,7 @@ export default function SubCategory({navigation, route}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '21%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
             },
           ]}>
           Sub Categories
@@ -112,7 +120,18 @@ export default function SubCategory({navigation, route}) {
             justifyContent: 'center',
             marginBottom: 15,
           }}>
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(26, 26, 26, 1)'
+                  : 'rgba(249, 249, 249, 1)',
+                borderColor: isDark
+                  ? 'rgba(94, 95, 96, 1)'
+                  : 'rgba(0, 0, 0, 0.1)',
+              },
+            ]}>
             <Image
               source={require('../assets/search-icon.png')}
               style={{

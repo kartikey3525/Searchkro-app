@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,14 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {ThemeContext} from '../context/themeContext';
 
 const {width, height} = Dimensions.get('window');
 
 export default function SellerProductDetails({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const product = {
     id: 1,
     title: 'Samsung Phone',
@@ -31,7 +35,8 @@ export default function SellerProductDetails({navigation}) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           alignItems: 'center',
@@ -44,7 +49,7 @@ export default function SellerProductDetails({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -53,10 +58,11 @@ export default function SellerProductDetails({navigation}) {
               fontSize: 20,
               fontWeight: 'bold',
               alignSelf: 'center',
+              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
               marginLeft: '25%',
             },
           ]}>
-          Shop Details
+          Product Details
         </Text>
       </View>
 
@@ -80,24 +86,34 @@ export default function SellerProductDetails({navigation}) {
 
       {/* Product Details */}
       <View style={styles.detailsContainer}>
-        <Text numberOfLines={2} style={styles.title}>
+        <Text
+          numberOfLines={2}
+          style={[styles.title, {color: isDark ? '#fff' : '#000'}]}>
           {product.title}
         </Text>
-        <Text style={styles.info}>
+        <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
           <Ionicons name="location-outline" size={16} /> {product.location}
         </Text>
-        <Text style={styles.info}>
+        <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
           <Ionicons name="call-outline" size={16} /> {product.contact}
         </Text>
-        <Text style={styles.info}>
+        <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
           <Ionicons name="mail-outline" size={16} /> {product.email}
         </Text>
         <Text
           numberOfLines={5}
-          style={[styles.description, {color: 'black', fontWeight: 'bold'}]}>
+          style={[
+            styles.description,
+            {color: isDark ? '#fff' : 'black', fontWeight: 'bold'},
+          ]}>
           description :
         </Text>
-        <Text numberOfLines={5} style={[styles.description, {marginTop: 0}]}>
+        <Text
+          numberOfLines={5}
+          style={[
+            styles.description,
+            {marginTop: 0, color: isDark ? '#fff' : 'black'},
+          ]}>
           {product.description}
         </Text>
       </View>

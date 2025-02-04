@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -7,254 +7,139 @@ import {
   Pressable,
   Image,
   Dimensions,
-  Modal,
   TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function Payments({navigation}) {
-  const [recentPostList, setRecentPostList] = useState([
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
+  const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+
+  const paymentMethods = [
     {
       id: 1,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
+      name: 'PhonePe',
+      number: '4532 6532 7654 7521',
+      img: require('../assets/phonepay.png'),
     },
     {
       id: 2,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
+      name: 'Bank',
+      number: '4532 6532 7654 7521',
+      img: require('../assets/banklogo1.png'),
     },
     {
       id: 3,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
+      name: 'Paypal',
+      number: 'Paypal',
+      img: require('../assets/paypal.png'),
     },
-  ]);
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const handleLongPress = item => {
-    const updatedList = recentPostList.map(listItem =>
-      listItem.id === item.id
-        ? {...listItem, selected: !listItem.selected}
-        : listItem,
-    );
-    setRecentPostList(updatedList);
-    setSelectedItem(item);
-    setModalVisible(true);
-  };
-
-  const handleDelete = () => {
-    const updatedList = recentPostList.filter(
-      item => item.id !== selectedItem.id,
-    );
-    setRecentPostList(updatedList);
-    setModalVisible(false);
-  };
+  ];
 
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.screen}>
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>Payments</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          Payments
+        </Text>
       </View>
 
-      <Pressable
-        // key={index}
-        style={{
-          justifyContent: 'center',
-          marginBottom: 10,
-          alignItems: 'center',
-        }}>
-        <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
-          <Image
-            source={require('../assets/phonepay.png')}
-            style={{
-              width: 76,
-              height: 76,
-              marginRight: 15,
-            }}
-            resizeMode="contain"
-          />
-          <View style={{width: Width * 0.6}}>
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.recListText,
-                {fontWeight: '500', fontSize: 18, width: Width * 0.66},
-              ]}>
-              4532 6532 7654 7521
-            </Text>
-          </View>
-
+      {paymentMethods.map(method => (
+        <Pressable
+          key={method.id}
+          onPress={() => setSelectedPaymentId(method.id)}
+          style={{
+            justifyContent: 'center',
+            marginBottom: 10,
+            alignItems: 'center',
+          }}>
           <View
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(6, 196, 217, 1)',
-            }}>
+            style={[
+              styles.rectangle2,
+              {
+                flexDirection: 'row',
+                backgroundColor: isDark ? '#121212' : '#fff',
+              },
+            ]}>
+            <Image
+              source={method.img}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <View style={{width: Width * 0.6}}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.recListText,
+                  {
+                    fontWeight: '500',
+                    fontSize: 18,
+                    color: isDark ? '#fff' : '#000',
+                  },
+                ]}>
+                {method.number}
+              </Text>
+            </View>
             <View
-              style={{
-                width: 15,
-                height: 15,
-                borderWidth: 2,
-                borderColor: 'white',
-                borderRadius: 10,
-                backgroundColor: 'rgba(6, 196, 217, 1)',
-              }}></View>
-          </View>
-        </View>
-      </Pressable>
-
-      <Pressable
-        // key={index}
-        style={{
-          justifyContent: 'center',
-          marginBottom: 10,
-          alignItems: 'center',
-        }}>
-        <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
-          <Image
-            source={require('../assets/banklogo1.png')}
-            style={{
-              width: 60,
-              height: 60,
-              marginRight: 15,
-            }}
-            resizeMode="contain"
-          />
-          <View style={{width: Width * 0.63}}>
-            <Text
-              numberOfLines={1}
               style={[
-                styles.recListText,
-                {fontWeight: '500', fontSize: 18, width: Width * 0.62},
+                styles.radioButton,
+                selectedPaymentId === method.id && styles.radioButtonSelected,
               ]}>
-              4532 6532 7654 7521
-            </Text>
+              {selectedPaymentId === method.id && (
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(6, 196, 217, 1)',
+                  }}>
+                  <View
+                    style={{
+                      width: 15,
+                      height: 15,
+                      borderWidth: 2,
+                      borderColor: isDark ? '#000' : 'white',
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(6, 196, 217, 1)',
+                    }}></View>
+                </View>
+              )}
+            </View>
           </View>
-
-          <View
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 2.3,
-              borderColor: 'rgba(0, 0, 0, 0.11)',
-              backgroundColor: 'rgb(255, 255, 255)',
-            }}></View>
-        </View>
-      </Pressable>
-
-      <Pressable
-        // key={index}
-        style={{
-          justifyContent: 'center',
-          marginBottom: 10,
-          alignItems: 'center',
-        }}>
-        <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
-          <Image
-            source={require('../assets/paypal.png')}
-            style={{
-              width: 50,
-              height: 50,
-              marginRight: 15,
-            }}
-            resizeMode="contain"
-          />
-          <View style={{width: Width * 0.66}}>
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.recListText,
-                {fontWeight: '500', fontSize: 18, width: Width * 0.66},
-              ]}>
-              Paypal
-            </Text>
-          </View>
-
-          <View
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 2.3,
-              borderColor: 'rgba(0, 0, 0, 0.11)',
-              backgroundColor: 'rgb(255, 255, 255)',
-            }}></View>
-        </View>
-      </Pressable>
+        </Pressable>
+      ))}
 
       <TouchableOpacity
-        style={[styles.blueBotton, {marginTop: Height * 0.4}]}
+        style={[styles.blueButton, {marginTop: Height * 0.4}]}
         onPress={() => navigation.navigate('paymentsuccess')}>
         <Text
           style={[
             styles.smallText,
-            {
-              color: '#fff',
-              fontSize: 22,
-              marginBottom: 0,
-            },
+            {color: '#fff', fontSize: 22, marginBottom: 0},
           ]}>
           Continue
         </Text>
       </TouchableOpacity>
-
-      {/* Confirmation Modal */}
-      <Modal transparent={true} visible={modalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text
-              style={[
-                styles.modalText,
-                {fontWeight: 'bold', marginBottom: 10},
-              ]}>
-              Delete ?
-            </Text>
-            <Text style={styles.modalText}>Are you sure want Delete?</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false), handleLongPress();
-                }}
-                style={styles.cancelButton}>
-                <Text style={[styles.buttonText, {color: 'black'}]}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
@@ -264,7 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  blueBotton: {
+  blueButton: {
     backgroundColor: '#00AEEF',
     width: '88%',
     height: 56,
@@ -272,15 +157,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     margin: 10,
     marginBottom: 20,
-
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    margin: 5,
-    marginLeft: 20,
   },
   header: {
     flexDirection: 'row',
@@ -303,56 +181,30 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
   },
+  logo: {
+    width: 60,
+    height: 60,
+    marginRight: 15,
+  },
   recListText: {
     color: '#1d1e20',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
+  radioButton: {
+    width: 20,
+    height: 20,
     borderRadius: 10,
-    padding: 20,
-    marginBottom: '12%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(217, 217, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 46,
+    borderWidth: 2.3,
+    borderColor: 'rgb(90, 90, 90)',
   },
-  deleteButton: {
+  radioButtonSelected: {
     backgroundColor: 'rgba(6, 196, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
   },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '500',
-    fontSize: 18,
+  radioButtonInner: {
+    width: 15,
+    height: 15,
+    borderRadius: 10,
+    backgroundColor: 'white',
   },
 });

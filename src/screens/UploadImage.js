@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  PermissionsAndroid,
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -16,8 +17,13 @@ import {Dimensions} from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
+import * as ImagePicker from 'react-native-image-picker';
 
 export default function UploadImage({navigation, route}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [isLoading, setIsLoading] = useState(false);
   const [media, setMedia] = useState([]);
 
@@ -28,31 +34,12 @@ export default function UploadImage({navigation, route}) {
   const {handleRegister, handleLogin, createPost} = useContext(AuthContext);
 
   const validateInputs = () => {
-    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-
-    // if (media.size > MAX_SIZE) {
-    //   setErrors(prevState => ({
-    //     ...prevState,
-    //     media: 'File size should not exceed 5MB.',
-    //   }));
-    //   return false;
-    // }
-
-    // if (!allowedTypes.includes(media.type)) {
-    //   setErrors(prevState => ({
-    //     ...prevState,
-    //     media: 'Only jpg, jpeg, and png images are allowed.',
-    //   }));
-    //   return false;
-    // }
-
     if (media.length === 0) {
       setErrors(prevState => ({
         ...prevState,
         media: 'Please select at least one image.',
       }));
-      return;
+      return false;
     }
     return true;
   };
@@ -86,52 +73,91 @@ export default function UploadImage({navigation, route}) {
     });
   };
 
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'App Camera Permission',
+            message: 'App needs access to your camera to take photos',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Camera permission granted');
+          launchCamera();
+        } else {
+          console.log('Camera permission denied');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      console.log('Camera permission not required on iOS');
+      launchCamera();
+    }
+  };
+
+  const launchCamera = () => {
+    let options = {
+      includeBase64: false,
+      mediaType: 'photo',
+      maxWidth: 400,
+      maxHeight: 400,
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+
+    ImagePicker.launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else {
+        console.log('Image URI:', response.assets?.[0]?.uri);
+        if (response.assets && response.assets.length > 0) {
+          setMedia(prevMedia => [...prevMedia, {uri: response.assets[0].uri}]);
+        }
+      }
+    });
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-          marginBottom: 20,
-        }}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#121212' : '#FFFFFF'},
+      ]}>
+      <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
-        <Text
-          style={[
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              marginLeft: '21%',
-            },
-          ]}>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
           Upload photos
         </Text>
       </View>
 
       <Text
         style={[
-          {
-            color: 'rgba(33, 33, 33, 1)',
-            fontSize: 22,
-            fontWeight: '500',
-            alignSelf: 'center',
-            marginBottom: 20,
-          },
+          styles.title,
+          {color: isDark ? '#E0E0E0' : 'rgba(33, 33, 33, 1)'},
         ]}>
         Choose and Upload Your Picture
       </Text>
-      {/* Selector with First Image */}
+
+      {/* Image Selector */}
       <View>
-        <View style={{}}>
+        <View>
           {media.length > 0 && media[0].uri ? (
             <>
               <Image
@@ -140,19 +166,27 @@ export default function UploadImage({navigation, route}) {
               />
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => {
-                  // Remove the first image from the media array
-                  setMedia(media.slice(1)); // This removes the first item from the array
-                }}>
-                <Entypo name="cross" size={25} color="black" />
+                onPress={() => setMedia(media.slice(1))}>
+                <Entypo name="cross" size={25} color={'black'} />
               </TouchableOpacity>
             </>
           ) : (
             <TouchableOpacity onPress={selectMedia}>
-              <View style={styles.mediaSelector}>
+              <View
+                style={[
+                  styles.mediaSelector,
+                  {
+                    backgroundColor: isDark
+                      ? '#1E1E1E'
+                      : 'rgba(250, 250, 250, 1)',
+                  },
+                ]}>
                 <MaterialIcons name="image" size={45} color="grey" />
                 <Text
-                  style={{color: 'rgba(158, 158, 158, 1)', fontWeight: 'bold'}}>
+                  style={{
+                    color: isDark ? '#BBB' : 'rgba(158, 158, 158, 1)',
+                    fontWeight: 'bold',
+                  }}>
                   Select Media
                 </Text>
               </View>
@@ -160,63 +194,40 @@ export default function UploadImage({navigation, route}) {
           )}
         </View>
       </View>
-      <HelperText type="error" visible={!!errors.media}>
+      <HelperText type="error" visible={!!errors.media} style={{color: 'red'}}>
         {errors.media}
       </HelperText>
 
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <View
-          style={{
-            width: '40%',
-            height: 2,
-            backgroundColor: 'rgba(238, 238, 238, 1)',
-          }}
-        />
-        <Text
-          style={[
-            {
-              textAlign: 'left',
-              fontSize: 20,
-              color: 'rgba(97, 97, 97, 1)',
-              margin: 10,
-            },
-          ]}>
-          or
-        </Text>
-        <View
-          style={{
-            width: '40%',
-            height: 2,
-            backgroundColor: 'rgba(238, 238, 238, 1)',
-          }}
-        />
-      </View>
+      {/* Camera Option */}
       <TouchableOpacity
-        style={styles.whiteBotton}
-        onPress={() => navigation.navigate('BottomTabs')}>
+        style={[
+          styles.whiteBotton,
+          {
+            backgroundColor: isDark ? '#1E1E1E' : 'rgba(250, 250, 250, 1)',
+            borderColor: isDark ? '#333' : '#A3A3A3',
+          },
+        ]}
+        // onPress={() => navigation.navigate('BottomTabs')}
+        onPress={() => requestCameraPermission()}>
         <Entypo name="camera" size={25} color="rgba(6, 196, 217, 1)" />
         <Text
-          style={[
-            {
-              color: 'rgba(6, 196, 217, 1)',
-              fontSize: 18,
-              textAlign: 'center',
-              marginBottom: 0,
-              fontWeight: '600',
-              alignSelf: 'center',
-              marginLeft: 10,
-            },
-          ]}>
+          style={{
+            color: 'rgba(6, 196, 217, 1)',
+            fontSize: 18,
+            fontWeight: '600',
+            marginLeft: 10,
+          }}>
           Open Camera & Take Photo
         </Text>
       </TouchableOpacity>
 
+      {/* Uploaded Images */}
       {media.length > 0 && (
         <>
           <Text
             style={[
               {
-                color: 'rgb(0, 0, 0)',
+                color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                 fontSize: 18,
                 textAlign: 'left',
                 marginBottom: 10,
@@ -232,39 +243,29 @@ export default function UploadImage({navigation, route}) {
           <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
             {media.slice(1, 8).map((item, index) => (
               <View key={index} style={styles.mediaItem}>
-                {item.type.startsWith('image') ? (
-                  <>
-                    <Image
-                      source={{uri: item.uri}}
-                      style={styles.mediaPreview}
-                    />
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={() => {
-                        // Remove the image from media array
-                        setMedia(media.filter((mediaItem, i) => i !== index));
-                      }}>
-                      <Entypo name="cross" size={18} color="black" />
-                    </TouchableOpacity>
-                  </>
-                ) : item.type.startsWith('video') ? null : (
-                  <Text>{item.fileName}</Text>
-                )}
+                {/* {item.type.startsWith('image') ? ( */}
+                <>
+                  <Image source={{uri: item.uri}} style={styles.mediaPreview} />
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => {
+                      setMedia(media.filter((_, i) => i !== index));
+                    }}>
+                    <Entypo name="cross" size={18} color={'black'} />
+                  </TouchableOpacity>
+                </>
+                {/* ) : null} */}
               </View>
             ))}
 
-            {/* Add Selector Button */}
             {media.length < 8 && (
               <TouchableOpacity
                 onPress={selectMedia}
                 style={[
                   styles.mediaItem,
                   {
-                    backgroundColor: 'rgb(255, 255, 255)',
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: 'rgba(176, 176, 176, 1)',
-                    borderStyle: 'dashed',
+                    backgroundColor: isDark ? '#1E1E1E' : 'rgb(255, 255, 255)',
+                    borderColor: isDark ? '#555' : 'rgba(176, 176, 176, 1)',
                   },
                 ]}>
                 <Entypo
@@ -278,40 +279,17 @@ export default function UploadImage({navigation, route}) {
         </>
       )}
 
+      {/* Post Button */}
       <TouchableOpacity
-        style={[styles.blueBotton, {margin: media.length > 0 ? '25%' : '60%'}]}
-        // onPress={() => navigation.navigate('BottomTabs')}
+        style={[styles.blueButton, {margin: media.length > 0 ? '25%' : '60%'}]}
         onPress={() => handlePress()}>
-        <Text
-          style={[
-            styles.smallText,
-            {
-              color: '#fff',
-              fontSize: 22,
-
-              marginBottom: 0,
-            },
-          ]}>
-          Post
-        </Text>
+        <Text style={[styles.buttonText, {color: '#fff'}]}>Post</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    width: Width,
-    height: Height,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  addSelector: {
-    width: '20%',
-  },
-  imageWrapper: {
-    position: 'relative',
-  },
   closeButton: {
     position: 'absolute',
     top: -4,
@@ -344,6 +322,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1, // Keeps items square
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 8,
   },
   mediaPreview: {
     width: '100%',
@@ -407,6 +386,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  screen: {
+    width: Width,
+    height: Height,
+    alignItems: 'center',
+  },
   whiteBotton: {
     backgroundColor: 'rgba(250, 250, 250, 1)',
     width: '90%',
@@ -417,5 +401,51 @@ const styles = StyleSheet.create({
     borderColor: '#A3A3A3',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    width: Width,
+    flexDirection: 'row',
+    height: Height * 0.1,
+    justifyContent: 'flex-start',
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginLeft: '21%',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '500',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: 'rgb(255, 255, 255)',
+    borderRadius: 15,
+    padding: 1,
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  blueButton: {
+    backgroundColor: '#00AEEF',
+    width: '90%',
+    height: 56,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 22,
   },
 });

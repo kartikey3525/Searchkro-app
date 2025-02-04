@@ -9,35 +9,26 @@ import {
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Rating} from 'react-native-ratings';
 
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
-// import Entypo from 'react-native-vector-icons/Entypo';
-import axios from 'axios';
-import Dropdown from '../components/Dropdown';
-import {useRef} from 'react';
-import PhoneInput from 'react-native-phone-number-input';
 import {launchImageLibrary} from 'react-native-image-picker';
-import Octicons from 'react-native-vector-icons/Octicons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import {Slider} from '@miblanchard/react-native-slider';
-import RatingButtons from '../components/RatingButtons';
+import {ThemeContext} from '../context/themeContext';
 
-// import PhoneInput from 'react-phone-number-input/input';
-// import PhoneTextInput from '../components/PhoneTextInput';
 export default function RatedScreen({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [media, setMedia] = useState([]);
   const [description, setdescription] = useState('');
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const [errors, setErrors] = useState({
     email: '',
@@ -116,7 +107,11 @@ export default function RatedScreen({navigation}) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -130,7 +125,7 @@ export default function RatedScreen({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -140,6 +135,7 @@ export default function RatedScreen({navigation}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               marginLeft: '21%',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
             },
           ]}>
           Rated review
@@ -153,6 +149,7 @@ export default function RatedScreen({navigation}) {
             overflow: 'hidden',
             flexDirection: 'row',
             height: 100,
+            backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
           },
         ]}>
         <Image
@@ -176,6 +173,7 @@ export default function RatedScreen({navigation}) {
                 fontWeight: 'bold',
                 fontSize: 20,
                 margin: 5,
+                color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
                 marginTop: 10,
                 marginLeft: 0,
                 width: Width * 0.57,
@@ -191,8 +189,9 @@ export default function RatedScreen({navigation}) {
           styles.recListText,
           {
             fontWeight: 'bold',
-            fontSize: 20,
+            fontSize: 18,
             alignSelf: 'flex-start',
+            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
             marginLeft: 30,
             marginTop: 10,
             marginBottom: 10,
@@ -225,6 +224,7 @@ export default function RatedScreen({navigation}) {
             fontSize: 18,
             alignSelf: 'flex-start',
             marginLeft: 30,
+            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
             marginTop: 10,
             marginBottom: 10,
           },
@@ -235,11 +235,22 @@ export default function RatedScreen({navigation}) {
       <View
         style={[
           styles.inputContainer,
-          {height: 130, alignItems: 'flex-start'},
+          {
+            height: 130,
+            alignItems: 'flex-start',
+            backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+          },
         ]}>
         <TextInput
           value={description}
-          style={[styles.textInput, {height: 93}]}
+          style={[
+            styles.textInput,
+            {
+              height: 93,
+              backgroundColor: isDark ? '#121212' : '#fff',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setdescription}
           numberOfLines={5}
           multiline={true}
@@ -263,6 +274,7 @@ export default function RatedScreen({navigation}) {
             fontSize: 18,
             alignSelf: 'flex-start',
             marginLeft: 30,
+            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
             marginBottom: 10,
           },
         ]}>
@@ -274,20 +286,37 @@ export default function RatedScreen({navigation}) {
             <>
               <Image
                 source={{uri: media[0].uri}}
-                style={[styles.mediaSelector, {borderWidth: 0}]}
+                style={[
+                  styles.mediaSelector,
+                  {borderWidth: 0, backgroundColor: 'rgba(248, 247, 247, 1)'},
+                ]}
               />
               <TouchableOpacity
-                style={styles.closeButton}
+                style={[
+                  styles.closeButton,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgba(0, 0, 0, 0.5)',
+                  },
+                ]}
                 onPress={() => {
-                  // Remove the first image from the media array
-                  setMedia(media.slice(1)); // This removes the first item from the array
+                  setMedia(media.slice(1));
                 }}>
-                {/* <Entypo name="cross" size={25} color="black" /> */}
+                <Entypo name="cross" size={25} color={'black'} />
               </TouchableOpacity>
             </>
           ) : (
             <TouchableOpacity onPress={selectMedia}>
-              <View style={styles.mediaSelector}>
+              <View
+                style={[
+                  styles.mediaSelector,
+                  {
+                    backgroundColor: isDark
+                      ? '#121212'
+                      : 'rgba(248, 247, 247, 1)',
+                  },
+                ]}>
                 <Entypo name="upload-to-cloud" size={45} color="grey" />
                 <Text
                   style={{color: 'rgba(158, 158, 158, 1)', fontWeight: 'bold'}}>
@@ -306,7 +335,7 @@ export default function RatedScreen({navigation}) {
           <Text
             style={[
               {
-                color: 'rgb(0, 0, 0)',
+                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                 fontSize: 18,
                 textAlign: 'left',
                 marginBottom: 10,
@@ -319,7 +348,14 @@ export default function RatedScreen({navigation}) {
             Post images
           </Text>
 
-          <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
+          <View
+            style={[
+              styles.imageContainer,
+              {
+                flexWrap: 'wrap',
+                backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+              },
+            ]}>
             {media.slice(1, 8).map((item, index) => (
               <View key={index} style={styles.mediaItem}>
                 {item.type.startsWith('image') ? (
@@ -329,12 +365,23 @@ export default function RatedScreen({navigation}) {
                       style={styles.mediaPreview}
                     />
                     <TouchableOpacity
-                      style={styles.closeButton}
+                      style={[
+                        styles.closeButton,
+                        {
+                          backgroundColor: isDark
+                            ? '#121212'
+                            : 'rgba(248, 247, 247, 1)',
+                        },
+                      ]}
                       onPress={() => {
                         // Remove the image from media array
                         setMedia(media.filter((mediaItem, i) => i !== index));
                       }}>
-                      <Entypo name="cross" size={18} color="black" />
+                      <Entypo
+                        name="cross"
+                        size={18}
+                        color={isDark ? 'white' : 'black'}
+                      />
                     </TouchableOpacity>
                   </>
                 ) : item.type.startsWith('video') ? null : (
@@ -388,8 +435,6 @@ export default function RatedScreen({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
-    width: Width,
-    height: Height,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },

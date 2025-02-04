@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {
   View,
   TextInput,
@@ -15,18 +15,17 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import Octicons from 'react-native-vector-icons/Octicons';
-// import {ThemeContext} from '../context/themeContext';
-// import {lightTheme, darkTheme} from '../context/theme';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 // Replace with your actual backend server URL
 const socket = io('http://YOUR_SERVER_IP:5000');
 
 const ChatScreen = ({navigation, route}) => {
-  const {isDarkMode} = useContext(ThemeContext);
-  const theme = isDarkMode ? darkTheme : lightTheme;
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const {chatId, userId} = route.params; // Unique chat room ID and user ID
   const [messages, setMessages] = useState([]);
@@ -79,13 +78,21 @@ const ChatScreen = ({navigation, route}) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
+    <View
+      style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+      <View
+        style={[
+          styles.rectangle2,
+          {
+            flexDirection: 'row',
+            backgroundColor: isDark ? '#121212' : '#fff',
+          },
+        ]}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{}}
         />
         <Image
@@ -103,7 +110,12 @@ const ChatScreen = ({navigation, route}) => {
             numberOfLines={1}
             style={[
               styles.recListText,
-              {fontWeight: 'bold', fontSize: 16, width: 180},
+              {
+                fontWeight: 'bold',
+                fontSize: 16,
+                width: 180,
+                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
+              },
             ]}>
             {route?.params ? route?.params?.item.title : 'seller name'}
           </Text>
@@ -126,7 +138,7 @@ const ChatScreen = ({navigation, route}) => {
           onPress={() => toggleModal('item.id')} // Use toggleModal instead of setModalVisible
           name="dots-three-vertical"
           size={24}
-          color="rgb(0, 0, 0)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)'}
           style={{alignSelf: 'flex-start', marginTop: 10}}
         />
         {selectedItemId === 'item.id' && (
@@ -138,7 +150,11 @@ const ChatScreen = ({navigation, route}) => {
               right: 30,
             }}
             onPress={() => toggleModal(item.id)}>
-            <View style={styles.modalContent}>
+            <View
+              style={[
+                styles.modalContent,
+                {backgroundColor: isDark ? '#121212' : '#fff'},
+              ]}>
               <TouchableOpacity
                 style={{
                   padding: 4,
@@ -150,12 +166,21 @@ const ChatScreen = ({navigation, route}) => {
                 <Octicons
                   name={'history'}
                   size={14}
-                  color="rgba(94, 95, 96, 1)"
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
                 />
                 <Text
                   style={[
                     styles.bigText,
-                    {fontSize: 14, marginLeft: 5, fontWeight: '500'},
+                    {
+                      fontSize: 14,
+                      marginLeft: 5,
+                      fontWeight: '500',
+                      color: isDark
+                        ? 'rgba(255, 255, 255, 1)'
+                        : 'rgba(94, 95, 96, 1)',
+                    },
                   ]}>
                   View History
                 </Text>
@@ -164,7 +189,7 @@ const ChatScreen = ({navigation, route}) => {
               <View
                 style={{
                   height: 1,
-                  backgroundColor: 'lightgrey',
+                  backgroundColor: isDark ? 'grey' : 'lightgrey',
                   width: 120,
                   alignSelf: 'center',
                   borderRadius: 10,
@@ -179,11 +204,24 @@ const ChatScreen = ({navigation, route}) => {
                   marginLeft: 5,
                 }}
                 onPress={() => deleteItem(item.id)}>
-                <Entypo name={'block'} size={16} color="rgba(94, 95, 96, 1)" />
+                <Entypo
+                  name={'block'}
+                  size={16}
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
+                />
                 <Text
                   style={[
                     styles.bigText,
-                    {fontSize: 14, marginLeft: 5, fontWeight: '500'},
+                    {
+                      fontSize: 14,
+                      marginLeft: 5,
+                      fontWeight: '500',
+                      color: isDark
+                        ? 'rgba(255, 255, 255, 1)'
+                        : 'rgba(94, 95, 96, 1)',
+                    },
                   ]}>
                   Block
                 </Text>
@@ -192,7 +230,7 @@ const ChatScreen = ({navigation, route}) => {
               <View
                 style={{
                   height: 1,
-                  backgroundColor: 'lightgrey',
+                  backgroundColor: isDark ? 'grey' : 'lightgrey',
                   width: 120,
                   alignSelf: 'center',
                   borderRadius: 10,
@@ -207,11 +245,24 @@ const ChatScreen = ({navigation, route}) => {
                   marginLeft: 5,
                 }}
                 onPress={() => deleteItem(item.id)}>
-                <Octicons name={'mute'} size={16} color="rgba(94, 95, 96, 1)" />
+                <Octicons
+                  name={'mute'}
+                  size={16}
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
+                />
                 <Text
                   style={[
                     styles.bigText,
-                    {fontSize: 14, marginLeft: 5, fontWeight: '500'},
+                    {
+                      fontSize: 14,
+                      marginLeft: 5,
+                      fontWeight: '500',
+                      color: isDark
+                        ? 'rgba(255, 255, 255, 1)'
+                        : 'rgba(94, 95, 96, 1)',
+                    },
                   ]}>
                   Mute
                 </Text>
@@ -252,7 +303,10 @@ const ChatScreen = ({navigation, route}) => {
                   isSentByUser ? styles.sentMessage : styles.receivedMessage,
                 ]}>
                 {item.text ? (
-                  <Text style={styles.message}>{item.text}</Text>
+                  <Text
+                    style={[styles.message, {color: isDark ? '#fff' : '#000'}]}>
+                    {item.text}
+                  </Text>
                 ) : null}
                 {item.image && (
                   <Image source={{uri: item.image}} style={styles.image} />
@@ -271,18 +325,27 @@ const ChatScreen = ({navigation, route}) => {
         }}
       />
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: isDark ? '#000' : '#fff',
+          },
+        ]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input]}
           value={text}
           onChangeText={setText}
+          placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
           placeholder="Enter amount or chat"
         />
         <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
           <MaterialIcons
             name="image"
             size={35}
-            color="rgba(86, 86, 86, 0.48)"
+            color={
+              isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
+            }
           />
         </TouchableOpacity>
 
@@ -290,7 +353,9 @@ const ChatScreen = ({navigation, route}) => {
           <Feather
             name="plus-circle"
             size={30}
-            color="rgba(86, 86, 86, 0.48)"
+            color={
+              isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
+            }
           />
         </TouchableOpacity>
 

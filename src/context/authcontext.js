@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Alert} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
-let apiURL = 'http://192.168.1.53:8080';
+let apiURL = 'http://192.168.1.24:8080';
 const AuthContext = createContext();
 
 const AuthProvider = ({children}) => {
@@ -22,6 +22,7 @@ const AuthProvider = ({children}) => {
   const [userdata, setUserdata] = useState([]);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isposting, setisposting] = useState(false);
 
   useEffect(() => {
     getDeviceToken();
@@ -212,7 +213,7 @@ const AuthProvider = ({children}) => {
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('Error 107', error.response?.data || 'No error response');
+        // console.log('Error 107', error.response?.data || 'No error response');
       } else {
         console.log('Error 109', 'Failed to load categories');
       }
@@ -272,7 +273,7 @@ const AuthProvider = ({children}) => {
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('Error 107', error.response?.data || 'No error response');
+        // console.log('Error 107', error.response?.data || 'No error response');
       } else {
         console.log('Error 109', 'Failed to load categories');
       }
@@ -414,6 +415,8 @@ const AuthProvider = ({children}) => {
         setUserRole,
         getSellerCategories,
         posts,
+        setisposting,
+        isposting,
       }}>
       {children}
     </AuthContext.Provider>

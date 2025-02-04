@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -13,11 +13,15 @@ import {
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function Messages({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [recentPostList, setRecentPostList] = useState([
     {
       id: 1,
@@ -121,9 +125,16 @@ export default function Messages({navigation}) {
         marginBottom: 10,
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderColor: 'rgba(0, 0, 0, 0.1)',
+        borderColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
       }}>
-      <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
+      <View
+        style={[
+          styles.rectangle2,
+          {
+            flexDirection: 'row',
+            backgroundColor: isDark ? '#121212' : '#fff',
+          },
+        ]}>
         <Image
           source={item.img}
           style={{
@@ -149,7 +160,12 @@ export default function Messages({navigation}) {
             numberOfLines={1}
             style={[
               styles.recListText,
-              {fontWeight: 'bold', fontSize: 16, width: 180},
+              {
+                fontWeight: 'bold',
+                fontSize: 16,
+                width: 180,
+                color: isDark ? '#fff' : '#000',
+              },
             ]}>
             {item.title}
           </Text>
@@ -163,6 +179,7 @@ export default function Messages({navigation}) {
                 fontSize: 14,
                 width: 180,
                 marginTop: 5,
+                color: isDark ? '#fff' : '#1d1e20',
               },
             ]}>
             {item.status}
@@ -179,24 +196,30 @@ export default function Messages({navigation}) {
               backgroundColor: 'rgba(6, 196, 217, 1)',
             }}></View>
         </View>
-        <Feather name="camera" size={24} color="rgba(75, 77, 77, 0.44)" />
+        <Feather
+          name="camera"
+          size={24}
+          color={isDark ? '#fff' : 'rgba(75, 77, 77, 0.44)'}
+        />
       </View>
     </Pressable>
   );
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>New message</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          New message
+        </Text>
       </View>
-
       <View
         style={{
           flexDirection: 'row',
@@ -204,7 +227,14 @@ export default function Messages({navigation}) {
           justifyContent: 'center',
           marginBottom: 15,
         }}>
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? '#121212' : '#fff',
+              borderColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
+            },
+          ]}>
           <Image
             source={require('../assets/search-icon.png')}
             style={{
@@ -217,7 +247,7 @@ export default function Messages({navigation}) {
           />
           <TextInput
             // value={'text'}
-            style={styles.searchInput}
+            style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
             // onChangeText={setText}
             placeholderTextColor={'rgba(94, 95, 96, 1)'}
             placeholder="Search"
@@ -226,23 +256,31 @@ export default function Messages({navigation}) {
           />
         </View>
       </View>
-
       <ScrollView showsVerticalScrollIndicator={false}>
         {recentPostList.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>
-
       {/* Confirmation Modal */}
-      <Modal transparent={true} visible={modalVisible} animationType="slide">
+      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              {backgroundColor: isDark ? '#121212' : '#fff'},
+            ]}>
             <Text
               style={[
                 styles.modalText,
-                {fontWeight: 'bold', marginBottom: 10},
+                {
+                  fontWeight: 'bold',
+                  marginBottom: 10,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               Delete ?
             </Text>
-            <Text style={styles.modalText}>Are you sure want Delete?</Text>
+            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
+              Are you sure want Delete?
+            </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 onPress={() => {
@@ -261,7 +299,7 @@ export default function Messages({navigation}) {
             </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   );
 }

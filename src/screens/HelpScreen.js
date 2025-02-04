@@ -1,81 +1,80 @@
-import React, {useState} from 'react';
+import React, {useContext} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Pressable,
-  Image,
-  Dimensions,
-  Modal,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function HelpScreen({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   return (
-    <View style={styles.screen}>
+    <View
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>Help and Support</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          Help and Support
+        </Text>
       </View>
 
+      {/** Navigation Buttons with Correct Screen Names */}
       <TouchableOpacity
         onPress={() => navigation.navigate('faqscreen')}
-        style={{
-          width: Width * 0.9,
-          alignSelf: 'center',
-          borderRadius: 10,
-          height: '10%',
-          margin: 10,
-          justifyContent: 'center',
-          backgroundColor: 'rgba(223, 223, 223, 0.36)',
-        }}>
-        <Text style={[styles.headerText, {marginLeft: 20, fontWeight: '500'}]}>
+        style={[
+          styles.button,
+          {
+            backgroundColor: isDark
+              ? 'rgba(50, 50, 50, 0.7)'
+              : 'rgba(223, 223, 223, 0.36)',
+          },
+        ]}>
+        <Text style={[styles.buttonText, {color: isDark ? '#fff' : '#000'}]}>
           FAQs
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate('chatsupport')}
-        style={{
-          width: Width * 0.9,
-          alignSelf: 'center',
-          borderRadius: 10,
-          height: '10%',
-          margin: 10,
-
-          justifyContent: 'center',
-          backgroundColor: 'rgba(223, 223, 223, 0.36)',
-        }}>
-        <Text style={[styles.headerText, {marginLeft: 20, fontWeight: '500'}]}>
-          Chat support
+        style={[
+          styles.button,
+          {
+            backgroundColor: isDark
+              ? 'rgba(50, 50, 50, 0.7)'
+              : 'rgba(223, 223, 223, 0.36)',
+          },
+        ]}>
+        <Text style={[styles.buttonText, {color: isDark ? '#fff' : '#000'}]}>
+          Chat Support
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate('reportissue')}
-        style={{
-          width: Width * 0.9,
-          alignSelf: 'center',
-          borderRadius: 10,
-          margin: 10,
-          height: '10%',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(223, 223, 223, 0.36)',
-        }}>
-        <Text style={[styles.headerText, {marginLeft: 20, fontWeight: '500'}]}>
-          Report a issue
+        style={[
+          styles.button,
+          {
+            backgroundColor: isDark
+              ? 'rgba(50, 50, 50, 0.7)'
+              : 'rgba(223, 223, 223, 0.36)',
+          },
+        ]}>
+        <Text style={[styles.buttonText, {color: isDark ? '#fff' : '#000'}]}>
+          Report an Issue
         </Text>
       </TouchableOpacity>
     </View>
@@ -85,13 +84,6 @@ export default function HelpScreen({navigation}) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    margin: 5,
-    marginLeft: 20,
   },
   header: {
     flexDirection: 'row',
@@ -103,64 +95,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: '24%',
   },
-  rectangle2: {
-    backgroundColor: '#fff',
-    width: Width * 0.95,
-    height: 80,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+  button: {
+    width: Width * 0.9,
+    alignSelf: 'center',
     borderRadius: 10,
-    padding: 10,
-  },
-  recListText: {
-    color: '#1d1e20',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: '12%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(217, 217, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 40,
-    alignItems: 'center',
+    height: '10%',
+    margin: 10,
     justifyContent: 'center',
-    height: 46,
-  },
-  deleteButton: {
-    backgroundColor: 'rgba(6, 196, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
   },
   buttonText: {
-    color: '#fff',
+    marginLeft: 20,
     fontWeight: '500',
     fontSize: 18,
   },

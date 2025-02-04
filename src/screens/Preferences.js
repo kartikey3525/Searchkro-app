@@ -14,6 +14,7 @@ import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 export default function Preferences({navigation}) {
   const [numColumns, setNumColumns] = useState(4);
@@ -24,6 +25,8 @@ export default function Preferences({navigation}) {
   useEffect(() => {
     // getCategories();
   }, [isFocused]);
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -52,10 +55,19 @@ export default function Preferences({navigation}) {
           width: Width * 0.5, // Take half the screen width for two columns
         }}
         onPress={() => navigation.navigate('preferencedetails', {item: item})}>
-        <View style={[styles.rectangle, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <Image source={item.img} style={{width: '100%', height: '100%'}} />
         </View>
-        <Text numberOfLines={1} style={styles.recListText}>
+        <Text
+          numberOfLines={1}
+          style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -72,17 +84,31 @@ export default function Preferences({navigation}) {
           width: Width * 0.5,
         }}
         onPress={() => navigation.navigate('preferencedetails', {item: item})}>
-        <View style={[styles.rectangle1, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle1,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <Image
             source={{uri: item.images[0]}}
             // source={item.img}
             style={{width: '100%', height: '100%'}}
           />
         </View>
-        <Text numberOfLines={1} style={[styles.recListText2, {fontSize: 15}]}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.recListText2,
+            {fontSize: 15, color: isDark ? '#fff' : '#000'},
+          ]}>
           {item.title}
         </Text>
-        <Text numberOfLines={2} style={styles.recListText2}>
+        <Text
+          numberOfLines={2}
+          style={[styles.recListText2, {color: isDark ? '#fff' : '#000'}]}>
           {item.description}
         </Text>
       </TouchableOpacity>
@@ -91,7 +117,9 @@ export default function Preferences({navigation}) {
 
   return (
     <View style={{flex: 1}}>
-      <View style={styles.container} showsVerticalScrollIndicator={false}>
+      <View
+        style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}
+        showsVerticalScrollIndicator={false}>
         <View
           style={{
             marginTop: '2%',
@@ -111,7 +139,7 @@ export default function Preferences({navigation}) {
               onPress={() => navigation.goBack()}
               name="chevron-thin-left"
               size={20}
-              color="rgba(94, 95, 96, 1)"
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
               style={{marginLeft: 20, padding: 5}}
             />
             <Text
@@ -121,6 +149,7 @@ export default function Preferences({navigation}) {
                   fontWeight: 'bold',
                   alignSelf: 'center',
                   marginLeft: '25%',
+                  color: isDark ? '#fff' : '#000',
                   width: Width * 0.5,
                 },
               ]}>
@@ -131,6 +160,7 @@ export default function Preferences({navigation}) {
           <FlatList
             style={{
               marginTop: '2%',
+              height: Height * 0.9,
             }}
             key={flatListKey}
             horizontal={false}
@@ -169,24 +199,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
-  },
-  iconStyle: {
-    width: Width * 0.13,
-    height: 50,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: '7%',
-    backgroundColor: 'rgba(7, 201, 29, 1)',
-  },
-  square: {
-    backgroundColor: 'rgba(248, 247, 247, 1)',
-    width: Width * 0.21,
-    marginRight: '2%',
-    height: 86,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
   },
   rectangle1: {
     backgroundColor: 'rgba(248, 247, 247, 1)',
@@ -250,44 +262,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 6,
     fontFamily: 'Poppins-Bold',
-  },
-  smallblueBotton: {
-    backgroundColor: 'rgba(7, 201, 29, 1)',
-    width: '30%',
-    height: 56,
-    borderRadius: 10,
-    margin: 10,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  blueBotton: {
-    backgroundColor: '#00AEEF',
-    width: '88%',
-    height: 56,
-    borderRadius: 10,
-    margin: 10,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputContainer: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: 'rgb(0, 0, 0)',
-    borderWidth: 1,
-    borderRadius: 14,
-    height: 45,
-    padding: 1,
-  },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    color: 'black',
-    height: 45,
-    left: 16,
   },
 });

@@ -2,24 +2,26 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import React, {useContext} from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
-
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
+import {ThemeContext} from '../context/themeContext';
+
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function CommonScreen({navigation}) {
   const {userRole, setUserRole} = useContext(AuthContext);
-
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   return (
-    <ScrollView style={styles.screen}>
+    <ScrollView
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View
         style={{
           position: 'absolute',
@@ -27,8 +29,11 @@ export default function CommonScreen({navigation}) {
           alignSelf: 'center',
           width: 300,
         }}>
-        <Text style={styles.bigText}>Choose your role in the trade</Text>
-        <Text style={styles.smallText}>
+        <Text style={[styles.bigText, {color: isDark ? '#FFFFFF' : '#000000'}]}>
+          Choose your role in the trade
+        </Text>
+        <Text
+          style={[styles.smallText, {color: isDark ? '#CCCCCC' : '#000000'}]}>
           Filling your invoice details and getting finance for it, is just a few
           steps away.
         </Text>
@@ -37,39 +42,39 @@ export default function CommonScreen({navigation}) {
           style={[
             styles.recitem,
             {
+              backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
               borderColor:
                 userRole === 'buyer'
-                  ? 'rgba(6, 196, 217, 1)'
-                  : 'rgb(255, 255, 255)',
+                  ? '#06C4D9'
+                  : isDark
+                  ? '#333333'
+                  : '#FFFFFF',
             },
           ]}
           onPress={() => setUserRole('buyer')}>
-          <View
-            style={{
-              width: Width * 0.12,
-              marginLeft: 20,
-              height: 50,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(6, 196, 217, 1)',
-              borderRadius: 10,
-            }}>
-            <FontAwesome5
-              name="shopping-bag"
-              size={22}
-              color="rgba(255, 255, 255, 1)"
-              style={{}}
-            />
+          <View style={[styles.iconContainer, {backgroundColor: '#06C4D9'}]}>
+            <FontAwesome5 name="shopping-bag" size={22} color="#FFFFFF" />
           </View>
           <View style={{marginLeft: 20, width: Width * 0.6}}>
-            <Text style={{fontWeight: 'bold'}}>BUYER</Text>
-            <Text style={{fontSize: 13}}>I want to request a product.</Text>
+            <Text
+              style={[
+                styles.roleText,
+                {color: isDark ? '#FFFFFF' : '#000000'},
+              ]}>
+              BUYER
+            </Text>
+            <Text
+              style={[
+                styles.roleDescription,
+                {color: isDark ? '#CCCCCC' : '#000000'},
+              ]}>
+              I want to request a product.
+            </Text>
           </View>
           <Entypo
             name="chevron-thin-right"
             size={16}
-            color="rgba(94, 95, 96, 1)"
-            style={{}}
+            color={isDark ? '#CCCCCC' : '#5E5F60'}
           />
         </TouchableOpacity>
 
@@ -77,88 +82,90 @@ export default function CommonScreen({navigation}) {
           style={[
             styles.recitem,
             {
+              backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
               borderColor:
                 userRole === 'seller'
-                  ? 'rgba(6, 196, 217, 1)'
-                  : 'rgb(255, 255, 255)',
+                  ? '#06C4D9'
+                  : isDark
+                  ? '#333333'
+                  : '#FFFFFF',
             },
           ]}
           onPress={() => setUserRole('seller')}>
-          <View
-            style={{
-              width: Width * 0.12,
-              marginLeft: 20,
-              height: 50,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(6, 196, 217, 1)',
-              borderRadius: 10,
-            }}>
+          <View style={[styles.iconContainer, {backgroundColor: '#06C4D9'}]}>
             <FontAwesome5
               name="tag"
               size={22}
-              color="rgba(255, 255, 255, 1)"
+              color="#FFFFFF"
               style={{marginLeft: 2}}
             />
           </View>
           <View style={{marginLeft: 20, width: Width * 0.6}}>
-            <Text style={{fontWeight: 'bold'}}>SELLER</Text>
-            <Text style={{fontSize: 13}}>I have products to sell</Text>
+            <Text
+              style={[
+                styles.roleText,
+                {color: isDark ? '#FFFFFF' : '#000000'},
+              ]}>
+              SELLER
+            </Text>
+            <Text
+              style={[
+                styles.roleDescription,
+                {color: isDark ? '#CCCCCC' : '#000000'},
+              ]}>
+              I have products to sell.
+            </Text>
           </View>
           <Entypo
             name="chevron-thin-right"
             size={16}
-            color="rgba(94, 95, 96, 1)"
-            style={{}}
+            color={isDark ? '#CCCCCC' : '#5E5F60'}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.blueBotton}
+          style={[
+            styles.blueBotton,
+            {backgroundColor: isDark ? '#0077B6' : '#00AEEF'},
+          ]}
           onPress={() => navigation.navigate('Login')}>
-          <Text
-            style={[
-              {
-                color: '#fff',
-                fontSize: 20,
-                marginBottom: 0,
-              },
-            ]}>
-            Continue
-          </Text>
+          <Text style={{color: '#fff', fontSize: 20}}>Continue</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#F2FCF8',
   },
   recitem: {
     flexDirection: 'row',
     width: Width * 0.9,
     height: Height * 0.1,
-    backgroundColor: '#fff',
     borderRadius: 10,
     marginTop: 20,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(6, 196, 217, 1)',
+  },
+  iconContainer: {
+    width: Width * 0.12,
+    marginLeft: 20,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
   },
   smallText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: 'rgba(0, 0, 0, 1)',
     textAlign: 'left',
     width: Width * 0.79,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
-
   bigText: {
     fontSize: 26,
-    color: 'black',
     textAlign: 'center',
     marginTop: Height * 0.1,
     fontWeight: 'bold',
@@ -166,8 +173,13 @@ const styles = StyleSheet.create({
     width: Width * 0.98,
     fontFamily: 'Poppins-Bold',
   },
+  roleText: {
+    fontWeight: 'bold',
+  },
+  roleDescription: {
+    fontSize: 13,
+  },
   blueBotton: {
-    backgroundColor: '#00AEEF',
     width: Width * 0.9,
     height: Height * 0.07,
     borderRadius: 10,

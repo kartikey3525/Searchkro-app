@@ -1,23 +1,22 @@
-import React, {useRef, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
   Animated,
   Dimensions,
-  Modal,
-  TouchableOpacity,
 } from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function PaymentSuccess({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [recentPostList, setRecentPostList] = useState([
     {
       id: 1,
@@ -66,7 +65,11 @@ export default function PaymentSuccess({navigation}) {
           justifyContent: 'center',
         }}>
         <Animated.Image
-          source={require('../assets/paymentsuccess.png')}
+          source={
+            isDark
+              ? require('../assets/paymentsuccess-dark.png')
+              : require('../assets/paymentsuccess.png')
+          }
           style={[
             styles.image,
             {
@@ -82,7 +85,7 @@ export default function PaymentSuccess({navigation}) {
             {
               fontWeight: '500',
               fontSize: 22,
-              color: '#fff',
+              color: isDark ? '#000' : '#fff',
               width: Width * 0.8,
 
               textAlign: 'center',

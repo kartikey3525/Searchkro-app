@@ -25,6 +25,8 @@ import Geolocation from '@react-native-community/geolocation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'react-native-image-picker';
+import {ThemeContext} from '../context/themeContext';
+import Feather from 'react-native-vector-icons/Feather';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -33,6 +35,8 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function SellerProfile({navigation, route}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [email, setEmail] = useState('');
   const [description, setdescription] = useState('');
   const [Socialmedia, setSocialmedia] = useState('');
@@ -342,7 +346,10 @@ export default function SellerProfile({navigation, route}) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.screen}>
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -356,7 +363,7 @@ export default function SellerProfile({navigation, route}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -366,11 +373,20 @@ export default function SellerProfile({navigation, route}) {
               fontWeight: 'bold',
               alignSelf: 'center',
               textAlign: 'center',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               width: Width * 0.8,
             },
           ]}>
           Profile
         </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Profilescreen')}>
+          <Feather
+            name="settings"
+            size={20}
+            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
+            style={{padding: 5}}
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={{}}>
@@ -378,7 +394,10 @@ export default function SellerProfile({navigation, route}) {
           <>
             <Image
               source={{uri: media[0].uri}}
-              style={[styles.mediaSelector, {borderWidth: 0}]}
+              style={[
+                styles.mediaSelector,
+                {borderWidth: 0, backgroundColor: 'rgb(255, 255, 255)'},
+              ]}
             />
             <TouchableOpacity
               style={styles.closeButton}
@@ -394,7 +413,15 @@ export default function SellerProfile({navigation, route}) {
             disabled
             // onPress={selectMedia}
           >
-            <View style={styles.mediaSelector}>
+            <View
+              style={[
+                styles.mediaSelector,
+                {
+                  backgroundColor: isDark
+                    ? '#121212'
+                    : 'rgb(255, 255, 255)',
+                },
+              ]}>
               <MaterialIcons
                 name="image"
                 size={35}
@@ -431,6 +458,7 @@ export default function SellerProfile({navigation, route}) {
               color: '#000',
               fontWeight: '600',
               fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
               width: Width * 0.48,
@@ -445,6 +473,7 @@ export default function SellerProfile({navigation, route}) {
               color: '#000',
               fontWeight: '600',
               fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
             },
@@ -461,10 +490,25 @@ export default function SellerProfile({navigation, route}) {
           width: Width,
           justifyContent: 'space-evenly',
         }}>
-        <View style={[styles.inputContainer, {width: '42%', marginLeft: 20}]}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              width: '42%',
+              borderColor: isDark ? 'rgb(97, 97, 97)' : 'rgb(108, 108, 108)',
+              marginLeft: 20,
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+            },
+          ]}>
           <TextInput
             value={email}
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              {
+                color: isDark ? '#fff' : '#000',
+                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              },
+            ]}
             onChangeText={setEmail}
             placeholder="Email"
             mode="outlined"
@@ -506,6 +550,7 @@ export default function SellerProfile({navigation, route}) {
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               alignSelf: 'flex-start',
               width: Width * 0.5,
             },
@@ -521,11 +566,27 @@ export default function SellerProfile({navigation, route}) {
           width: Width * 0.9,
           height: 60,
           borderWidth: 1,
-          borderColor: errors.phone ? 'red' : 'rgba(231, 231, 231, 1)',
+          borderColor: errors.phone ? 'red' : 'rgba(0, 0, 0, 0.43)',
           marginBottom: 5,
           borderRadius: 10,
         }}
-        textInputStyle={{height: 50}}
+        textContainerStyle={{
+          backgroundColor: isDark ? '#121212' : '#fff',
+        }}
+        textInputStyle={{
+          height: 50,
+          backgroundColor: isDark ? '#121212' : '#fff',
+          color: isDark ? '#fff' : '#000',
+          fontSize: 16,
+        }}
+        codeTextStyle={{
+          color: isDark ? '#fff' : '#000',
+        }}
+        flagButtonStyle={{
+          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          borderTopLeftRadius: 10,
+          borderBottomLeftRadius: 10,
+        }}
         defaultCode="IN"
         layout="second"
         onChangeText={text => setphone(text)}
@@ -546,6 +607,7 @@ export default function SellerProfile({navigation, route}) {
               color: '#000',
               fontWeight: '600',
               fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
               width: '50%',
@@ -590,6 +652,7 @@ export default function SellerProfile({navigation, route}) {
               color: '#000',
               fontWeight: '600',
               fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
               width: Width * 0.48,
@@ -601,9 +664,9 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
               fontWeight: '600',
               fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
             },
@@ -620,10 +683,25 @@ export default function SellerProfile({navigation, route}) {
           width: Width,
           justifyContent: 'space-evenly',
         }}>
-        <View style={[styles.inputContainer, {width: '42%'}]}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              width: '42%',
+              borderColor: isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
           <TextInput
             value={ownerName}
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
             onChangeText={setownerName}
             placeholder="Shop name"
             mode="outlined"
@@ -633,10 +711,25 @@ export default function SellerProfile({navigation, route}) {
           />
         </View>
 
-        <View style={[styles.inputContainer, {width: '42%'}]}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              width: '42%',
+              borderColor: isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
           <TextInput
             value={shopName}
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
             onChangeText={setshopName}
             placeholder="Owner name"
             mode="outlined"
@@ -662,7 +755,7 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,
@@ -674,14 +767,28 @@ export default function SellerProfile({navigation, route}) {
         </Text>
       </View>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(109, 109, 109, 0.43)'
+              : 'rgba(0, 0, 0, 1)',
+          },
+        ]}>
         <TextInput
           value={bussinessAddress}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setbussinessAddress}
           placeholder="Bussiness Address"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? '#ccc' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -702,7 +809,7 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,
@@ -731,7 +838,7 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,
@@ -743,14 +850,28 @@ export default function SellerProfile({navigation, route}) {
         </Text>
       </View>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(109, 109, 109, 0.43)'
+              : 'rgba(0, 0, 0, 1)',
+          },
+        ]}>
         <TextInput
           value={Socialmedia}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setSocialmedia}
           placeholder="Social media"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={'grey'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -771,7 +892,7 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,
@@ -786,17 +907,30 @@ export default function SellerProfile({navigation, route}) {
       <View
         style={[
           styles.inputContainer,
-          {height: 100, alignItems: 'flex-start'},
+          {
+            height: 100,
+            alignItems: 'flex-start',
+            borderColor: isDark
+              ? 'rgba(109, 109, 109, 0.43)'
+              : 'rgba(0, 0, 0, 1)',
+          },
         ]}>
         <TextInput
           value={description}
-          style={[styles.textInput, {height: 93}]}
+          style={[
+            styles.textInput,
+            {
+              height: 93,
+              color: isDark ? '#fff' : '#000',
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+            },
+          ]}
           onChangeText={setdescription}
           numberOfLines={5}
           multiline={true}
           placeholder="Add a short description about your business, products, or services . . ."
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={'grey'}
           autoCapitalize="none"
         />
       </View>
@@ -816,7 +950,7 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
               marginBottom: 5,

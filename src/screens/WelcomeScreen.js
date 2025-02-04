@@ -5,18 +5,24 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from 'react-native';
-import React from 'react';
+import React, {useContext} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useNavigation} from '@react-navigation/native';
-import {Dimensions} from 'react-native';
+import {ThemeContext} from '../context/themeContext'; // Import Theme Context
+
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-export default function WelcomeScreen({}) {
+export default function WelcomeScreen() {
   const navigation = useNavigation();
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   return (
-    <ScrollView style={styles.screen}>
+    <ScrollView
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <TouchableOpacity
         style={{
           flexDirection: 'row',
@@ -43,25 +49,30 @@ export default function WelcomeScreen({}) {
           style={{
             width: 160,
             height: 150,
-            // backgroundColor: '#00AEEF',
           }}
           resizeMode="contain"
         />
       </TouchableOpacity>
 
       <Image
-        source={require('../assets/box-image.png')}
+        source={
+          require('../assets/box-image-dark.png') // Light theme image
+        }
         style={{
           width: 353,
-          // height: 353,
           height: Height * 0.38,
+          alignSelf: 'center',
         }}
         resizeMode="contain"
       />
 
       <View style={{justifyContent: 'center'}}>
         <Image
-          source={require('../assets/welcome-rectangle.png')}
+          source={
+            isDark
+              ? require('../assets/welcome-rectangle-dark.png') // Dark theme image
+              : require('../assets/welcome-rectangle.png') // Light theme image
+          }
           style={{width: Width * 0.99, height: Height * 0.5, marginTop: -40}}
           resizeMode="contain"
         />
@@ -71,7 +82,6 @@ export default function WelcomeScreen({}) {
             position: 'absolute',
             alignItems: 'center',
             alignSelf: 'center',
-
             width: 300,
           }}>
           <View style={{flexDirection: 'row'}}>
@@ -86,7 +96,7 @@ export default function WelcomeScreen({}) {
             />
             <View
               style={{
-                backgroundColor: '#9DA49E1A',
+                backgroundColor: isDark ? '#444' : '#9DA49E1A',
                 width: 10,
                 height: 10,
                 borderRadius: 100,
@@ -95,8 +105,11 @@ export default function WelcomeScreen({}) {
             />
           </View>
 
-          <Text style={styles.bigText}>"Style Starts Here!"</Text>
-          <Text style={styles.smallText}>
+          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+            "Style Starts Here!"
+          </Text>
+          <Text
+            style={[styles.smallText, {color: isDark ? '#E0E0E0' : '#1D1E20'}]}>
             Shop the latest trends, exclusive collections, and timeless fashion.
           </Text>
 
@@ -110,24 +123,21 @@ export default function WelcomeScreen({}) {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     width: Width,
     height: Height,
-    backgroundColor: '#F2FCF8',
   },
   smallText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#1D1E20',
     textAlign: 'center',
     width: 250,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
-
   bigText: {
     fontSize: 30,
-    color: 'black',
     textAlign: 'center',
     marginTop: 40,
     fontWeight: 'bold',

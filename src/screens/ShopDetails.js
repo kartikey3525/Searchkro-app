@@ -19,6 +19,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Rating} from 'react-native-ratings';
 import {useIsFocused} from '@react-navigation/native';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
@@ -31,6 +32,9 @@ import * as scale from 'd3-scale';
 import HorizontalRatingButtons from '../components/HorizontalRating';
 
 export default function ShopDetails({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [numColumns, setNumColumns] = useState(4);
   const isFocused = useIsFocused();
   const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
@@ -78,6 +82,16 @@ export default function ShopDetails({navigation}) {
     {key: 'photos', title: 'Photos'},
   ]);
 
+  const [selectedItemId, setSelectedItemId] = useState(null);
+
+  const toggleModal = id => {
+    if (selectedItemId === id) {
+      setSelectedItemId(null); // Close modal if the same item is clicked again
+    } else {
+      setSelectedItemId(id); // Open modal for the clicked item
+    }
+  };
+
   const Overview = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
@@ -86,6 +100,7 @@ export default function ShopDetails({navigation}) {
             styles.bigText,
             {
               alignSelf: 'flex-start',
+              color: isDark ? 'white' : 'black',
               fontSize: 18,
               left: 25,
               marginTop: 10,
@@ -101,9 +116,8 @@ export default function ShopDetails({navigation}) {
             {
               alignSelf: 'flex-start',
               fontSize: 14,
-
+              color: isDark ? 'white' : 'black',
               left: 25,
-
               marginTop: 5,
               marginBottom: 0,
             },
@@ -135,9 +149,9 @@ export default function ShopDetails({navigation}) {
             {
               alignSelf: 'flex-start',
               fontSize: 14,
+              color: isDark ? 'white' : 'black',
 
               left: 25,
-
               marginTop: 5,
               marginBottom: 0,
             },
@@ -168,6 +182,7 @@ export default function ShopDetails({navigation}) {
             {
               alignSelf: 'flex-start',
               fontSize: 18,
+              color: isDark ? 'white' : 'black',
               left: 25,
               marginTop: 5,
               marginBottom: 0,
@@ -210,6 +225,7 @@ export default function ShopDetails({navigation}) {
               alignSelf: 'flex-start',
               fontSize: 18,
               left: 25,
+              color: isDark ? 'white' : 'black',
               marginTop: 5,
               marginBottom: 0,
             },
@@ -275,6 +291,7 @@ export default function ShopDetails({navigation}) {
                   {
                     alignSelf: 'flex-start',
                     fontSize: 14,
+                    color: isDark ? 'white' : 'black',
                     marginTop: 5,
                     marginBottom: 0,
                   },
@@ -310,6 +327,8 @@ export default function ShopDetails({navigation}) {
                 {
                   alignSelf: 'flex-start',
                   fontSize: 14,
+                  color: isDark ? 'white' : 'black',
+
                   marginTop: 10,
                   marginBottom: 0,
                 },
@@ -343,6 +362,7 @@ export default function ShopDetails({navigation}) {
               marginTop: 10,
               marginLeft: 25,
               marginBottom: 0,
+              color: isDark ? 'white' : 'black',
             },
           ]}>
           Recent rating review
@@ -397,7 +417,7 @@ export default function ShopDetails({navigation}) {
             key={flatListKey}
             horizontal={false}
             scrollEnabled={false}
-            numColumns={4}
+            numColumns={3}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
             data={recentPostList}
@@ -656,7 +676,7 @@ export default function ShopDetails({navigation}) {
           key={flatListKey}
           horizontal={false}
           scrollEnabled={false}
-          numColumns={4}
+          numColumns={3}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           data={recentPostList}
@@ -688,11 +708,22 @@ export default function ShopDetails({navigation}) {
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('details', {item: item})}>
-        <View style={[styles.rectangle, {overflow: 'hidden'}]}>
+        <View
+          style={[
+            styles.rectangle,
+            {
+              overflow: 'hidden',
+              backgroundColor: isDark
+                ? 'rgb(0, 0, 0)'
+                : 'rgba(248, 247, 247, 1)',
+            },
+          ]}>
           <Image source={item.img} style={{width: '100%', height: '100%'}} />
         </View>
 
-        <Text numberOfLines={1} style={styles.recListText}>
+        <Text
+          numberOfLines={1}
+          style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -702,12 +733,19 @@ export default function ShopDetails({navigation}) {
   const render2RectangleList = ({item, index}) => {
     return (
       <Pressable
-        style={{borderBottomWidth: 1, borderBottomColor: 'rgba(0, 0, 0, 0.1)'}}
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
+        }}
         onPress={() => navigation.navigate('details', {item: item})}>
         <View
           style={[
             styles.rectangle2,
-            {overflow: 'hidden', flexDirection: 'row'},
+            {
+              overflow: 'hidden',
+              flexDirection: 'row',
+              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            },
           ]}>
           <View
             style={{
@@ -721,11 +759,98 @@ export default function ShopDetails({navigation}) {
             }}>
             <Image source={item.img} style={{width: '100%', height: '100%'}} />
           </View>
+          <Entypo
+            name={'dots-three-vertical'}
+            size={16}
+            color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+            style={{position: 'absolute', right: 10, top: 20}}
+            onPress={() => toggleModal(item.id)}
+          />
+          {selectedItemId === item.id && (
+            <Pressable
+              style={{
+                position: 'absolute',
+                alignSelf: 'flex-end',
+                top: 10,
+                right: 24,
+              }}
+              onPress={() => toggleModal(item.id)}>
+              <View
+                style={[
+                  styles.modalContent,
+                  {
+                    backgroundColor: isDark ? 'black' : 'white',
+                    borderWidth: 1,
+                    borderColor: 'rgb(255, 255, 255)',
+                  },
+                ]}>
+                <TouchableOpacity
+                  style={{
+                    padding: 4,
 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 20,
+                  }}
+                  onPress={() => {}}>
+                  <Text
+                    style={[
+                      {
+                        fontSize: 16,
+                        marginLeft: 5,
+                        fontWeight: '500',
+                        color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                      },
+                    ]}>
+                    Edit
+                  </Text>
+                </TouchableOpacity>
+
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: 'lightgrey',
+                    width: 120,
+                    alignSelf: 'center',
+                    borderRadius: 10,
+                  }}
+                />
+
+                <TouchableOpacity
+                  style={{
+                    padding: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 20,
+                  }}
+                  onPress={() => deleteItem(item.id)}>
+                  <Text
+                    style={[
+                      {
+                        fontSize: 16,
+                        marginLeft: 5,
+                        fontWeight: '500',
+                        color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                      },
+                    ]}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          )}
+          <View></View>
           <View>
             <Text
               numberOfLines={1}
-              style={[styles.recListText, {fontWeight: 'bold', fontSize: 14}]}>
+              style={[
+                styles.recListText,
+                {
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  color: isDark ? '#fff' : '#000',
+                },
+              ]}>
               {item.title}
             </Text>
 
@@ -741,7 +866,7 @@ export default function ShopDetails({navigation}) {
                 style={[
                   {
                     marginTop: 0,
-                    color: 'rgba(29, 30, 32, 1)',
+                    color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                     fontWeight: '500',
                     fontSize: 12,
                     left: 2,
@@ -781,7 +906,7 @@ export default function ShopDetails({navigation}) {
             style={[
               {
                 marginTop: 0,
-                color: 'rgba(94, 95, 96, 1)',
+                color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
                 fontWeight: '500',
                 fontSize: 12,
                 marginRight: 20,
@@ -801,12 +926,16 @@ export default function ShopDetails({navigation}) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <AntDesign name={'like1'} size={16} color="rgba(94, 95, 96, 1)" />
+            <AntDesign
+              name={'like1'}
+              size={16}
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+            />
             <Text
               style={[
                 {
                   marginLeft: 5,
-                  color: 'rgba(94, 95, 96, 1)',
+                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
                   fontWeight: '500',
                   fontSize: 12,
                 },
@@ -815,7 +944,7 @@ export default function ShopDetails({navigation}) {
             </Text>
           </View>
 
-          <View
+          <Pressable
             style={{
               marginRight: 15,
               borderRadius: 5,
@@ -825,24 +954,25 @@ export default function ShopDetails({navigation}) {
               borderColor: 'rgba(228, 228, 228, 1)',
               alignItems: 'center',
               justifyContent: 'center',
-            }}>
+            }}
+            onPress={() => navigation.navigate('messages', {item: item})}>
             <FontAwesome
               name={'commenting-o'}
               size={16}
-              color="rgba(94, 95, 96, 1)"
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
             />
             <Text
               style={[
                 {
                   marginLeft: 5,
-                  color: 'rgba(94, 95, 96, 1)',
+                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
                   fontWeight: '500',
                   fontSize: 12,
                 },
               ]}>
               comment
             </Text>
-          </View>
+          </Pressable>
 
           <View
             style={{
@@ -854,12 +984,16 @@ export default function ShopDetails({navigation}) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Feather name={'send'} size={16} color="rgba(94, 95, 96, 1)" />
+            <Feather
+              name={'send'}
+              size={16}
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+            />
             <Text
               style={[
                 {
                   marginLeft: 5,
-                  color: 'rgba(94, 95, 96, 1)',
+                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
                   fontWeight: '500',
                   fontSize: 12,
                 },
@@ -905,7 +1039,9 @@ export default function ShopDetails({navigation}) {
 
   return (
     <View style={{flex: 1}}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}
+        showsVerticalScrollIndicator={false}>
         <View
           style={{
             marginTop: '2%',
@@ -925,7 +1061,7 @@ export default function ShopDetails({navigation}) {
               onPress={() => navigation.goBack()}
               name="chevron-thin-left"
               size={20}
-              color="rgba(94, 95, 96, 1)"
+              color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
               style={{marginLeft: 20, padding: 5}}
             />
             <Text
@@ -935,6 +1071,7 @@ export default function ShopDetails({navigation}) {
                   fontWeight: 'bold',
                   alignSelf: 'center',
                   marginLeft: '25%',
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                 },
               ]}>
               Shop Details
@@ -953,21 +1090,36 @@ export default function ShopDetails({navigation}) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#000' : 'white',
               justifyContent: 'flex-start',
               bottom: 40,
               right: 35,
               elevation: 1,
             }}>
-            <View style={[styles.inputContainer, {borderWidth: 0}]}>
-              <View style={[styles.searchInput, {width: '65%', left: 1}]}>
+            <View
+              style={[
+                styles.inputContainer,
+                {
+                  borderWidth: 0,
+                  backgroundColor: isDark ? '#000' : 'rgba(255, 255, 255, 1)',
+                },
+              ]}>
+              <View
+                style={[
+                  styles.searchInput,
+                  {
+                    width: '65%',
+                    left: 1,
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                  },
+                ]}>
                 <Text
                   style={{
                     fontSize: 16,
                     fontWeight: 'bold',
                     marginTop: 2,
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   }}>
-                  {' '}
                   Your Locaiton
                 </Text>
 
@@ -977,7 +1129,9 @@ export default function ShopDetails({navigation}) {
                     fontSize: 13,
                     fontWeight: '500',
                     marginTop: 0,
-                    color: 'rgba(0, 0, 0, 0.4)',
+                    color: isDark
+                      ? 'rgba(255, 255, 255, 1)'
+                      : 'rgba(0, 0, 0, 0.4)',
                   }}>
                   {' '}
                   6391 Elgin St. Celina, Delaware 10299...
@@ -1000,7 +1154,13 @@ export default function ShopDetails({navigation}) {
                 numberOfLines={1}
                 style={[
                   styles.recListText,
-                  {fontWeight: 'bold', marginTop: 0, fontSize: 16, width: 30},
+                  {
+                    fontWeight: 'bold',
+                    marginTop: 0,
+                    fontSize: 16,
+                    width: 30,
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                  },
                 ]}>
                 4.5
               </Text>
@@ -1015,14 +1175,30 @@ export default function ShopDetails({navigation}) {
               />
             </View>
 
-            <View style={[styles.inputContainer, {borderWidth: 0}]}>
-              <View style={[styles.searchInput, {width: '65%', left: 0}]}>
+            <View
+              style={[
+                styles.inputContainer,
+                {
+                  borderWidth: 0,
+                  backgroundColor: isDark ? '#000' : 'rgba(255, 255, 255, 1)',
+                },
+              ]}>
+              <View
+                style={[
+                  styles.searchInput,
+                  {
+                    width: '65%',
+                    left: 0,
+                    backgroundColor: isDark ? '#000' : 'rgba(255, 255, 255, 1)',
+                  },
+                ]}>
                 <View style={{flexDirection: 'row'}}>
                   <Text
                     style={{
                       fontSize: 15,
                       fontWeight: '500',
                       marginTop: 2,
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     }}>
                     Open :
                   </Text>
@@ -1032,6 +1208,7 @@ export default function ShopDetails({navigation}) {
                       color: 'grey',
                       fontWeight: '500',
                       marginTop: 2,
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     }}>
                     9:30 am–10:30 pm
                   </Text>
@@ -1042,6 +1219,7 @@ export default function ShopDetails({navigation}) {
                     style={{
                       fontSize: 15,
                       fontWeight: '500',
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                       marginTop: 2,
                     }}>
                     About :
@@ -1054,7 +1232,9 @@ export default function ShopDetails({navigation}) {
                       marginTop: 0,
                       alignSelf: 'center',
                       left: 0,
-                      color: 'rgba(0, 0, 0, 0.86)',
+                      color: isDark
+                        ? 'rgba(255, 255, 255, 1)'
+                        : 'rgba(0, 0, 0, 0.86)',
                     }}>
                     {' '}
                     6391 Elgin St. Celina, Delaware 10299...
@@ -1129,21 +1309,25 @@ export default function ShopDetails({navigation}) {
               renderTabBar={props => (
                 <TabBar
                   {...props}
-                  indicatorStyle={{backgroundColor: 'black'}} // Active tab indicator
+                  indicatorStyle={{backgroundColor: isDark ? 'white' : 'black'}} // Active tab indicator
                   style={{
-                    backgroundColor: 'white', // Tab bar background color
+                    backgroundColor: isDark ? 'black' : 'white', // Tab bar background color
                     borderTopWidth: 1, // Top border
                     borderBottomWidth: 1, // Bottom border
-                    borderColor: 'rgba(0, 0, 0, 0.1)', // Border color
+                    borderColor: isDark
+                      ? 'rgba(0, 0, 0, 0.1)'
+                      : 'rgba(0, 0, 0, 0.1)', // Border color
                   }}
                   labelStyle={{
                     fontWeight: 'bold', // Ensure bold label
-                    color: 'black', // Force black color for labels
+                    color: isDark ? 'white' : 'black', // Force black color for labels
                     textTransform: 'none', // Disable any text transformation (like uppercase)
                   }}
-                  activeColor="black"
+                  activeColor={isDark ? 'white' : 'black'}
                   inactiveColor="grey"
-                  pressColor="rgba(0, 0, 0, 0.1)"
+                  pressColor={
+                    isDark ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                  }
                 />
               )}
             />
@@ -1152,7 +1336,7 @@ export default function ShopDetails({navigation}) {
       </ScrollView>
       <View
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 1)',
+          backgroundColor: isDark ? 'black' : 'rgba(255, 255, 255, 1)',
           flexDirection: 'row',
           borderTopWidth: 1,
           borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -1168,18 +1352,21 @@ export default function ShopDetails({navigation}) {
           style={[
             styles.smallblueBotton,
             {
-              backgroundColor: 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? 'black' : 'rgb(255, 255, 255)',
               borderWidth: 1,
-              borderColor: 'rgba(15, 92, 246, 1)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 1)'
+                : 'rgba(15, 92, 246, 1)',
             },
           ]}
-          // onPress={() => setModalVisible(true)}
-          onPress={() => handlePress()}>
+          onPress={() => navigation.navigate('messages', {item: null})}>
           <Text
             style={[
               styles.smallText,
               {
-                color: 'rgba(15, 92, 246, 1)',
+                color: isDark
+                  ? 'rgba(255, 255, 255, 1)'
+                  : 'rgba(15, 92, 246, 1)',
                 fontSize: 20,
                 fontWeight: 'bold',
                 marginBottom: 0,
@@ -1213,6 +1400,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  modalContent: {
+    borderRadius: 5,
+    width: 120,
+    backgroundColor: 'white',
+    elevation: 2,
   },
   tabContainer: {
     height: Height * 1.8,

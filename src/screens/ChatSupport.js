@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,18 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
+  FlatList,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import io from 'socket.io-client';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+const socket = io('http://YOUR_SERVER_IP:5000');
 
 export default function ChatSupport({navigation}) {
   const [selectedItemId, setSelectedItemId] = useState(null);
@@ -48,107 +52,134 @@ export default function ChatSupport({navigation}) {
     setSelectedItemId(prevItemId => (prevItemId === itemId ? null : itemId));
   };
 
-  const render2RectangleList = (item, index) => (
-    <View
-      key={index}
-      style={{
-        justifyContent: 'flex-start',
-        marginBottom: 10,
-        alignItems: 'center',
-        flexDirection: 'row',
-      }}>
-      <View style={{marginLeft: 25}}>
-        <View style={[styles.rectangle2, {flexDirection: 'row'}]}>
-          <Text
-            onPress={() => toggleDescription(item.id)}
-            numberOfLines={1}
-            style={[
-              styles.recListText,
-              {
-                fontWeight: 'bold',
-                fontSize: 18,
-                textAlign: 'left',
-                color: 'rgba(0, 0, 0, 0.67)',
-              },
-            ]}>
-            {item.title}
-          </Text>
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
-          <FontAwesome5
-            onPress={() => toggleDescription(item.id)}
-            name={selectedItemId === item.id ? 'angle-up' : 'angle-down'}
-            size={18}
-            color="rgb(0, 0, 0)"
-            style={{padding: 5}}
-          />
-        </View>
+  const {chatId, userId} = 'id';
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [image, setImage] = useState(null);
 
-        {selectedItemId === item.id && (
-          <Text
-            numberOfLines={3}
-            style={[
-              styles.recListText,
-              {
-                fontWeight: '500',
-                fontSize: 15,
-                width: 320,
-                marginLeft: '4%',
-                textAlign: 'left',
-                color: 'rgba(94, 95, 96, 1)',
-              },
-            ]}>
-            {item.description}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
+  useEffect(() => {
+    socket.emit('joinRoom', {userId, chatId});
+
+    socket.on('receiveMessage', newMessage => {
+      setMessages(prevMessages => [newMessage, ...prevMessages]);
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, []);
+
+  const toggleModal = id => {
+    if (selectedItemId === id) {
+      setSelectedItemId(null);
+    } else {
+      setSelectedItemId(id);
+    }
+  };
+
+  const sendMessage = () => {
+    if (text.trim() || image) {
+      const newMessage = {
+        id: Date.now(),
+        text,
+        image,
+        senderId: userId,
+      };
+
+      socket.emit('sendMessage', {chatId, ...newMessage});
+      setMessages(prevMessages => [newMessage, ...prevMessages]);
+      setText('');
+      setImage(null);
+    }
+  };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={styles.headerText}>Chat Support</Text>
+        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
+          Chat Support
+        </Text>
       </View>
 
-      {recentPostList.map((item, index) => render2RectangleList(item, index))}
+      {/* Chat Messages List */}
+      <View style={styles.chatContainer}>
+        <FlatList
+          data={messages}
+          inverted
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item, index}) => {
+            const isSentByUser = item.senderId === userId;
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          marginBottom: 20,
-        }}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            // value={'text'}
-            style={styles.searchInput}
-            // onChangeText={setText}
-            placeholderTextColor={'rgba(94, 95, 96, 0.39)'}
-            placeholder="Write your message"
-            autoCapitalize="none"
-            onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-          />
-          <FontAwesome
-            name={'paperclip'}
-            size={22}
-            color="rgba(0, 0, 0, 0.46)"
-            style={{padding: 5}}
-          />
-          <Ionicons
-            name={'send'}
-            size={20}
-            color="rgba(0, 174, 239, 1)"
-            style={{padding: 5}}
-          />
-        </View>
+            return (
+              <View
+                style={[
+                  styles.messageRow,
+                  isSentByUser ? styles.sentRow : styles.receivedRow,
+                ]}>
+                {/* Profile Picture and Message */}
+                {!isSentByUser && index === 0 && (
+                  <Image
+                    source={require('../assets/user-male.png')}
+                    style={styles.profileImage}
+                  />
+                )}
+
+                <View
+                  style={[
+                    styles.messageContainer,
+                    isSentByUser ? styles.sentMessage : styles.receivedMessage,
+                  ]}>
+                  {item.text && (
+                    <Text
+                      style={[
+                        styles.message,
+                        {color: isDark ? '#fff' : '#000'},
+                      ]}>
+                      {item.text}
+                    </Text>
+                  )}
+                  {item.image && (
+                    <Image source={{uri: item.image}} style={styles.image} />
+                  )}
+                </View>
+              </View>
+            );
+          }}
+        />
+      </View>
+
+      {/* Input Area */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
+          style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
+          placeholder="Write your message"
+        />
+        <FontAwesome
+          name={'paperclip'}
+          size={22}
+          color={isDark ? 'rgba(255, 255, 255, 0.46)' : 'rgba(0, 0, 0, 0.46)'}
+          style={{padding: 5}}
+        />
+        <Ionicons
+          onPress={sendMessage}
+          name={'send'}
+          size={20}
+          color="rgba(0, 174, 239, 1)"
+          style={{padding: 5}}
+        />
       </View>
     </View>
   );
@@ -158,31 +189,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  inputContainer: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: Width * 0.9,
-    elevation: 5,
-    borderRadius: 40,
-    alignSelf: 'center',
-    height: 50,
-    padding: 1,
-  },
-  searchInput: {
-    width: '80%',
-    alignSelf: 'center',
-    fontSize: 15,
-    fontWeight: '500',
-    height: 45,
-    left: 16,
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    margin: 5,
-    marginLeft: 20,
   },
   header: {
     flexDirection: 'row',
@@ -195,64 +201,69 @@ const styles = StyleSheet.create({
     width: Width * 0.8,
     textAlign: 'center',
   },
-  rectangle2: {
-    backgroundColor: '#fff',
-    width: 340,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    borderRadius: 10,
-    padding: 10,
-  },
-  recListText: {
-    color: '#1d1e20',
-  },
-  modalContainer: {
+  chatContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
+    paddingHorizontal: 10,
+    paddingTop: 10,
   },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: '12%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
+  inputContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(217, 217, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 40,
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
+    width: Width * 0.9,
+    elevation: 5,
+    borderRadius: 40,
+    alignSelf: 'center',
+    height: 50,
+    padding: 1,
+    marginBottom: 10,
   },
-  deleteButton: {
-    backgroundColor: 'rgba(6, 196, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
-  },
-  buttonText: {
-    color: '#fff',
+  searchInput: {
+    width: '80%',
+    fontSize: 15,
     fontWeight: '500',
-    fontSize: 18,
+    height: 45,
+    left: 16,
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginVertical: 5,
+  },
+  sentRow: {
+    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
+  },
+  receivedRow: {
+    justifyContent: 'flex-start',
+    alignSelf: 'flex-start',
+  },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  messageContainer: {
+    padding: 10,
+    borderRadius: 20,
+    maxWidth: '80%',
+  },
+  sentMessage: {
+    borderTopRightRadius: 0,
+    backgroundColor: 'rgba(10, 190, 255, 1)',
+  },
+  receivedMessage: {
+    borderBottomLeftRadius: 0,
+    backgroundColor: 'rgba(6, 196, 217, 0.41)',
+  },
+  message: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  image: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 5,
   },
 });

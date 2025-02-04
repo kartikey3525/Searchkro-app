@@ -5,16 +5,27 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  useColorScheme,
 } from 'react-native';
-import React from 'react';
+import React, {useContext} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {Dimensions} from 'react-native';
+import {ThemeContext} from '../context/themeContext';
+
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function WelcomeScreen2({navigation}) {
+  const {theme} = useContext(ThemeContext);
+
+  const isDarkMode = theme === 'dark'; // Check if dark mode is enabled
+
   return (
-    <ScrollView style={styles.screen}>
+    <ScrollView
+      style={[
+        styles.screen,
+        {backgroundColor: isDarkMode ? '#121212' : '#fff'},
+      ]}>
       <TouchableOpacity
         style={{
           flexDirection: 'row',
@@ -26,7 +37,7 @@ export default function WelcomeScreen2({navigation}) {
           style={[
             styles.smallText,
             {
-              color: '#00AEEF',
+              color: isDarkMode ? '#00AEEF' : '#00AEEF',
               width: 30,
               top: 60,
               alignSelf: 'center',
@@ -37,25 +48,30 @@ export default function WelcomeScreen2({navigation}) {
           Skip
         </Text>
         <Image
-          source={require('../assets/Back-Container.png')}
+          source={
+            require('../assets/Back-Container.png') // Light mode image
+          }
           style={{
             width: 160,
             height: 150,
-            // backgroundColor: '#00AEEF',
           }}
           resizeMode="contain"
         />
       </TouchableOpacity>
 
       <Image
-        source={require('../assets/recieving-image.png')}
+        source={require('../assets/recieving-image-dark.png')}
         style={{width: 353, height: Height * 0.38, alignSelf: 'center'}}
         resizeMode="contain"
       />
 
       <View style={{justifyContent: 'center'}}>
         <Image
-          source={require('../assets/welcome-rectangle.png')}
+          source={
+            isDarkMode
+              ? require('../assets/welcome-rectangle-dark.png') // Dark mode image
+              : require('../assets/welcome-rectangle.png') // Light mode image
+          }
           style={{width: Width * 0.99, height: Height * 0.47, marginTop: -20}}
           resizeMode="contain"
         />
@@ -70,7 +86,7 @@ export default function WelcomeScreen2({navigation}) {
           <View style={{flexDirection: 'row'}}>
             <View
               style={{
-                backgroundColor: '#9DA49E1A',
+                backgroundColor: isDarkMode ? '#FFFFFF80' : '#9DA49E1A',
                 width: 10,
                 height: 10,
                 borderRadius: 100,
@@ -79,7 +95,7 @@ export default function WelcomeScreen2({navigation}) {
             />
             <View
               style={{
-                backgroundColor: '#00AEEF',
+                backgroundColor: isDarkMode ? '#00AEEF' : '#00AEEF',
                 width: 10,
                 height: 10,
                 borderRadius: 100,
@@ -88,14 +104,24 @@ export default function WelcomeScreen2({navigation}) {
             />
           </View>
 
-          <Text style={styles.bigText}>"Gear Up for the Future!"</Text>
-          <Text style={styles.smallText}>
+          <Text
+            style={[styles.bigText, {color: isDarkMode ? 'white' : 'black'}]}>
+            "Gear Up for the Future!"
+          </Text>
+          <Text
+            style={[
+              styles.smallText,
+              {color: isDarkMode ? '#CCCCCC' : '#1D1E20'},
+            ]}>
             Explore top gadgets, unbeatable prices, and the latest tech
             innovations.
           </Text>
 
           <TouchableOpacity
-            style={styles.blueBotton}
+            style={[
+              styles.blueBotton,
+              {backgroundColor: isDarkMode ? '#0077B6' : '#00AEEF'},
+            ]}
             onPress={() => navigation.navigate('commonscreen')}>
             <AntDesign name="arrowright" size={24} color="white" />
           </TouchableOpacity>
@@ -104,23 +130,20 @@ export default function WelcomeScreen2({navigation}) {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#F2FCF8',
   },
   smallText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#1D1E20',
     textAlign: 'center',
     width: 280,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
-
   bigText: {
     fontSize: 26,
-    color: 'black',
     textAlign: 'center',
     marginTop: 40,
     fontWeight: 'bold',
@@ -129,7 +152,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
   },
   blueBotton: {
-    backgroundColor: '#00AEEF',
     width: 56,
     height: 56,
     borderRadius: 100,

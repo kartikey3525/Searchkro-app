@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -9,17 +8,14 @@ import {
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
 import {Dimensions} from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import axios from 'axios';
-import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
-import PhoneInput from 'react-native-phone-number-input';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import {ThemeContext} from '../context/themeContext';
 
 export default function ForgetPassword({navigation}) {
   const [email, setEmail] = useState('');
@@ -30,6 +26,8 @@ export default function ForgetPassword({navigation}) {
   const [valid, setValid] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const phoneInput = useRef(null);
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const [errors, setErrors] = useState({
     email: '',
@@ -102,7 +100,11 @@ export default function ForgetPassword({navigation}) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -116,7 +118,7 @@ export default function ForgetPassword({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
       </View>
@@ -124,7 +126,12 @@ export default function ForgetPassword({navigation}) {
       <Text
         style={[
           styles.modalText,
-          {fontWeight: 'bold', marginBottom: 10, fontSize: 30},
+          {
+            fontWeight: 'bold',
+            marginBottom: 10,
+            fontSize: 30,
+            color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+          },
         ]}>
         Forget password
       </Text>
@@ -136,16 +143,27 @@ export default function ForgetPassword({navigation}) {
             textAlign: 'center',
             fontWeight: 'normal',
             fontSize: 16,
+            color: isDark ? '#fff' : 'rgb(0, 0, 0)',
             marginBottom: 40,
           },
         ]}>
         Please enter your email to reset the password?
       </Text>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {backgroundColor: isDark ? '#121212' : '#fff'},
+        ]}>
         <TextInput
           value={email}
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#121212' : '#fff',
+              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+            },
+          ]}
           onChangeText={setEmail}
           placeholder="enter your email address"
           mode="outlined"

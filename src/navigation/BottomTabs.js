@@ -1,8 +1,6 @@
 import React, {useContext} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
-// import {CategoryIcon} from '../assets/category';
+import {ThemeContext} from '../context/themeContext';
 
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -18,6 +16,8 @@ import SellerProfile from '../screens/SellerProfile';
 const Tab = createBottomTabNavigator();
 
 const BottomTabs = () => {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const {userRole} = useContext(AuthContext);
   return (
     <Tab.Navigator
@@ -27,7 +27,6 @@ const BottomTabs = () => {
         tabBarLabelStyle: {
           fontSize: 13,
           fontWeight: '600',
-          // color: 'rgba(0, 174, 239, 1)',
           marginBottom: 5,
         },
         tabBarStyle: {
@@ -35,7 +34,7 @@ const BottomTabs = () => {
           height: '7.4%',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          backgroundColor: '#ffffff',
+          backgroundColor: isDark ? '#000' : '#ffffff',
           elevation: 5,
         },
         tabBarIconStyle: {

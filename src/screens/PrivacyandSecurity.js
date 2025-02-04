@@ -1,22 +1,22 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Pressable,
-  Image,
   Dimensions,
   Modal,
   TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {ThemeContext} from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function PrivacyandSecurity({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const handleDelete = () => {
     const updatedList = recentPostList.filter(
@@ -26,16 +26,21 @@ export default function PrivacyandSecurity({navigation}) {
     setModalVisible(false);
   };
   return (
-    <View style={styles.screen}>
+    <View
+      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
-        <Text style={[styles.headerText, {textAlign: 'center'}]}>
+        <Text
+          style={[
+            styles.headerText,
+            {textAlign: 'center', color: isDark ? '#fff' : '#000'},
+          ]}>
           Privacy and Security
         </Text>
       </View>
@@ -51,9 +56,19 @@ export default function PrivacyandSecurity({navigation}) {
           height: '10%',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'rgba(223, 223, 223, 0.36)',
+          backgroundColor: isDark
+            ? 'rgba(50, 50, 50, 0.7)'
+            : 'rgba(223, 223, 223, 0.36)',
         }}>
-        <Text style={[styles.headerText, {marginLeft: 20, fontWeight: '500'}]}>
+        <Text
+          style={[
+            styles.headerText,
+            {
+              marginLeft: 20,
+              fontWeight: '500',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}>
           Delete Account
         </Text>
 
@@ -61,22 +76,41 @@ export default function PrivacyandSecurity({navigation}) {
           onPress={() => navigation.goBack()}
           name="right"
           size={20}
-          color="rgb(0, 0, 0)"
+          color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
           style={{right: 10}}
         />
       </TouchableOpacity>
 
       <Modal transparent={true} visible={modalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.3)'
+                : 'rgba(0, 0, 0, 0.3)',
+            },
+          ]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)',
+              },
+            ]}>
             <Text
               style={[
                 styles.modalText,
-                {fontWeight: 'bold', marginBottom: 10, fontSize: 20},
+                {
+                  fontWeight: 'bold',
+                  marginBottom: 10,
+                  fontSize: 20,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               Delete Account
             </Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
               Are you sure you want to delete your account ?
             </Text>
             <View style={styles.modalButtons}>
@@ -84,8 +118,19 @@ export default function PrivacyandSecurity({navigation}) {
                 onPress={() => {
                   setModalVisible(false);
                 }}
-                style={styles.cancelButton}>
-                <Text style={[styles.buttonText, {color: 'black'}]}>
+                style={[
+                  styles.cancelButton,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(51, 51, 51, 1)'
+                      : 'rgba(217, 217, 217, 1)',
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {color: isDark ? '#fff' : 'black'},
+                  ]}>
                   Cancel
                 </Text>
               </TouchableOpacity>

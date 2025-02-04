@@ -19,12 +19,16 @@ import {AuthContext} from '../context/authcontext';
 import {launchImageLibrary} from 'react-native-image-picker';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'react-native-image-picker';
+import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function ReportIssue({navigation}) {
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -164,7 +168,11 @@ export default function ReportIssue({navigation}) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View
         style={{
           alignItems: 'center',
@@ -178,7 +186,7 @@ export default function ReportIssue({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20, padding: 5}}
         />
         <Text
@@ -189,6 +197,7 @@ export default function ReportIssue({navigation}) {
               alignSelf: 'center',
               textAlign: 'center',
               width: Width * 0.76,
+              color: isDark ? '#fff' : '#000',
             },
           ]}>
           Report an issue
@@ -211,6 +220,7 @@ export default function ReportIssue({navigation}) {
             fontSize: 18,
             alignSelf: 'center',
             marginBottom: 10,
+            color: isDark ? '#fff' : '#000',
           },
         ]}>
         Upload Your Picture
@@ -234,7 +244,11 @@ export default function ReportIssue({navigation}) {
                 // selectMedia
                 () => setModalVisible(!modalVisible)
               }>
-              <View style={styles.mediaSelector}>
+              <View
+                style={[
+                  styles.mediaSelector,
+                  {backgroundColor: isDark ? '#121212' : '#fff'},
+                ]}>
                 <Text
                   style={{color: 'rgba(158, 158, 158, 1)', fontWeight: 'bold'}}>
                   Select file
@@ -252,7 +266,7 @@ export default function ReportIssue({navigation}) {
           <Text
             style={[
               {
-                color: 'rgb(0, 0, 0)',
+                color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                 fontSize: 18,
                 textAlign: 'left',
                 marginBottom: 10,
@@ -275,7 +289,7 @@ export default function ReportIssue({navigation}) {
                       style={styles.mediaPreview}
                     />
                     <TouchableOpacity
-                      style={styles.closeButton2}
+                      style={[styles.closeButton2]}
                       onPress={() => {
                         // Remove the image from media array
                         setMedia(media.filter((mediaItem, i) => i !== index));
@@ -296,7 +310,7 @@ export default function ReportIssue({navigation}) {
                 style={[
                   styles.mediaItem,
                   {
-                    backgroundColor: 'rgb(255, 255, 255)',
+                    backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
                     borderWidth: 1,
                     borderRadius: 10,
                     borderColor: 'rgba(176, 176, 176, 1)',
@@ -323,6 +337,7 @@ export default function ReportIssue({navigation}) {
             marginLeft: 30,
             marginTop: 10,
             marginBottom: 10,
+            color: isDark ? '#fff' : '#000',
           },
         ]}>
         Product description
@@ -331,11 +346,22 @@ export default function ReportIssue({navigation}) {
       <View
         style={[
           styles.inputContainer,
-          {height: 130, alignItems: 'flex-start'},
+          {
+            height: 130,
+            alignItems: 'flex-start',
+            backgroundColor: isDark ? '#121212' : '#fff',
+          },
         ]}>
         <TextInput
           value={description}
-          style={[styles.textInput, {height: 93}]}
+          style={[
+            styles.textInput,
+            {
+              height: 93,
+              backgroundColor: isDark ? '#121212' : '#fff',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
           onChangeText={setdescription}
           numberOfLines={5}
           multiline={true}
@@ -369,8 +395,20 @@ export default function ReportIssue({navigation}) {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent={true}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.19)'
+                : 'rgba(0, 0, 0, 0.3)',
+            },
+          ]}>
+          <View
+            style={[
+              styles.modalContent,
+              {backgroundColor: isDark ? '#121212' : '#fff'},
+            ]}>
             <View
               style={{
                 height: 5,
@@ -383,11 +421,15 @@ export default function ReportIssue({navigation}) {
               }}
             />
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[styles.closeButton]}
               onPress={() => {
                 setModalVisible(false);
               }}>
-              <Entypo name="cross" size={22} color="black" />
+              <Entypo
+                name="cross"
+                size={22}
+                color={isDark ? '#fff' : 'black'}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -399,13 +441,15 @@ export default function ReportIssue({navigation}) {
                 alignItems: 'center',
                 borderBottomWidth: 1,
                 padding: 10,
-                borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+                borderBottomColor: isDark
+                  ? 'rgba(255, 255, 255, 0.2)'
+                  : 'rgba(0, 0, 0, 0.2)',
               }}
               onPress={requestCameraPermission}>
               <Entypo
                 name={'camera'}
                 size={25}
-                color="rgb(0, 0, 0)"
+                color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 15, marginLeft: 20}}
               />
 
@@ -415,6 +459,7 @@ export default function ReportIssue({navigation}) {
                     fontSize: 18,
                     fontWeight: '600',
                     marginLeft: 6,
+                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                   },
                 ]}>
                 Take Photo
@@ -430,12 +475,14 @@ export default function ReportIssue({navigation}) {
                 borderBottomWidth: 1,
                 height: 60,
                 padding: 10,
-                borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+                borderBottomColor: isDark
+                  ? 'rgba(255, 255, 255, 0.2)'
+                  : 'rgba(0, 0, 0, 0.2)',
               }}>
               <MaterialCommunityIcons
                 name={'image'}
                 size={30}
-                color="rgb(0, 0, 0)"
+                color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 10, marginLeft: 18}}
               />
 
@@ -445,6 +492,7 @@ export default function ReportIssue({navigation}) {
                     fontSize: 18,
                     fontWeight: '600',
                     marginLeft: 6,
+                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                   },
                 ]}>
                 Choose from Gallery
