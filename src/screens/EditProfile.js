@@ -123,6 +123,7 @@ export default function EditProfile({navigation}) {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         styles.screen,
         {backgroundColor: isDark ? 'black' : 'white'},

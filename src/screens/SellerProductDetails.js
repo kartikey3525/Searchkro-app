@@ -36,6 +36,7 @@ export default function SellerProductDetails({navigation}) {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{

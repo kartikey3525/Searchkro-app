@@ -8,18 +8,15 @@ export const ThemeProvider = ({children}) => {
 
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({colorScheme}) => {
-      if (theme === 'SystemDefault') {
-        setTheme(colorScheme);
-      }
+      setTheme(colorScheme); // Always update the theme instantly when system theme changes
     });
+
     return () => subscription.remove();
-  }, [theme]);
+  }, []);
 
   const changeTheme = selectedTheme => {
-    console.log('theme', theme);
-
     if (selectedTheme === 'SystemDefault') {
-      setTheme(Appearance.getColorScheme());
+      setTheme(Appearance.getColorScheme()); // Sync with system theme
     } else {
       setTheme(selectedTheme.toLowerCase());
     }

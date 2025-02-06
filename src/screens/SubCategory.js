@@ -126,10 +126,8 @@ export default function SubCategory({navigation, route}) {
               {
                 backgroundColor: isDark
                   ? 'rgba(26, 26, 26, 1)'
-                  : 'rgba(249, 249, 249, 1)',
-                borderColor: isDark
-                  ? 'rgba(94, 95, 96, 1)'
-                  : 'rgba(0, 0, 0, 0.1)',
+                  : 'rgb(255, 255, 255)',
+                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
               },
             ]}>
             <Image

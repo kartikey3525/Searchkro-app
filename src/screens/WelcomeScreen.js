@@ -22,6 +22,7 @@ export default function WelcomeScreen() {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <TouchableOpacity
         style={{
@@ -36,7 +37,7 @@ export default function WelcomeScreen() {
             {
               color: '#00AEEF',
               width: 30,
-              top: 60,
+              top: 35,
               alignSelf: 'center',
               position: 'absolute',
               right: 95,
@@ -48,7 +49,7 @@ export default function WelcomeScreen() {
           source={require('../assets/Back-Container.png')}
           style={{
             width: 160,
-            height: 150,
+            height: 100,
           }}
           resizeMode="contain"
         />

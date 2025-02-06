@@ -249,7 +249,7 @@ export default function Messages({navigation}) {
             // value={'text'}
             style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
             // onChangeText={setText}
-            placeholderTextColor={'rgba(94, 95, 96, 1)'}
+            placeholderTextColor={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
             placeholder="Search"
             autoCapitalize="none"
             onSubmitEditing={event => handleSearch(event.nativeEvent.text)}

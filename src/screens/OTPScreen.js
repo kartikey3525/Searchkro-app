@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import React, {useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -16,6 +18,8 @@ import {OtpInput} from 'react-native-otp-entry';
 import {useEffect} from 'react';
 import {ThemeContext} from '../context/themeContext';
 
+const Width = Dimensions.get('window').width;
+const Height = Dimensions.get('window').height;
 export default function OTPScreen({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -91,18 +95,23 @@ export default function OTPScreen({navigation, route}) {
   };
 
   return (
-    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <View
         style={{
           flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{
             position: 'absolute',
-            top: 50,
+            // top: 50,
             right: '50%',
           }}>
           <AntDesign name="left" size={25} color={isDark ? '#fff' : '#000'} />
@@ -110,7 +119,7 @@ export default function OTPScreen({navigation, route}) {
 
         <Image
           source={require('../assets/logo.png')}
-          style={{width: 100, height: 100, alignSelf: 'center', top: 30}}
+          style={{width: 100, height: 100, alignSelf: 'center'}}
           resizeMode="contain"
         />
       </View>
@@ -173,7 +182,7 @@ export default function OTPScreen({navigation, route}) {
           justifyContent: 'flex-end',
           flexDirection: 'row',
           padding: 2,
-          marginBottom: '75%',
+          marginBottom: '50%',
         }}>
         <Text
           disabled={resendDisabled}
@@ -235,14 +244,13 @@ export default function OTPScreen({navigation, route}) {
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },

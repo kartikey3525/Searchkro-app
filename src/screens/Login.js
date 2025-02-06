@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -21,6 +22,7 @@ export default function Login({navigation}) {
   const [email, setEmail] = useState('');
   const [username, setusername] = useState('');
   const [password, setPassword] = useState('');
+  const [handleRemenberme, sethandleRemenberme] = useState(false);
   const [isnew, setIsnew] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -263,18 +265,18 @@ export default function Login({navigation}) {
         {errors.password}
       </HelperText>
 
-      <View
+      <Pressable
+        onPress={() => sethandleRemenberme(!handleRemenberme)}
         style={{
           alignItems: 'flex-start',
           flexDirection: 'row',
           width: '90%',
-          padding: 2,
         }}>
         <Ionicons
           name="checkmark-circle-outline"
-          size={25}
-          color={'#949090'}
-          style={{marginRight: 8}}
+          size={24}
+          color={handleRemenberme ? '#43E2F3' : '#949090'}
+          style={{marginRight: 6}}
         />
         <Text
           style={[
@@ -288,7 +290,7 @@ export default function Login({navigation}) {
           style={[styles.smallText, {textAlign: 'left', color: '#43E2F3'}]}>
           Forget Password?
         </Text>
-      </View>
+      </Pressable>
 
       <TouchableOpacity
         style={styles.blueBotton}

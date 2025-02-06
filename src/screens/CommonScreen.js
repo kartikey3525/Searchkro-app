@@ -21,6 +21,7 @@ export default function CommonScreen({navigation}) {
   const isDark = theme === 'dark';
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
       <View
         style={{
@@ -33,7 +34,10 @@ export default function CommonScreen({navigation}) {
           Choose your role in the trade
         </Text>
         <Text
-          style={[styles.smallText, {color: isDark ? '#CCCCCC' : '#000000'}]}>
+          style={[
+            styles.smallText,
+            {color: isDark ? '#CCCCCC' : 'rgba(0, 0, 0, 1)'},
+          ]}>
           Filling your invoice details and getting finance for it, is just a few
           steps away.
         </Text>
@@ -42,6 +46,7 @@ export default function CommonScreen({navigation}) {
           style={[
             styles.recitem,
             {
+              marginTop: 40,
               backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF',
               borderColor:
                 userRole === 'buyer'
@@ -159,18 +164,19 @@ const styles = StyleSheet.create({
   },
   smallText: {
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: '500',
     textAlign: 'left',
-    width: Width * 0.79,
+    width: Width * 0.88,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
   bigText: {
-    fontSize: 26,
+    fontSize: 24,
     textAlign: 'center',
     marginTop: Height * 0.1,
     fontWeight: 'bold',
     marginBottom: 2,
-    width: Width * 0.98,
+    width: Width * 0.9,
+    marginRight: 5,
     fontFamily: 'Poppins-Bold',
   },
   roleText: {
@@ -184,7 +190,7 @@ const styles = StyleSheet.create({
     height: Height * 0.07,
     borderRadius: 10,
     margin: 10,
-    marginTop: Height * 0.4,
+    marginTop: Height * 0.36,
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',

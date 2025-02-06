@@ -130,7 +130,7 @@ export default function InSubCategory({navigation, route}) {
               styles.inputContainer,
               {
                 backgroundColor: isDark ? '#121212' : '#fff',
-                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : '#fff',
+                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : '#000',
               },
             ]}>
             <Image

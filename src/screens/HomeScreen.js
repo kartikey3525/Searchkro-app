@@ -99,7 +99,7 @@ export default function HomeScreen({navigation}) {
         },
         error => {
           console.error('Location error:', error);
-          Alert.alert('Error', 'Unable to fetch location.');
+          // Alert.alert('Error', 'Unable to fetch location.');
         },
         {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
       );
@@ -170,6 +170,7 @@ export default function HomeScreen({navigation}) {
       <TouchableOpacity
         style={{
           justifyContent: 'center',
+          paddingLeft: 4,
           marginBottom: 15,
           alignItems: 'center',
         }}
@@ -204,6 +205,7 @@ export default function HomeScreen({navigation}) {
         style={{
           justifyContent: 'center',
           marginBottom: 15,
+          paddingLeft: 4,
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('shopdetails', {item: item})}>
@@ -373,7 +375,7 @@ export default function HomeScreen({navigation}) {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            marginBottom: 15,
+            marginBottom: 5,
             marginTop: 20,
           }}>
           <Image
@@ -393,7 +395,7 @@ export default function HomeScreen({navigation}) {
               style={[
                 styles.searchInput,
                 {
-                  width: userRole === 'buyer' ? '52%' : '62%',
+                  width: userRole === 'buyer' ? '55%' : '62%',
                   left: 1,
                   color: isDark ? '#fff' : '#000',
                 },
@@ -405,6 +407,7 @@ export default function HomeScreen({navigation}) {
                     fontSize: 12,
                     fontWeight: 'bold',
                     marginTop: 6,
+                    width: '100%',
                     color: isDark ? '#fff' : '#000',
                   }}>
                   Latitude: {location.latitude}, Longitude: {location.longitude}
@@ -562,11 +565,11 @@ export default function HomeScreen({navigation}) {
           <>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              style={{height: '75%', flexGrow: 1}}>
+              style={{height: Height * 0.72, flexGrow: 1}}>
               <FlatList
                 style={{
                   width: Width,
-                  left: '4%',
+                  left: '2%',
                   alignSelf: 'center',
                 }}
                 key={flatListKey}
@@ -718,8 +721,8 @@ const styles = StyleSheet.create({
   square: {
     backgroundColor: 'rgba(248, 247, 247, 1)',
     width: Width * 0.21,
-    marginRight: '2%',
-    height: 86,
+    marginRight: '3%',
+    height: 78,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -761,7 +764,7 @@ const styles = StyleSheet.create({
   recListText: {
     fontSize: 12,
     fontWeight: '500',
-    width: 120,
+    width: 110,
     color: '#000',
     marginTop: 4,
   },
@@ -804,7 +807,7 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   searchInput: {
-    width: Width * 0.8,
+    width: Width * 0.85,
     alignSelf: 'center',
     fontSize: 17,
     fontWeight: '500',

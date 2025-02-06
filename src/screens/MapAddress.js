@@ -62,7 +62,7 @@ export default function MapAddress({navigation}) {
       <View
         style={{
           position: 'absolute',
-          top: 50,
+          marginTop: 50,
           width: '100%',
           justifyContent: 'center',
           alignItems: 'center',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin: 10,
     marginBottom: 20,
-    marginTop: '60%',
+    marginTop: '40%',
     alignItems: 'center',
     justifyContent: 'center',
   },

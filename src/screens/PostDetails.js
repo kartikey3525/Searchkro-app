@@ -260,7 +260,7 @@ export default function PostDetails({navigation, route}) {
           styles.inputContainer,
           {
             backgroundColor: isDark ? '#121212' : '#fff',
-            borderColor: isDark ? '121212' : '#fff',
+            borderColor: isDark ? '121212' : 'rgba(173, 173, 173, 0.31)',
           },
         ]}>
         <TextInput
@@ -342,7 +342,11 @@ export default function PostDetails({navigation, route}) {
       <View
         style={[
           styles.inputContainer,
-          {height: 100, alignItems: 'flex-start'},
+          {
+            height: 100,
+            alignItems: 'flex-start',
+            borderColor: isDark ? '121212' : 'rgba(173, 173, 173, 0.31)',
+          },
         ]}>
         <TextInput
           value={description}

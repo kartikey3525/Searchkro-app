@@ -98,10 +98,10 @@ const ChatScreen = ({navigation, route}) => {
         <Image
           source={require('../assets/User-image.png')}
           style={{
-            width: 66,
-            height: 66,
-            marginLeft: 20,
-            marginRight: 20,
+            width: 50,
+            height: 50,
+            marginLeft: 10,
+            marginRight: 10,
           }}
           resizeMode="contain"
         />
@@ -112,7 +112,7 @@ const ChatScreen = ({navigation, route}) => {
               styles.recListText,
               {
                 fontWeight: 'bold',
-                fontSize: 16,
+                fontSize: 15,
                 width: 180,
                 color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
               },
@@ -125,7 +125,7 @@ const ChatScreen = ({navigation, route}) => {
               styles.recListText,
               {
                 fontWeight: '500',
-                fontSize: 14,
+                fontSize: 13,
                 width: 180,
                 marginTop: 5,
                 color: 'rgba(75, 203, 27, 1)',
@@ -162,7 +162,7 @@ const ChatScreen = ({navigation, route}) => {
                   alignItems: 'center',
                   marginLeft: 5,
                 }}
-                onPress={() => deleteItem(item.id)}>
+                onPress={() => {}}>
                 <Octicons
                   name={'history'}
                   size={14}
@@ -203,7 +203,7 @@ const ChatScreen = ({navigation, route}) => {
                   alignItems: 'center',
                   marginLeft: 5,
                 }}
-                onPress={() => deleteItem(item.id)}>
+                onPress={() => {}}>
                 <Entypo
                   name={'block'}
                   size={16}
@@ -244,7 +244,7 @@ const ChatScreen = ({navigation, route}) => {
                   alignItems: 'center',
                   marginLeft: 5,
                 }}
-                onPress={() => deleteItem(item.id)}>
+                onPress={() => {}}>
                 <Octicons
                   name={'mute'}
                   size={16}

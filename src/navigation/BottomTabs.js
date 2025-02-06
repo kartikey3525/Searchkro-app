@@ -25,7 +25,7 @@ const BottomTabs = () => {
         headerShown: false,
         tabBarShowLabel: true,
         tabBarLabelStyle: {
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: '600',
           marginBottom: 5,
         },

@@ -130,6 +130,7 @@ export default function UploadImage({navigation, route}) {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         styles.screen,
         {backgroundColor: isDark ? '#121212' : '#FFFFFF'},

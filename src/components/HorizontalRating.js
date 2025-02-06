@@ -52,8 +52,8 @@ const HorizontalRatingButtons = ({ratings}) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginLeft: 20,
-    margin: 10,
+    marginLeft: 15,
+    margin: 5,
     flexDirection: 'row', // Ensures horizontal layout
     justifyContent: 'flex-start', // Aligns items to the start
     alignItems: 'center', // Vertically center the items
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 10,
     borderWidth: 1,
-    padding: 8,
+    padding: 6,
     flexDirection: 'row',
     borderColor: 'rgba(228, 228, 228, 1)',
     alignItems: 'center',

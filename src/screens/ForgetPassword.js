@@ -101,6 +101,7 @@ export default function ForgetPassword({navigation}) {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},

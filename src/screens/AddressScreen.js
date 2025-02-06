@@ -60,7 +60,7 @@ export default function AddressScreen({navigation}) {
             styles.textInput,
             {
               color: isDark ? '#FFFFFF' : '#000000',
-              backgroundColor: isDark ? '#000000' : 'rgba(248, 247, 247, 1)',
+              backgroundColor: isDark ? '#000000' : 'rgb(255, 255, 255)',
             },
           ]}
           // onChangeText={setText}
@@ -99,21 +99,21 @@ export default function AddressScreen({navigation}) {
 
       <FlatList
         data={suggestedLocations}
+        style={{marginTop: '4%'}}
         renderItem={({item}) => (
           <View
             style={{
               alignItems: 'flex-start',
               width: '90%',
               padding: 2,
-              marginTop: 10,
-              marginBottom: 15,
+              marginBottom: 5,
             }}>
             <Text
               style={[
                 styles.smallText,
                 {
                   textAlign: 'left',
-                  fontSize: 20,
+                  fontSize: 17,
                   left: 8,
                   color: isDark ? '#FFFFFF' : '#000000',
                 },
@@ -126,7 +126,7 @@ export default function AddressScreen({navigation}) {
                 {
                   color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
                   textAlign: 'left',
-                  fontSize: 17,
+                  fontSize: 15,
                   left: 8,
                 },
               ]}>
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
 
   bigText: {
-    fontSize: 30,
+    fontSize: 23,
     color: 'black',
     textAlign: 'left',
     marginTop: 40,

@@ -58,12 +58,6 @@ export default function ShopDetails({navigation}) {
     {id: 4, title: 'packaged food', img: require('../assets/clothes.png')},
     {id: 5, title: 'Groceries', img: require('../assets/groceries.png')},
     {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
-    {id: 8, title: 'Food', img: require('../assets/food.png')},
-    {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {id: 9, title: 'Home service', img: require('../assets/home-service.png')},
-    {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
-    {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
-    {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
 
   const dynamicRatings = [
@@ -190,7 +184,7 @@ export default function ShopDetails({navigation}) {
           ]}>
           Product categories
         </Text>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '95%', marginLeft: 14}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -408,7 +402,7 @@ export default function ShopDetails({navigation}) {
           ]}>
           Photos
         </Text>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '95%', marginLeft: 10}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -445,7 +439,7 @@ export default function ShopDetails({navigation}) {
           ]}>
           Product categories
         </Text>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '95%', marginLeft: 14}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -697,9 +691,6 @@ export default function ShopDetails({navigation}) {
   const flatListKey = `flat-list-${numColumns}`;
 
   const renderRectangleList = ({item, index}) => {
-    const isFirst = index === 0;
-    const isLast = index === item.length - 1;
-
     return (
       <TouchableOpacity
         style={{
@@ -734,6 +725,7 @@ export default function ShopDetails({navigation}) {
     return (
       <Pressable
         style={{
+          backgroundColor: isDark ? '#121212' : '#fff',
           borderBottomWidth: 1,
           borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
         }}
@@ -744,7 +736,7 @@ export default function ShopDetails({navigation}) {
             {
               overflow: 'hidden',
               flexDirection: 'row',
-              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
             },
           ]}>
           <View
@@ -774,7 +766,7 @@ export default function ShopDetails({navigation}) {
                 top: 10,
                 right: 24,
               }}
-              onPress={() => toggleModal(item.id)}>
+              onPress={() => {}}>
               <View
                 style={[
                   styles.modalContent,
@@ -823,7 +815,7 @@ export default function ShopDetails({navigation}) {
                     alignItems: 'center',
                     marginLeft: 20,
                   }}
-                  onPress={() => deleteItem(item.id)}>
+                  onPress={() => {}}>
                   <Text
                     style={[
                       {
@@ -1008,24 +1000,23 @@ export default function ShopDetails({navigation}) {
 
   const renderPhotosList = ({item, index}) => {
     return (
-      <TouchableOpacity
+      <View
         style={{
           justifyContent: 'center',
           marginBottom: 10,
           alignItems: 'center',
-        }}
-        onPress={() => navigation.navigate('details', {item: item})}>
+        }}>
         <View style={[styles.rectangle, {overflow: 'hidden'}]}>
           <Image source={item.img} style={{width: '100%', height: '100%'}} />
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   const getTabHeight = () => {
     switch (index) {
       case 0:
-        return 1720; // Height for Tab 1
+        return 1680; // Height for Tab 1
       case 1:
         return 430; // Height for Tab 2
       case 2:
@@ -1149,6 +1140,7 @@ export default function ShopDetails({navigation}) {
             <View
               style={{
                 flexDirection: 'row',
+                alignItems: 'center',
               }}>
               <Text
                 numberOfLines={1}
@@ -1171,7 +1163,7 @@ export default function ShopDetails({navigation}) {
                 readonly
                 ratingBackgroundColor="rgba(255, 219, 17, 1)"
                 startingValue={3}
-                imageSize={20}
+                imageSize={15}
               />
             </View>
 
@@ -1252,7 +1244,7 @@ export default function ShopDetails({navigation}) {
             }}>
             <Pressable style={styles.iconStyle}>
               <Ionicons
-                onPress={() => navigation.goBack()}
+                onPress={() => Linking.openURL(`tel:${8860315531}`)}
                 name="call"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
@@ -1265,7 +1257,7 @@ export default function ShopDetails({navigation}) {
                 {backgroundColor: 'rgba(15, 92, 246, 1)'},
               ]}>
               <Ionicons
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('messages', {item: null})}
                 name="chatbubble-ellipses-outline"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
@@ -1442,9 +1434,9 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     backgroundColor: 'rgba(248, 247, 247, 1)',
-    width: 120,
-    marginRight: 10,
-    height: 130,
+    width: Width * 0.295,
+    marginRight: 6,
+    height: 120,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
