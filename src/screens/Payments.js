@@ -19,7 +19,7 @@ export default function Payments({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState(1);
 
   const paymentMethods = [
     {

@@ -256,7 +256,7 @@ export default function ReferandEarn({navigation}) {
             source={
               isDark
                 ? require('../assets/more-dark.png')
-                : require('../assets/more-dark.png')
+                : require('../assets/more.png')
             }
             style={{
               width: 30,

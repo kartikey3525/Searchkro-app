@@ -159,7 +159,11 @@ export default function ChatSupport({navigation}) {
       </View>
 
       {/* Input Area */}
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {backgroundColor: isDark ? '#121212' : '#fff'},
+        ]}>
         <TextInput
           value={text}
           onChangeText={setText}

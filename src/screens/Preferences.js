@@ -210,8 +210,8 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     backgroundColor: 'rgba(248, 247, 247, 1)',
-    width: 180,
-    height: 130,
+    width: Width * 0.44,
+    height: 180,
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 10,

@@ -150,7 +150,7 @@ export default function RatedScreen({navigation}) {
             overflow: 'hidden',
             flexDirection: 'row',
             height: 100,
-            backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
           },
         ]}>
         <Image
@@ -239,7 +239,7 @@ export default function RatedScreen({navigation}) {
           {
             height: 130,
             alignItems: 'flex-start',
-            backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+            backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
           },
         ]}>
         <TextInput

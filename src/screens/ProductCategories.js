@@ -64,7 +64,7 @@ export default function ProductCategories({navigation}) {
   const jacket = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '100%', marginLeft: 8}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -88,7 +88,7 @@ export default function ProductCategories({navigation}) {
   const jeans = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '100%', marginLeft: 8}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -111,7 +111,7 @@ export default function ProductCategories({navigation}) {
   const hoddies = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '100%', marginLeft: 8}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -135,7 +135,7 @@ export default function ProductCategories({navigation}) {
   const tshirts = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 14}}>
+        <View style={{width: '100%', marginLeft: 8}}>
           <FlatList
             style={{
               marginTop: '2%',
@@ -166,9 +166,6 @@ export default function ProductCategories({navigation}) {
   const flatListKey = `flat-list-${numColumns}`;
 
   const renderRectangleList = ({item, index}) => {
-    const isFirst = index === 0;
-    const isLast = index === item.length - 1;
-
     return (
       <TouchableOpacity
         style={{
@@ -342,7 +339,7 @@ const styles = StyleSheet.create({
   },
   rectangle: {
     backgroundColor: 'rgba(248, 247, 247, 1)',
-    width: 120,
+    width: Width * 0.295,
     marginRight: 10,
     height: 130,
     justifyContent: 'center',
