@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: 'black',
     textAlign: 'center',
-    marginTop: 40,
+    marginTop: 20,
     fontWeight: 'bold',
     marginBottom: 6,
     fontFamily: 'Poppins-Bold',
@@ -382,14 +382,12 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 56,
     borderRadius: 10,
-    margin: '30%',
+    margin: '20%',
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   screen: {
-    width: Width,
-    height: Height,
     alignItems: 'center',
   },
   whiteBotton: {
@@ -424,14 +422,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  closeButton: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: 'rgb(255, 255, 255)',
-    borderRadius: 15,
-    padding: 1,
-  },
   imageContainer: {
     flexDirection: 'row',
     alignItems: 'center',

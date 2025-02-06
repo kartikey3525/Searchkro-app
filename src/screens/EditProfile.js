@@ -134,7 +134,7 @@ export default function EditProfile({navigation}) {
           width: Width,
           flexDirection: 'row',
           height: Height * 0.1,
-          marginTop: 20,
+          marginTop: 10,
           justifyContent: 'flex-start',
         }}>
         <Entypo
@@ -177,7 +177,7 @@ export default function EditProfile({navigation}) {
                 alignSelf: 'center',
                 overflow: 'hidden',
                 borderRadius: 100,
-                top: 15,
+                top: 10,
                 borderWidth: 5,
                 borderColor: 'rgba(0, 0, 0, 0.14)',
               }}
@@ -198,7 +198,7 @@ export default function EditProfile({navigation}) {
               alignSelf: 'center',
               overflow: 'hidden',
               borderRadius: 100,
-              top: 15,
+              top: 10,
               borderWidth: 5,
               borderColor: 'rgba(0, 0, 0, 0.14)',
             }}
@@ -398,7 +398,7 @@ export default function EditProfile({navigation}) {
 
       <TouchableOpacity
         style={[styles.blueBotton, {margin: '10%'}]}
-        onPress={() => navigation.navigate('Profile')}>
+        onPress={() => navigation.navigate('Profilescreen')}>
         <Text
           style={[
             styles.smallText,
@@ -435,8 +435,6 @@ export default function EditProfile({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
-    width: Width,
-    height: Height,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },

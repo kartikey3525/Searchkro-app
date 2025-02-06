@@ -130,7 +130,7 @@ export default function Payments({navigation}) {
       ))}
 
       <TouchableOpacity
-        style={[styles.blueButton, {marginTop: Height * 0.4}]}
+        style={[styles.blueButton, {marginTop: Height * 0.3}]}
         onPress={() => navigation.navigate('paymentsuccess')}>
         <Text
           style={[

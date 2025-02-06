@@ -50,7 +50,7 @@ export default function PostDetails({navigation, route}) {
         console.log('Location permission granted');
         getLocation();
       } else {
-        Alert.alert('Permission Denied', 'Location access is required.');
+        // Alert.alert('Permission Denied', 'Location access is required.');
       }
     } catch (err) {
       console.warn(err);
@@ -85,7 +85,7 @@ export default function PostDetails({navigation, route}) {
         },
         error => {
           console.error('Location error:', error);
-          Alert.alert('Error', 'Unable to fetch location.');
+          // Alert.alert('Error', 'Unable to fetch location.');
         },
         {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
       );
@@ -192,7 +192,7 @@ export default function PostDetails({navigation, route}) {
         location: location,
       });
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      // Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -260,7 +260,9 @@ export default function PostDetails({navigation, route}) {
           styles.inputContainer,
           {
             backgroundColor: isDark ? '#121212' : '#fff',
-            borderColor: isDark ? '121212' : 'rgba(173, 173, 173, 0.31)',
+            borderColor: isDark
+              ? 'rgba(173, 173, 173, 0.31)'
+              : 'rgba(173, 173, 173, 0.31)',
           },
         ]}>
         <TextInput
@@ -269,7 +271,7 @@ export default function PostDetails({navigation, route}) {
             styles.textInput,
             {
               color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#000' : '#fff',
+              backgroundColor: isDark ? '#121212' : '#fff',
             },
           ]}
           onChangeText={setEmail}
@@ -345,7 +347,9 @@ export default function PostDetails({navigation, route}) {
           {
             height: 100,
             alignItems: 'flex-start',
-            borderColor: isDark ? '121212' : 'rgba(173, 173, 173, 0.31)',
+            borderColor: isDark
+              ? 'rgba(173, 173, 173, 0.31)'
+              : 'rgba(173, 173, 173, 0.31)',
           },
         ]}>
         <TextInput
@@ -418,7 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     color: '#000',
-    width: '86%',
+    width: '100%',
     height: 50,
     padding: 10,
     margin: 4,
@@ -447,7 +451,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 56,
     borderRadius: 10,
-    margin: '40%',
+    marginTop: '20%',
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',

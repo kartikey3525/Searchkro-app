@@ -173,7 +173,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '600',
@@ -226,7 +226,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '600',
@@ -267,8 +267,8 @@ export default function ProfileScreen({navigation}) {
                   <Image
                     source={require('../assets/help.png')}
                     style={{
-                      width: 26,
-                      height: 22,
+                      width: 22,
+                      height: 18,
                       marginLeft: 15,
                     }}
                     resizeMode="contain"
@@ -279,7 +279,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
@@ -319,8 +319,8 @@ export default function ProfileScreen({navigation}) {
                   <Image
                     source={require('../assets/privacy.png')}
                     style={{
-                      width: 25,
-                      height: 20,
+                      width: 22,
+                      height: 18,
                       marginLeft: 15,
                     }}
                     resizeMode="contain"
@@ -331,7 +331,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
@@ -386,7 +386,7 @@ export default function ProfileScreen({navigation}) {
                           styles.recListText,
                           {
                             fontSize: 15,
-                            width: Width * 0.69,
+                            width: Width * 0.66,
                             color: isDark ? 'white' : 'black',
                             marginLeft: 15,
                             fontWeight: '500',
@@ -438,7 +438,7 @@ export default function ProfileScreen({navigation}) {
                           styles.recListText,
                           {
                             fontSize: 15,
-                            width: Width * 0.69,
+                            width: Width * 0.66,
                             color: isDark ? 'white' : 'black',
                             marginLeft: 15,
                             fontWeight: '500',
@@ -493,7 +493,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
@@ -535,8 +535,8 @@ export default function ProfileScreen({navigation}) {
                     <Image
                       source={require('../assets/prefernce.png')}
                       style={{
-                        width: 25,
-                        height: 25,
+                        width: 22,
+                        height: 23,
                         marginLeft: 15,
                       }}
                       resizeMode="contain"
@@ -547,7 +547,7 @@ export default function ProfileScreen({navigation}) {
                         styles.recListText,
                         {
                           fontSize: 15,
-                          width: Width * 0.69,
+                          width: Width * 0.66,
                           color: isDark ? 'white' : 'black',
                           marginLeft: 15,
                           fontWeight: '500',
@@ -601,7 +601,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
@@ -656,7 +656,7 @@ export default function ProfileScreen({navigation}) {
                       styles.recListText,
                       {
                         fontSize: 15,
-                        width: Width * 0.69,
+                        width: Width * 0.66,
                         color: isDark ? 'white' : 'black',
                         marginLeft: 15,
                         fontWeight: '500',
