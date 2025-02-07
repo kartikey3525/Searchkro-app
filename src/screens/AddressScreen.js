@@ -90,7 +90,7 @@ export default function AddressScreen({navigation}) {
               textAlign: 'left',
               color: 'rgba(0, 174, 239, 1)',
               fontSize: 17,
-              left: 8,
+              left: 6,
             },
           ]}>
           Choose on map
@@ -124,7 +124,7 @@ export default function AddressScreen({navigation}) {
               style={[
                 styles.smallText,
                 {
-                  color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
+                  color: isDark ? 'rgb(184, 184, 184)' : 'rgba(99, 99, 99, 1)',
                   textAlign: 'left',
                   fontSize: 15,
                   left: 8,

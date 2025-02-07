@@ -142,7 +142,7 @@ export default function NotificationScreen({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
         <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   sectionHeader: {
-    fontWeight: 'bold',
+    fontWeight: '400',
     fontSize: 14,
     margin: 5,
     marginLeft: 20,

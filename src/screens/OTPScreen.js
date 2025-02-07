@@ -119,7 +119,7 @@ export default function OTPScreen({navigation, route}) {
 
         <Image
           source={require('../assets/logo.png')}
-          style={{width: 100, height: 100, alignSelf: 'center'}}
+          style={{width: 100, height: 100, alignSelf: 'center', top: 20}}
           resizeMode="contain"
         />
       </View>
@@ -183,13 +183,14 @@ export default function OTPScreen({navigation, route}) {
           flexDirection: 'row',
           padding: 2,
           marginBottom: '50%',
+          alignSelf: 'flex-end',
         }}>
         <Text
           disabled={resendDisabled}
           onPress={handleResend}
           style={[
             styles.smallText,
-            {color: '#000', width: 100, marginLeft: '56%'},
+            {color: isDark ? '#ccc' : '#000', width: 100},
           ]}>
           Resend code
         </Text>

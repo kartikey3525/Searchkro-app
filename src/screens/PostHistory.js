@@ -60,7 +60,7 @@ export default function PostHistory({navigation}) {
             {
               overflow: 'hidden',
               flexDirection: 'row',
-              backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+              backgroundColor: isDark ? 'rgba(28, 28, 28, 1)' : 'white',
             },
           ]}>
           <Image
@@ -107,7 +107,7 @@ export default function PostHistory({navigation}) {
                   {
                     marginTop: 0,
                     color: isDark ? 'white' : 'rgba(29, 30, 32, 1)',
-                    fontWeight: 'bold',
+                    fontWeight: '400',
                     fontSize: 12,
                     width: 130,
                     lineHeight: 18,
@@ -121,7 +121,7 @@ export default function PostHistory({navigation}) {
             onPress={() => toggleModal(item.id)} // Use toggleModal instead of setModalVisible
             name="dots-three-vertical"
             size={24}
-            color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+            color={isDark ? 'rgb(154, 154, 154)' : 'rgb(0, 0, 0)'}
             style={{alignSelf: 'flex-start', marginTop: 10}}
           />
         </View>

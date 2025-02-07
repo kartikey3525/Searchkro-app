@@ -9,6 +9,7 @@ import {
   Image,
   Pressable,
   Modal,
+  Linking,
 } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -189,7 +190,7 @@ export default function ShopScreen({navigation}) {
                     color: isDark ? '#fff' : 'rgba(29, 30, 32, 1)',
                     fontWeight: '500',
                     fontSize: 10,
-                    width: 200,
+                    width: Width * 0.5,
                     left: 5,
                   },
                 ]}>
@@ -203,38 +204,40 @@ export default function ShopScreen({navigation}) {
                 marginBottom: 5,
                 alignItems: 'center',
                 alignSelf: 'flex-end',
-                marginRight: 5,
+                marginRight: 8,
                 marginTop: 5,
               }}>
-              <View
+              <Pressable
                 style={{
                   marginRight: 5,
                   borderRadius: 5,
                   borderWidth: 1,
                   padding: 2,
                   width: 30,
-                  borderColor: 'rgba(228, 228, 228, 1)',
+                  borderColor: 'rgb(155, 155, 155)',
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}>
+                }}
+                onPress={() => Linking.openURL(`tel:${8860315531}`)}>
                 <Ionicons name={'call'} size={16} color="rgba(7, 201, 29, 1)" />
-              </View>
-              <View
+              </Pressable>
+              <Pressable
                 style={{
                   borderRadius: 5,
                   borderWidth: 1,
                   padding: 2,
                   width: 30,
-                  borderColor: 'rgba(228, 228, 228, 1)',
+                  borderColor: 'rgb(155, 155, 155)',
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}>
+                }}
+                onPress={() => navigation.navigate('messages', {item: null})}>
                 <Ionicons
                   name={'chatbubble-ellipses-outline'}
                   size={16}
                   color="rgba(15, 92, 246, 1)"
                 />
-              </View>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -299,7 +302,7 @@ export default function ShopScreen({navigation}) {
     return (
       <View style={styles.sliderContainer}>
         <View style={{marginTop: 20}}>
-          <Text style={{fontWeight: 'bold'}}>
+          <Text style={{color: isDark ? '#fff' : '#000', fontWeight: 'bold'}}>
             {Array.isArray(value) ? value.join(' km - ') : value} km
           </Text>
         </View>
@@ -553,7 +556,7 @@ export default function ShopScreen({navigation}) {
                   style={[
                     styles.bigText,
                     {
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: 'bold',
                       marginLeft: 6,
                       color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
@@ -585,7 +588,7 @@ export default function ShopScreen({navigation}) {
                   style={[
                     styles.bigText,
                     {
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: 'bold',
                       marginLeft: 6,
                       color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',

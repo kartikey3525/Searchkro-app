@@ -332,10 +332,10 @@ export default function Login({navigation}) {
           style={[
             {
               color: isDark ? '#fff' : '#1D1E20',
-              fontSize: 18,
+              fontSize: 16,
               textAlign: 'center',
               marginBottom: 0,
-              fontWeight: '600',
+              fontWeight: '400',
               alignSelf: 'center',
               marginLeft: 10,
             },
@@ -363,10 +363,10 @@ export default function Login({navigation}) {
           style={[
             {
               color: isDark ? '#fff' : '#1D1E20',
-              fontSize: 18,
+              fontSize: 16,
               textAlign: 'center',
               marginBottom: 0,
-              fontWeight: '600',
+              fontWeight: '400',
               alignSelf: 'center',
               marginLeft: 10,
             },

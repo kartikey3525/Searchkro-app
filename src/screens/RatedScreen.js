@@ -171,7 +171,7 @@ export default function RatedScreen({navigation}) {
             style={[
               styles.recListText,
               {
-                fontWeight: 'bold',
+                fontWeight: '400',
                 fontSize: 20,
                 margin: 5,
                 color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
@@ -297,14 +297,18 @@ export default function RatedScreen({navigation}) {
                   styles.closeButton,
                   {
                     backgroundColor: isDark
-                      ? 'rgb(255, 255, 255)'
-                      : 'rgba(0, 0, 0, 0.5)',
+                      ? 'rgb(0, 0, 0)'
+                      : 'rgb(255, 255, 255)',
                   },
                 ]}
                 onPress={() => {
                   setMedia(media.slice(1));
                 }}>
-                <Entypo name="cross" size={25} color={'black'} />
+                <Entypo
+                  name="cross"
+                  size={25}
+                  color={isDark ? 'white' : 'black'}
+                />
               </TouchableOpacity>
             </>
           ) : (
@@ -354,7 +358,7 @@ export default function RatedScreen({navigation}) {
               styles.imageContainer,
               {
                 flexWrap: 'wrap',
-                backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               },
             ]}>
             {media.slice(1, 8).map((item, index) => (
@@ -370,7 +374,7 @@ export default function RatedScreen({navigation}) {
                         styles.closeButton,
                         {
                           backgroundColor: isDark
-                            ? '#121212'
+                            ? '#000'
                             : 'rgba(248, 247, 247, 1)',
                         },
                       ]}

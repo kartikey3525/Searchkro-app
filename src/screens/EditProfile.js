@@ -179,7 +179,9 @@ export default function EditProfile({navigation}) {
                 borderRadius: 100,
                 top: 10,
                 borderWidth: 5,
-                borderColor: 'rgba(0, 0, 0, 0.14)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 1)'
+                  : 'rgba(231, 231, 231, 1)',
               }}
             />
             <TouchableOpacity
@@ -248,7 +250,15 @@ export default function EditProfile({navigation}) {
         </View>
       </View>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(37, 37, 37, 1)'
+              : 'rgba(231, 231, 231, 1)',
+          },
+        ]}>
         <Image
           source={require('../assets/profile-edit.png')}
           style={{
@@ -282,7 +292,15 @@ export default function EditProfile({navigation}) {
         {errors.email}
       </HelperText>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(37, 37, 37, 1)'
+              : 'rgba(231, 231, 231, 1)',
+          },
+        ]}>
         <TouchableOpacity onPress={() => setOpen(true)}>
           <Image
             source={require('../assets/calendar.png')}
@@ -319,7 +337,15 @@ export default function EditProfile({navigation}) {
         {errors.email}
       </HelperText>
 
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(37, 37, 37, 1)'
+              : 'rgba(231, 231, 231, 1)',
+          },
+        ]}>
         <Image
           source={require('../assets/mail.png')}
           style={{
@@ -360,7 +386,9 @@ export default function EditProfile({navigation}) {
           width: Width * 0.9,
           height: 60,
           borderWidth: 1,
-          borderColor: 'rgba(231, 231, 231, 1)',
+          borderColor: isDark
+            ? 'rgba(37, 37, 37, 1)'
+            : 'rgba(231, 231, 231, 1)',
           marginBottom: 20,
           borderRadius: 10,
         }}
@@ -386,6 +414,7 @@ export default function EditProfile({navigation}) {
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
+        placeholderTextColor={isDark ? '#fff' : '#000'}
         defaultCode="IN"
         style={{}}
         layout="second"
@@ -394,7 +423,17 @@ export default function EditProfile({navigation}) {
         }}
       />
 
-      <Dropdown style={styles.inputContainer} placeholder="Gender" />
+      <Dropdown
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(37, 37, 37, 1)'
+              : 'rgba(231, 231, 231, 1) ',
+          },
+        ]}
+        placeholder="Gender"
+      />
 
       <TouchableOpacity
         style={[styles.blueBotton, {margin: '10%'}]}

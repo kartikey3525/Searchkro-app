@@ -84,7 +84,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: '26%',
+    width: Width * 0.8,
+    textAlign: 'center',
   },
   scrollContent: {
     paddingBottom: 20, // Ensures space at the bottom for better scrolling
@@ -96,8 +97,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   description: {
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '400',
     marginTop: 6,
   },
 });

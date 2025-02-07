@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   Platform,
+  Alert,
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -34,20 +35,20 @@ import {launchImageLibrary} from 'react-native-image-picker';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-export default function SellerProfile({navigation, route}) {
+export default function ProfileSettings({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [email, setEmail] = useState('');
   const [description, setdescription] = useState('');
-  const [Socialmedia, setSocialmedia] = useState('');
-  const [bussinessAddress, setbussinessAddress] = useState('');
+  const [opensAt, setopensAt] = useState('');
+  const [closeAt, setcloseAt] = useState('');
   const [ownerName, setownerName] = useState('');
   const [shopName, setshopName] = useState('');
   const [phone, setphone] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedScale, setSelectedScale] = useState([]);
   const [selectedAvailabity, setSelectedAvailabity] = useState([]);
-  const [media, setMedia] = useState(null);
+  const [media, setMedia] = useState([]);
   const [location, setLocation] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +106,7 @@ export default function SellerProfile({navigation, route}) {
       } else {
         console.log('Image URI:', response.assets?.[0]?.uri);
         if (response.assets && response.assets.length > 0) {
-          setMedia([{uri: response.assets[0].uri}]); // Store the image
+          setMedia(prevMedia => [...prevMedia, {uri: response.assets[0].uri}]); // Store the image
         }
       }
     });
@@ -114,7 +115,7 @@ export default function SellerProfile({navigation, route}) {
   const selectMedia = () => {
     launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
       if (response.assets) {
-        setMedia([{uri: response.assets[0].uri}]);
+        setMedia([...media, ...response.assets]);
         setErrors(prevErrors => ({...prevErrors, media: ''}));
       }
     });
@@ -133,7 +134,7 @@ export default function SellerProfile({navigation, route}) {
         console.log('Location permission granted');
         getLocation();
       } else {
-        Alert.alert('Permission Denied', 'Location access is required.');
+        // Alert.alert('Permission Denied', 'Location access is required.');
       }
     } catch (err) {
       console.warn(err);
@@ -168,7 +169,7 @@ export default function SellerProfile({navigation, route}) {
         },
         error => {
           console.error('Location error:', error);
-          Alert.alert('Error', 'Unable to fetch location.');
+          //   Alert.alert('Error', 'Unable to fetch location.');
         },
         {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
       );
@@ -193,12 +194,13 @@ export default function SellerProfile({navigation, route}) {
   const [errors, setErrors] = useState({
     email: '',
     description: '',
+    opensAt: '',
+    closeAt: '',
     phone: '',
     location: '',
     media: '',
     selectedCategories: '',
     bussinessAddress: '',
-    Socialmedia: '',
     ownerName: '',
     shopName: '',
     selectedScale: '',
@@ -213,12 +215,13 @@ export default function SellerProfile({navigation, route}) {
     let newErrors = {
       email: '',
       description: '',
+      opensAt: '',
+      closeAt: '',
       phone: '',
       location: '',
       media: '',
       selectedCategories: '',
       bussinessAddress: '',
-      Socialmedia: '',
       ownerName: '',
       shopName: '',
       selectedScale: '',
@@ -240,6 +243,15 @@ export default function SellerProfile({navigation, route}) {
       valid = false;
     } else if (description.length < 6) {
       newErrors.description = 'Description must be at least 6 characters long.';
+      valid = false;
+    }
+
+    if (!opensAt.trim()) {
+      newErrors.opensAt = 'opensAt is required.';
+      valid = false;
+    }
+    if (!closeAt.trim()) {
+      newErrors.closeAt = 'closeAt is required.';
       valid = false;
     }
 
@@ -271,33 +283,6 @@ export default function SellerProfile({navigation, route}) {
       valid = false;
     }
 
-    if (!bussinessAddress.trim()) {
-      newErrors.bussinessAddress = 'Description is required.';
-      valid = false;
-    } else if (bussinessAddress.length < 6) {
-      newErrors.bussinessAddress =
-        'Description must be at least 6 characters long.';
-      valid = false;
-    }
-
-    if (!Socialmedia.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
-      valid = false;
-    } else if (Socialmedia.length < 6) {
-      newErrors.Socialmedia = 'Description must be at least 6 characters long.';
-      valid = false;
-    }
-
-    if (!shopName.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
-      valid = false;
-    }
-
-    if (!ownerName.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
-      valid = false;
-    }
-
     setErrors(newErrors);
     return valid;
   };
@@ -306,12 +291,13 @@ export default function SellerProfile({navigation, route}) {
     setErrors({
       email: '',
       description: '',
+      opensAt: '',
+      closeAt: '',
       phone: '',
       location: '',
       media: '',
       selectedCategories: '',
       bussinessAddress: '',
-      Socialmedia: '',
       ownerName: '',
       shopName: '',
       selectedScale: '',
@@ -325,19 +311,20 @@ export default function SellerProfile({navigation, route}) {
       navigation.navigate('uploadimage', {
         email: email,
         description: description,
+        opensAt: opensAt,
+        closeAt: closeAt,
         phone: phone,
         selectedCategories: selectedCategories,
         location: location,
         media: '',
         bussinessAddress: '',
-        Socialmedia: '',
         ownerName: '',
         shopName: '',
         selectedScale: '',
         selectedAvailabity: '',
       });
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      //   Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -379,70 +366,109 @@ export default function SellerProfile({navigation, route}) {
           ]}>
           Profile
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Profilescreen')}>
-          <Feather
-            name="settings"
-            size={20}
-            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-            style={{padding: 5}}
-          />
-        </TouchableOpacity>
       </View>
 
-      <View style={{}}>
-        {media ? (
-          <>
-            <Image
-              source={{uri: media[0].uri}}
-              style={[
-                styles.mediaSelector,
-                {borderWidth: 0, backgroundColor: 'rgb(255, 255, 255)'},
-              ]}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                // Remove the first image from the media array
-                setMedia(null); // This removes the first item from the array
-              }}>
-              <Entypo name="cross" size={25} color="black" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <TouchableOpacity
-            disabled
-            // onPress={selectMedia}
-          >
-            <View
-              style={[
-                styles.mediaSelector,
-                {
-                  backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-                },
-              ]}>
-              <MaterialIcons
-                name="image"
-                size={35}
-                color="rgba(158, 158, 158, 1)"
+      <Text
+        style={[
+          styles.title,
+          {color: isDark ? '#E0E0E0' : 'rgba(33, 33, 33, 1)'},
+        ]}>
+        Upload Your Picture
+      </Text>
+      <View>
+        <View>
+          {media?.length > 0 && media[0].uri ? (
+            <>
+              <Image
+                source={{uri: media[0].uri}}
+                style={[styles.mediaSelector, {borderWidth: 0}]}
               />
-            </View>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image
-            source={require('../assets/edit.png')}
-            style={{
-              position: 'absolute',
-              width: 50,
-              height: 35,
-              right: -10,
-              bottom: 30,
-              alignSelf: 'flex-end',
-            }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setMedia(media.slice(1))}>
+                <Entypo name="cross" size={25} color={'black'} />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity onPress={selectMedia}>
+              <View
+                style={[
+                  styles.mediaSelector,
+                  {
+                    backgroundColor: isDark
+                      ? '#1E1E1E'
+                      : 'rgba(250, 250, 250, 1)',
+                  },
+                ]}>
+                <MaterialIcons name="image" size={45} color="grey" />
+                <Text
+                  style={{
+                    color: isDark ? '#BBB' : 'rgba(158, 158, 158, 1)',
+                    fontWeight: 'bold',
+                  }}>
+                  Upload
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
+      <HelperText type="error" visible={!!errors.media} style={{color: 'red'}}>
+        {errors.media}
+      </HelperText>
+      <View
+        style={{
+          alignSelf: 'flex-start',
+          marginLeft: 25,
+          flexDirection: 'row',
+        }}>
+        <Text
+          style={[
+            {
+              color: isDark ? '#fff' : '#000',
+              fontWeight: '600',
+              fontSize: 15,
+              marginBottom: 5,
+              alignSelf: 'flex-start',
+              width: '50%',
+            },
+          ]}>
+          Shop Name
+        </Text>
+      </View>
+
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: isDark
+              ? 'rgba(109, 109, 109, 0.43)'
+              : 'rgba(0, 0, 0, 1)',
+          },
+        ]}>
+        <TextInput
+          value={shopName}
+          style={[
+            styles.textInput,
+            {
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}
+          onChangeText={setshopName}
+          placeholder="Shop Name"
+          mode="outlined"
+          placeholderTextColor={isDark ? '#ccc' : 'black'}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+      <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.shopName}>
+        {errors.shopName}
+      </HelperText>
 
       <View
         style={{
@@ -453,86 +479,53 @@ export default function SellerProfile({navigation, route}) {
         <Text
           style={[
             {
-              color: '#000',
+              color: isDark ? '#fff' : '#000',
               fontWeight: '600',
               fontSize: 15,
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
-              width: Width * 0.48,
+              width: '50%',
             },
           ]}>
-          Email
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-            },
-          ]}>
-          Delivery available
+          About shop
         </Text>
       </View>
 
       <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          alignSelf: 'center',
-          width: Width,
-          justifyContent: 'space-evenly',
-        }}>
-        <View
+        style={[
+          styles.inputContainer,
+          {
+            height: 100,
+            alignItems: 'flex-start',
+            borderColor: isDark
+              ? 'rgba(109, 109, 109, 0.43)'
+              : 'rgba(0, 0, 0, 1)',
+          },
+        ]}>
+        <TextInput
+          value={description}
           style={[
-            styles.inputContainer,
+            styles.textInput,
             {
-              width: '42%',
-              borderColor: isDark ? 'rgb(97, 97, 97)' : 'rgb(108, 108, 108)',
-              marginLeft: 20,
+              height: 93,
+              color: isDark ? '#fff' : '#000',
               backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
             },
-          ]}>
-          <TextInput
-            value={email}
-            style={[
-              styles.textInput,
-              {
-                color: isDark ? '#fff' : '#000',
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-              },
-            ]}
-            onChangeText={setEmail}
-            placeholder="Email"
-            mode="outlined"
-            placeholderTextColor={'grey'}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        <Dropdown
-          item={[
-            {label: 'Yes', value: 'Yes'},
-            {label: 'No', value: 'No'},
           ]}
-          placeholder={'Select Availability'}
-          half={true}
-          single={true}
-          selectedValues={selectedAvailabity}
-          onChangeValue={handleCategoryChange}
+          onChangeText={setdescription}
+          numberOfLines={5}
+          multiline={true}
+          placeholder="Add a short description about your business, products, or services . . ."
+          mode="outlined"
+          placeholderTextColor={'grey'}
+          autoCapitalize="none"
         />
       </View>
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
+        visible={!!errors.description}>
+        {errors.description}
       </HelperText>
 
       <View
@@ -608,68 +601,10 @@ export default function SellerProfile({navigation, route}) {
               color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
               marginBottom: 5,
               alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          Bussiness scale
-        </Text>
-      </View>
-
-      <Dropdown
-        item={[
-          {label: 'Small Business (Local)', value: 'Small Business (Local)'},
-          {
-            label: 'Medium Business (City-wide)',
-            value: 'Medium Business (City-wide)',
-          },
-          {
-            label: 'Large Business (Multiple Cities/State-wide)',
-            value: 'Large Business (Multiple Cities/State-wide)',
-          },
-        ]}
-        placeholder={'Select Scale'}
-        half={false}
-        single={true}
-        selectedValues={selectedScale}
-        onChangeValue={handleCategoryChange}
-      />
-
-      <HelperText type="error" visible={!!errors.category} style={{height: 10}}>
-        {errors.category}
-      </HelperText>
-
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          marginLeft: 25,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={[
-            {
-              color: '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-              marginBottom: 5,
-              alignSelf: 'flex-start',
               width: Width * 0.48,
             },
           ]}>
-          Shop name
-        </Text>
-
-        <Text
-          style={[
-            {
-              fontWeight: '600',
-              fontSize: 15,
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-            },
-          ]}>
-          Owner name
+          Open hours
         </Text>
       </View>
 
@@ -692,7 +627,7 @@ export default function SellerProfile({navigation, route}) {
             },
           ]}>
           <TextInput
-            value={ownerName}
+            value={opensAt}
             style={[
               styles.textInput,
               {
@@ -700,11 +635,11 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setownerName}
-            placeholder="Shop name"
+            onChangeText={setopensAt}
+            placeholder="opens at"
             mode="outlined"
             placeholderTextColor={'grey'}
-            keyboardType="email-address"
+            keyboardType="number-pad"
             autoCapitalize="none"
           />
         </View>
@@ -720,7 +655,7 @@ export default function SellerProfile({navigation, route}) {
             },
           ]}>
           <TextInput
-            value={shopName}
+            value={closeAt}
             style={[
               styles.textInput,
               {
@@ -728,11 +663,11 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setshopName}
-            placeholder="Owner name"
+            onChangeText={setcloseAt}
+            placeholder="close at"
             mode="outlined"
             placeholderTextColor={'grey'}
-            keyboardType="email-address"
+            keyboardType="number-pad"
             autoCapitalize="none"
           />
         </View>
@@ -740,203 +675,8 @@ export default function SellerProfile({navigation, route}) {
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
-      </HelperText>
-
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          marginLeft: 25,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          Bussiness Address
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            borderColor: isDark
-              ? 'rgba(109, 109, 109, 0.43)'
-              : 'rgba(0, 0, 0, 1)',
-          },
-        ]}>
-        <TextInput
-          value={bussinessAddress}
-          style={[
-            styles.textInput,
-            {
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-              color: isDark ? '#fff' : '#000',
-            },
-          ]}
-          onChangeText={setbussinessAddress}
-          placeholder="Bussiness Address"
-          mode="outlined"
-          placeholderTextColor={isDark ? '#ccc' : 'black'}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
-      </HelperText>
-
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          marginLeft: 25,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          Location
-        </Text>
-      </View>
-      {/* Location Validation */}
-      <Dropdown
-        style={styles.inputContainer}
-        placeholder={location ? 'Selected current location' : 'Select Location'}
-      />
-      <HelperText type="error" visible={!!errors.location} style={{height: 10}}>
-        {errors.location}
-      </HelperText>
-
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          marginLeft: 25,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          Social media
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            borderColor: isDark
-              ? 'rgba(109, 109, 109, 0.43)'
-              : 'rgba(0, 0, 0, 1)',
-          },
-        ]}>
-        <TextInput
-          value={Socialmedia}
-          style={[
-            styles.textInput,
-            {
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-              color: isDark ? '#fff' : '#000',
-            },
-          ]}
-          onChangeText={setSocialmedia}
-          placeholder="Social media"
-          mode="outlined"
-          placeholderTextColor={'grey'}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
-      </HelperText>
-
-      <View
-        style={{
-          alignSelf: 'flex-start',
-          marginLeft: 25,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '600',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          description
-        </Text>
-      </View>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            height: 100,
-            alignItems: 'flex-start',
-            borderColor: isDark
-              ? 'rgba(109, 109, 109, 0.43)'
-              : 'rgba(0, 0, 0, 1)',
-          },
-        ]}>
-        <TextInput
-          value={description}
-          style={[
-            styles.textInput,
-            {
-              height: 93,
-              color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-            },
-          ]}
-          onChangeText={setdescription}
-          numberOfLines={5}
-          multiline={true}
-          placeholder="Add a short description about your business, products, or services . . ."
-          mode="outlined"
-          placeholderTextColor={'grey'}
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.description}>
-        {errors.description}
+        visible={!!errors.opensAt}>
+        {errors.opensAt}
       </HelperText>
 
       <View
@@ -976,6 +716,64 @@ export default function SellerProfile({navigation, route}) {
         {errors.category}
       </HelperText>
 
+      {/* Uploaded Images */}
+      {media.length > 0 && (
+        <>
+          <Text
+            style={[
+              {
+                color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                fontSize: 18,
+                textAlign: 'left',
+                marginBottom: 10,
+                fontWeight: '600',
+                alignSelf: 'flex-start',
+                marginLeft: '7%',
+                marginTop: '5%',
+              },
+            ]}>
+            Gallery
+          </Text>
+
+          <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
+            {media.slice(1, 8).map((item, index) => (
+              <View key={index} style={styles.mediaItem}>
+                {/* {item.type.startsWith('image') ? ( */}
+                <>
+                  <Image source={{uri: item.uri}} style={styles.mediaPreview} />
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => {
+                      setMedia(media.filter((_, i) => i !== index));
+                    }}>
+                    <Entypo name="cross" size={18} color={'black'} />
+                  </TouchableOpacity>
+                </>
+                {/* ) : null} */}
+              </View>
+            ))}
+
+            {media?.length < 8 && (
+              <TouchableOpacity
+                onPress={selectMedia}
+                style={[
+                  styles.mediaItem,
+                  {
+                    backgroundColor: isDark ? '#1E1E1E' : 'rgb(255, 255, 255)',
+                    borderColor: isDark ? '#555' : 'rgba(176, 176, 176, 1)',
+                  },
+                ]}>
+                <Entypo
+                  name="squared-plus"
+                  size={25}
+                  color="rgba(176, 176, 176, 1)"
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
+      )}
+
       <TouchableOpacity
         style={styles.blueBotton}
         onPress={() => navigation.navigate('Home')}
@@ -986,7 +784,7 @@ export default function SellerProfile({navigation, route}) {
             styles.smallText,
             {color: '#fff', fontSize: 22, marginBottom: 0},
           ]}>
-          Submit
+          Update
         </Text>
       </TouchableOpacity>
 
@@ -1075,7 +873,7 @@ export default function SellerProfile({navigation, route}) {
 
             <TouchableOpacity
               onPress={() => {
-                if (media.length > 0) {
+                if (media?.length > 0) {
                   // Remove the first image from the media array
                   setMedia(media.slice(1));
                 }
@@ -1116,6 +914,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
+  title: {
+    fontSize: 20,
+    fontWeight: '500',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: 'rgb(255, 255, 255)',
+    borderRadius: 15,
+    padding: 1,
+  },
+  mediaSelector: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: Width * 0.85,
+    height: 150,
+    borderWidth: 3,
+    backgroundColor: 'rgba(250, 250, 250, 1)',
+    borderRadius: 20,
+    borderColor: 'rgba(6, 196, 217, 1)',
+    marginBottom: 10,
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  mediaItem: {
+    width: '20%', // Slight margin for spacing
+    margin: '2%',
+    aspectRatio: 1, // Keeps items square
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  mediaPreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -1146,17 +989,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
     padding: 1,
-  },
-  mediaSelector: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 100,
-    borderRadius: 80,
-    borderWidth: 3,
-    borderColor: 'rgba(0, 0, 0, 0.28)',
-    backgroundColor: 'rgba(250, 250, 250, 1)',
-    marginBottom: 30,
   },
   phoneInput: {
     flexDirection: 'row',
@@ -1207,7 +1039,8 @@ const styles = StyleSheet.create({
   blueBotton: {
     backgroundColor: '#00AEEF',
     width: '90%',
-    height: 56,
+    height: 50,
+    marginTop: 20,
     borderRadius: 10,
     marginBottom: 20,
     alignItems: 'center',

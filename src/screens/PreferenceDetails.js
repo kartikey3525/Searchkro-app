@@ -148,12 +148,12 @@ export default function PreferenceDetails({navigation}) {
                   {
                     marginTop: 0,
                     color: 'rgba(29, 30, 32, 1)',
-                    fontWeight: '500',
+                    fontWeight: '400',
                     fontSize: 14,
                     width: 300,
                     left: 8,
                     color: isDark
-                      ? 'rgba(255, 255, 255, 1)'
+                      ? 'rgba(223, 224, 226, 1)'
                       : 'rgba(29, 30, 32, 1)',
                   },
                 ]}>
@@ -188,6 +188,8 @@ export default function PreferenceDetails({navigation}) {
                 style={[
                   styles.recListText,
                   {
+                    lineHeight: 16,
+                    letterSpacing: 1.2,
                     marginTop: 0,
                     color: isDark
                       ? 'rgba(255, 255, 255, 1)'
@@ -207,22 +209,7 @@ export default function PreferenceDetails({navigation}) {
       </Pressable>
     );
   };
-
-  const DEFAULT_VALUE = 0;
-  function Link(props) {
-    return (
-      <Text
-        {...props}
-        accessibilityRole="link"
-        style={StyleSheet.compose(styles.link, props.style)}
-      />
-    );
-  }
-
-  const renderAboveThumbComponent = () => {
-    return <View style={styles.container}></View>;
-  };
-
+ 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View

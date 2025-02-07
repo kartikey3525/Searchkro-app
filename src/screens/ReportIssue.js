@@ -358,6 +358,9 @@ export default function ReportIssue({navigation}) {
           style={[
             styles.textInput,
             {
+              borderColor: isDark
+                ? 'rgba(37, 37, 37, 1)'
+                : 'rgba(231, 231, 231, 1)',
               height: 93,
               backgroundColor: isDark ? '#121212' : '#fff',
               color: isDark ? '#fff' : '#000',
@@ -422,7 +425,7 @@ export default function ReportIssue({navigation}) {
               }}
             />
             <TouchableOpacity
-              style={[styles.closeButton]}
+              style={[styles.closeButton, {}]}
               onPress={() => {
                 setModalVisible(false);
               }}>
@@ -436,7 +439,7 @@ export default function ReportIssue({navigation}) {
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
-                height: 60,
+                height: 50,
                 marginTop: 30,
                 width: Width,
                 alignItems: 'center',
@@ -449,7 +452,7 @@ export default function ReportIssue({navigation}) {
               onPress={requestCameraPermission}>
               <Entypo
                 name={'camera'}
-                size={25}
+                size={22}
                 color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 15, marginLeft: 20}}
               />
@@ -457,8 +460,8 @@ export default function ReportIssue({navigation}) {
               <Text
                 style={[
                   {
-                    fontSize: 18,
-                    fontWeight: '600',
+                    fontSize: 16,
+                    fontWeight: '400',
                     marginLeft: 6,
                     color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                   },
@@ -474,7 +477,7 @@ export default function ReportIssue({navigation}) {
                 width: Width,
                 alignItems: 'center',
                 borderBottomWidth: 1,
-                height: 60,
+                height: 50,
                 padding: 10,
                 borderBottomColor: isDark
                   ? 'rgba(255, 255, 255, 0.2)'
@@ -482,7 +485,7 @@ export default function ReportIssue({navigation}) {
               }}>
               <MaterialCommunityIcons
                 name={'image'}
-                size={30}
+                size={28}
                 color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 10, marginLeft: 18}}
               />
@@ -490,8 +493,8 @@ export default function ReportIssue({navigation}) {
               <Text
                 style={[
                   {
-                    fontSize: 18,
-                    fontWeight: '600',
+                    fontSize: 16,
+                    fontWeight: '400',
                     marginLeft: 6,
                     color: isDark ? '#fff' : 'rgb(0, 0, 0)',
                   },
@@ -514,17 +517,18 @@ export default function ReportIssue({navigation}) {
                 alignItems: 'center',
                 padding: 10,
                 height: 60,
+                marginBottom: 20,
               }}>
               <FontAwesome
                 name={'trash'}
-                size={25}
+                size={22}
                 color="rgb(255, 0, 0)"
                 style={{marginRight: 15, marginLeft: 22}}
               />
               <Text
                 style={{
-                  fontSize: 18,
-                  fontWeight: '600',
+                  fontSize: 16,
+                  fontWeight: '400',
                   marginLeft: 6,
                   color: 'rgb(255, 0, 0)',
                 }}>
@@ -580,7 +584,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 1,
     left: '40%',
-    top: '10%',
+    top: '15%',
   },
   mediaSelector: {
     justifyContent: 'center',

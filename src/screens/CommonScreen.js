@@ -53,7 +53,7 @@ export default function CommonScreen({navigation}) {
                   ? '#06C4D9'
                   : isDark
                   ? '#333333'
-                  : '#FFFFFF',
+                  : 'rgba(220, 220, 220, 1)',
             },
           ]}
           onPress={() => setUserRole('buyer')}>
@@ -93,7 +93,7 @@ export default function CommonScreen({navigation}) {
                   ? '#06C4D9'
                   : isDark
                   ? '#333333'
-                  : '#FFFFFF',
+                  : 'rgba(220, 220, 220, 1)',
             },
           ]}
           onPress={() => setUserRole('seller')}>

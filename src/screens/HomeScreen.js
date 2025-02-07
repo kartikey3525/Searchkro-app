@@ -389,13 +389,16 @@ export default function HomeScreen({navigation}) {
           <View
             style={[
               styles.inputContainer,
-              {borderWidth: 0, backgroundColor: isDark ? '#000' : '#fff'},
+              {
+                borderWidth: 0,
+                backgroundColor: isDark ? '#000' : '#fff',
+                width: userRole === 'buyer' ? Width * 0.55 : Width * 0.6,
+              },
             ]}>
             <View
               style={[
                 styles.searchInput,
                 {
-                  width: userRole === 'buyer' ? '55%' : '62%',
                   left: 1,
                   color: isDark ? '#fff' : '#000',
                 },
@@ -430,6 +433,7 @@ export default function HomeScreen({navigation}) {
                   fontSize: 13,
                   fontWeight: '500',
                   marginTop: 0,
+                  width: Width * 0.53,
                   color: isDark
                     ? 'rgba(252, 252, 252, 0.4)'
                     : 'rgba(0, 0, 0, 0.4)',
@@ -445,12 +449,14 @@ export default function HomeScreen({navigation}) {
               style={{
                 backgroundColor: 'rgba(207, 207, 207, 0.12)',
                 height: 40,
-                width: '10%',
+                width: '11%',
                 alignSelf: 'center',
                 borderRadius: 10,
+                borderWidth: 1,
+                borderColor: isDark ? 'rgb(149, 149, 149)' : 'rgb(0, 0, 0)',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginRight: 10,
+                marginRight: 6,
               }}>
               <Image
                 source={require('../assets/notification.png')}
@@ -479,8 +485,10 @@ export default function HomeScreen({navigation}) {
             style={{
               backgroundColor: 'rgba(207, 207, 207, 0.12)',
               height: 40,
-              width: '10%',
+              width: '11%',
               alignSelf: 'center',
+              borderWidth: 1,
+              borderColor: isDark ? 'rgb(149, 149, 149)' : 'rgb(0, 0, 0)',
               borderRadius: 10,
               justifyContent: 'center',
               alignItems: 'center',
@@ -492,8 +500,8 @@ export default function HomeScreen({navigation}) {
                   : require('../assets/chat-icon.png')
               }
               style={{
-                width: 28,
-                height: 26,
+                width: 24,
+                height: 22,
                 alignSelf: 'center',
               }}
               resizeMode="contain"
@@ -535,37 +543,13 @@ export default function HomeScreen({navigation}) {
               onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
             />
           </View>
-
-          {/* <View
-            style={{
-              backgroundColor: isDark ? '#000' : 'white',
-              height: 45,
-              width: '12%',
-              alignSelf: 'center',
-              borderRadius: 10,
-              borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderWidth: 1,
-              marginLeft: 10,
-            }}>
-            <Image
-              source={require('../assets/category-icon.png')}
-              style={{
-                width: 22,
-                height: 22,
-                alignSelf: 'center',
-              }}
-              resizeMode="contain"
-            />
-          </View> */}
         </View>
 
         {userRole === 'buyer' ? (
           <>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              style={{height: Height * 0.72, flexGrow: 1}}>
+              style={{height: Height * 0.695, flexGrow: 1}}>
               <FlatList
                 style={{
                   width: Width,

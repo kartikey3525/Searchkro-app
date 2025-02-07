@@ -149,7 +149,8 @@ export default function ProfileScreen({navigation}) {
                     : 'rgba(0, 0, 0, 0.1)',
                   borderTopStartRadius: 5,
                   borderTopRightRadius: 5,
-                }}>
+                }}
+                onPress={() => navigation.navigate('profilesettings')}>
                 <View
                   style={{
                     flexDirection: 'row',

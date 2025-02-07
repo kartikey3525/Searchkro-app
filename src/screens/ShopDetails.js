@@ -1268,9 +1268,9 @@ export default function ShopDetails({navigation}) {
               style={[
                 styles.iconStyle,
                 {backgroundColor: 'rgba(255, 219, 17, 1)'},
-              ]}>
+              ]}
+              onPress={() => navigation.navigate('ratedscreen', {})}>
               <Octicons
-                onPress={() => navigation.goBack()}
                 name="star-fill"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
@@ -1283,7 +1283,6 @@ export default function ShopDetails({navigation}) {
                 {backgroundColor: 'rgba(33, 150, 243, 1)'},
               ]}>
               <FontAwesome
-                onPress={() => navigation.goBack()}
                 name="share"
                 size={26}
                 color="rgba(255, 255, 255, 1)"

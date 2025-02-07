@@ -99,12 +99,12 @@ export default function FAQScreen({navigation}) {
             style={[
               styles.recListText,
               {
-                fontWeight: '500',
-                fontSize: 15,
-                width: Width * 0.9,
+                fontWeight: '400',
+                fontSize: 13,
+                width: Width * 0.8,
                 marginLeft: '4%',
                 textAlign: 'left',
-                color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                color: isDark ? 'rgb(176, 176, 176)' : 'rgba(94, 95, 96, 1)',
               },
             ]}>
             {item.description}
@@ -122,7 +122,7 @@ export default function FAQScreen({navigation}) {
           onPress={() => navigation.goBack()}
           name="chevron-thin-left"
           size={20}
-          color="rgba(94, 95, 96, 1)"
+          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
           style={{marginLeft: 20}}
         />
         <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>

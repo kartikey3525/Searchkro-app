@@ -41,6 +41,7 @@ import PostHistory from '../screens/PostHistory';
 import SellerProductDetails from '../screens/SellerProductDetails';
 import SellerProfile from '../screens/SellerProfile';
 import ChatScreen from '../screens/ChatScreen';
+import ProfileSettings from '../screens/ProfileSettings';
 
 const Stack = createStackNavigator();
 
@@ -244,6 +245,11 @@ const MainScreens = () => {
         name="Chatscreen"
         component={ChatScreen}
         options={{title: 'Chatscreen', headerShown: false}}
+      />
+      <Stack.Screen
+        name="profilesettings"
+        component={ProfileSettings}
+        options={{title: 'profilesettings', headerShown: false}}
       />
     </Stack.Navigator>
   );

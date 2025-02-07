@@ -79,7 +79,7 @@ export default function ReferandEarn({navigation}) {
       key={index}
       style={{
         justifyContent: 'center',
-        marginBottom: 10,
+        marginBottom: 5,
         alignItems: 'center',
       }}>
       <View
@@ -93,8 +93,8 @@ export default function ReferandEarn({navigation}) {
         <Image
           source={item.img}
           style={{
-            width: 66,
-            height: 66,
+            width: 50,
+            height: 50,
             marginRight: 20,
           }}
           resizeMode="contain"
@@ -119,7 +119,7 @@ export default function ReferandEarn({navigation}) {
             style={[
               styles.recListText,
               {
-                fontWeight: '500',
+                fontWeight: '400',
                 fontSize: 16,
                 width: 180,
                 marginTop: 0,
@@ -189,7 +189,7 @@ export default function ReferandEarn({navigation}) {
       <Text
         style={[
           styles.headerText,
-          {fontSize: 26, marginLeft: '20%', color: isDark ? '#fff' : '#000'},
+          {fontSize: 26, color: isDark ? '#fff' : '#000'},
         ]}>
         Earn Money by Refer{' '}
       </Text>
@@ -292,7 +292,7 @@ export default function ReferandEarn({navigation}) {
             name="search"
             size={26}
             color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-            style={{marginRight: 16, marginTop: 20}}
+            style={{marginRight: 16, marginTop: 10}}
           />
         </View>
         <ScrollView
@@ -382,8 +382,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 25,
     margin: 10,
-    marginLeft: 10,
-    marginTop: 20,
+    marginLeft: 5,
+    marginTop: 10,
   },
   header: {
     flexDirection: 'row',
@@ -393,13 +393,14 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: '26%',
+    width: Width * 0.8,
+    textAlign: 'center',
+    alignSelf: 'center',
   },
   rectangle2: {
     backgroundColor: '#fff',
     width: Width * 0.95,
-    height: 80,
-    marginBottom: 5,
+    height: 70,
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 10,
