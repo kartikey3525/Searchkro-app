@@ -166,7 +166,7 @@ export default function Login({navigation}) {
           <Text
             style={[
               styles.smallText,
-              {marginBottom: 40, color: isDark ? '#fff' : '#000'},
+              {marginBottom: 20, color: isDark ? '#fff' : '#000'},
             ]}>
             create your account using email or social networks
           </Text>
@@ -308,7 +308,7 @@ export default function Login({navigation}) {
 
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
-        <Text style={[{textAlign: 'left', color: '#9DA49E', margin: 10}]}>
+        <Text style={[{textAlign: 'left', color: '#9DA49E', margin: 5}]}>
           OR
         </Text>
         <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
@@ -407,7 +407,8 @@ export default function Login({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
+    height: Height,
+    width: Width,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
@@ -427,7 +428,7 @@ const styles = StyleSheet.create({
     width: '86%',
     height: Height * 0.06,
     padding: 10,
-    margin: 4,
+    // margin: 4,
   },
   smallText: {
     fontSize: 15,
@@ -445,7 +446,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
     fontWeight: 'bold',
-    marginBottom: 6,
+    // marginBottom: 6,
     fontFamily: 'Poppins-Bold',
   },
   blueBotton: {
@@ -453,8 +454,8 @@ const styles = StyleSheet.create({
     width: '90%',
     height: Height * 0.07,
     borderRadius: 10,
-    margin: 10,
-    marginBottom: 20,
+    margin: 5,
+    // marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -463,7 +464,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: Height * 0.07,
     borderRadius: 10,
-    margin: 10,
+    margin: 5,
     flexDirection: 'row',
     borderWidth: 1,
     borderColor: '#A3A3A3',

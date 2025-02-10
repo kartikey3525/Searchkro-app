@@ -690,9 +690,20 @@ export default function ProfileScreen({navigation}) {
         visible={modalVisible}
         animationType="slide">
         <Pressable
-          style={styles.modalContainer2}
+          style={[
+            styles.modalContainer2,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.35)'
+                : 'rgba(0, 0, 0, 0.3)',
+            },
+          ]}
           onPress={() => setModalVisible(false)}>
-          <View style={styles.modalContent2}>
+          <View
+            style={[
+              styles.modalContent2,
+              {backgroundColor: isDark ? '#000' : '#fff'},
+            ]}>
             <Text
               style={[
                 styles.modalText,
@@ -701,6 +712,7 @@ export default function ProfileScreen({navigation}) {
                   marginBottom: 10,
                   fontSize: 25,
                   marginLeft: 30,
+                  color: isDark ? 'white' : 'black',
                   textAlign: 'left',
                 },
               ]}>
@@ -734,16 +746,20 @@ export default function ProfileScreen({navigation}) {
                     borderRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgb(0, 0, 0)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}>
                   <View
                     style={{
                       width: 15,
                       height: 15,
                       borderWidth: 2,
-                      borderColor: 'white',
+                      borderColor: isDark ? 'black' : 'white',
                       borderRadius: 10,
-                      backgroundColor: 'rgb(0, 0, 0)',
+                      backgroundColor: isDark
+                        ? 'rgb(255, 255, 255)'
+                        : 'rgb(0, 0, 0)',
                     }}></View>
                 </View>
               ) : (
@@ -755,8 +771,12 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: 'rgba(0, 0, 0, 0.11)',
-                    backgroundColor: 'rgb(255, 255, 255)',
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.11)'
+                      : 'rgba(255, 255, 255, 0.11)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}></View>
               )}
               <Text
@@ -766,6 +786,7 @@ export default function ProfileScreen({navigation}) {
                     fontWeight: '400',
                     marginLeft: 20,
                     marginBottom: 0,
+                    color: isDark ? 'white' : 'black',
                     fontSize: 19,
                     textAlign: 'left',
                   },
@@ -790,16 +811,20 @@ export default function ProfileScreen({navigation}) {
                     borderRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgb(0, 0, 0)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}>
                   <View
                     style={{
                       width: 15,
                       height: 15,
                       borderWidth: 2,
-                      borderColor: 'white',
+                      borderColor: isDark ? 'black' : 'white',
                       borderRadius: 10,
-                      backgroundColor: 'rgb(0, 0, 0)',
+                      backgroundColor: isDark
+                        ? 'rgb(255, 255, 255)'
+                        : 'rgb(0, 0, 0)',
                     }}></View>
                 </View>
               ) : (
@@ -811,8 +836,12 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: 'rgba(0, 0, 0, 0.11)',
-                    backgroundColor: 'rgb(255, 255, 255)',
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.11)'
+                      : 'rgba(255, 255, 255, 0.11)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}></View>
               )}
               <Text
@@ -820,6 +849,7 @@ export default function ProfileScreen({navigation}) {
                   styles.modalText,
                   {
                     fontWeight: '400',
+                    color: isDark ? 'white' : 'black',
                     marginLeft: 20,
                     marginBottom: 0,
                     fontSize: 19,
@@ -846,16 +876,20 @@ export default function ProfileScreen({navigation}) {
                     borderRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgb(0, 0, 0)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}>
                   <View
                     style={{
                       width: 15,
                       height: 15,
                       borderWidth: 2,
-                      borderColor: 'white',
+                      borderColor: isDark ? 'black' : 'white',
                       borderRadius: 10,
-                      backgroundColor: 'rgb(0, 0, 0)',
+                      backgroundColor: isDark
+                        ? 'rgb(255, 255, 255)'
+                        : 'rgb(0, 0, 0)',
                     }}></View>
                 </View>
               ) : (
@@ -867,8 +901,12 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: 'rgba(0, 0, 0, 0.11)',
-                    backgroundColor: 'rgb(255, 255, 255)',
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.11)'
+                      : 'rgba(255, 255, 255, 0.11)',
+                    backgroundColor: isDark
+                      ? 'rgb(255, 255, 255)'
+                      : 'rgb(0, 0, 0)',
                   }}></View>
               )}
               <Text
@@ -877,6 +915,7 @@ export default function ProfileScreen({navigation}) {
                   {
                     fontWeight: '400',
                     marginLeft: 20,
+                    color: isDark ? 'white' : 'black',
                     marginBottom: 0,
                     fontSize: 19,
                     textAlign: 'left',
