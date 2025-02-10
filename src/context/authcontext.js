@@ -3,7 +3,10 @@ import {useNavigation} from '@react-navigation/native';
 import {Alert} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
-let apiURL = 'http://192.168.1.24:8080';
+// let apiURL = 'http://192.168.1.24:8080';
+let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
+
+
 const AuthContext = createContext();
 
 const AuthProvider = ({children}) => {
