@@ -58,9 +58,13 @@ export default function FAQScreen({navigation}) {
         justifyContent: 'flex-start',
         marginBottom: 10,
         alignItems: 'center',
+        borderRadius: 10,
+        alignSelf: 'center',
+        padding: 4,
+        backgroundColor: isDark ? '#121212' : '#fff',
         flexDirection: 'row',
       }}>
-      <View style={{marginLeft: 16}}>
+      <View style={{}}>
         <View
           style={[
             styles.rectangle2,
@@ -115,8 +119,7 @@ export default function FAQScreen({navigation}) {
   );
 
   return (
-    <View
-      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}
@@ -195,7 +198,7 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   searchInput: {
-    width: '68%',
+    width: Width * 0.8,
     alignSelf: 'center',
     fontSize: 17,
     fontWeight: '500',
@@ -221,62 +224,13 @@ const styles = StyleSheet.create({
   },
   rectangle2: {
     backgroundColor: '#fff',
-    width: Width * 0.9,
+    width: Width * 0.89,
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 10,
-    padding: 10,
+    padding: 5,
   },
   recListText: {
     color: '#1d1e20',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: '12%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(217, 217, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
-  },
-  deleteButton: {
-    backgroundColor: 'rgba(6, 196, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '500',
-    fontSize: 18,
   },
 });

@@ -450,15 +450,9 @@ export default function ShopScreen({navigation}) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={render2RectangleList}
-          />
+          {recentPostList.map((item, index) => (
+            <View key={item.id}>{render2RectangleList({item, index})}</View>
+          ))}
         </ScrollView>
       </View>
 

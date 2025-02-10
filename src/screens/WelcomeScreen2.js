@@ -23,9 +23,9 @@ export default function WelcomeScreen2({navigation}) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={[
+      contentContainerStyle={[
         styles.screen,
-        {backgroundColor: isDarkMode ? '#121212' : '#fff'},
+        {backgroundColor: isDarkMode ? '#000' : '#fff'},
       ]}>
       <TouchableOpacity
         style={{
@@ -133,6 +133,7 @@ export default function WelcomeScreen2({navigation}) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    justifyContent: 'center',
   },
   smallText: {
     fontSize: 15,

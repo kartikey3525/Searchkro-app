@@ -80,7 +80,7 @@ export default function NotificationScreen({navigation}) {
           {
             flexDirection: 'row',
 
-            backgroundColor: isDark ? '#121212' : '#fff',
+            backgroundColor: isDark ? '#000' : '#fff',
           },
         ]}>
         <Image

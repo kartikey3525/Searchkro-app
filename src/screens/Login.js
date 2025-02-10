@@ -407,7 +407,7 @@ export default function Login({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
-    width: Width,
+    flex: 1,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },

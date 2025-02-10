@@ -196,12 +196,9 @@ export default function CategoryScreen({navigation, route}) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.73, flexGrow: 1}}>
-          <FlatList
-            showsHorizontalScrollIndicator={false} // Hides the horizontal scrollbar
-            data={fullCategorydata}
-            keyExtractor={item => item.id.toString()}
-            renderItem={rendersquareList}
-          />
+          {fullCategorydata.map((item, index) => (
+            <View key={item.id}>{rendersquareList({item, index})}</View>
+          ))}
         </ScrollView>
       </View>
     </View>

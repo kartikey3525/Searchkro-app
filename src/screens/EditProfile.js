@@ -398,11 +398,11 @@ export default function EditProfile({navigation}) {
           withCallingCode: true,
         }}
         textContainerStyle={{
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
         }}
         textInputStyle={{
           height: 50,
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           color: isDark ? '#fff' : '#000',
           fontSize: 16,
         }}
@@ -410,7 +410,7 @@ export default function EditProfile({navigation}) {
           color: isDark ? '#fff' : '#000',
         }}
         flagButtonStyle={{
-          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
@@ -474,6 +474,7 @@ export default function EditProfile({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },

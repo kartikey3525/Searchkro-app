@@ -85,7 +85,7 @@ const ChatScreen = ({navigation, route}) => {
           styles.rectangle2,
           {
             flexDirection: 'row',
-            backgroundColor: isDark ? '#121212' : '#fff',
+            backgroundColor: isDark ? '#000' : '#fff',
           },
         ]}>
         <Entypo
@@ -333,7 +333,7 @@ const ChatScreen = ({navigation, route}) => {
           },
         ]}>
         <TextInput
-          style={[styles.input]}
+          style={[styles.input, {color: isDark ? '#fff' : '#000'}]}
           value={text}
           onChangeText={setText}
           placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}

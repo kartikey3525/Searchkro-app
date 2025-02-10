@@ -16,6 +16,8 @@ import SellerProfile from '../screens/SellerProfile';
 const Tab = createBottomTabNavigator();
 
 const BottomTabs = () => {
+  const EmptyComponent = () => null;
+
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const {userRole} = useContext(AuthContext);
@@ -98,12 +100,12 @@ const BottomTabs = () => {
       {userRole === 'buyer' ? (
         <Tab.Screen
           name="AddButton"
-          component={() => null}
+          component={EmptyComponent} // ✅ No inline function
           options={{
             tabBarStyle: {
               backgroundColor: 'transparent',
             },
-            tabBarButton: () => <FloatingButton />,
+            tabBarButton: () => <FloatingButton />, // ✅ Custom tab button remains
           }}
         />
       ) : null}

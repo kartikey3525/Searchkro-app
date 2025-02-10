@@ -23,7 +23,10 @@ export default function WelcomeScreen() {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
+      contentContainerStyle={[
+        styles.screen,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+      ]}>
       <TouchableOpacity
         style={{
           flexDirection: 'row',
@@ -129,6 +132,7 @@ const styles = StyleSheet.create({
   screen: {
     width: Width,
     height: Height,
+    justifyContent: 'center',
   },
   smallText: {
     fontSize: 15,

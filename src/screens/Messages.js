@@ -132,7 +132,7 @@ export default function Messages({navigation}) {
           styles.rectangle2,
           {
             flexDirection: 'row',
-            backgroundColor: isDark ? '#121212' : '#fff',
+            backgroundColor: isDark ? '#000' : '#fff',
           },
         ]}>
         <Image
@@ -206,8 +206,7 @@ export default function Messages({navigation}) {
   );
 
   return (
-    <View
-      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}

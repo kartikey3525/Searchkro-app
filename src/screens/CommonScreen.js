@@ -22,7 +22,7 @@ export default function CommonScreen({navigation}) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
+      style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View
         style={{
           position: 'absolute',

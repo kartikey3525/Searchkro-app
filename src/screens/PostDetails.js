@@ -259,7 +259,7 @@ export default function PostDetails({navigation, route}) {
         style={[
           styles.inputContainer,
           {
-            backgroundColor: isDark ? '#121212' : '#fff',
+            backgroundColor: isDark ? '#000' : '#fff',
             borderColor: isDark
               ? 'rgba(173, 173, 173, 0.31)'
               : 'rgba(173, 173, 173, 0.31)',
@@ -271,7 +271,7 @@ export default function PostDetails({navigation, route}) {
             styles.textInput,
             {
               color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#121212' : '#fff',
+              backgroundColor: isDark ? '#000' : '#fff',
             },
           ]}
           onChangeText={setEmail}
@@ -306,11 +306,11 @@ export default function PostDetails({navigation, route}) {
           borderRadius: 10,
         }}
         textContainerStyle={{
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
         }}
         textInputStyle={{
           height: 50,
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           color: isDark ? '#fff' : '#000',
           fontSize: 16,
         }}
@@ -318,7 +318,7 @@ export default function PostDetails({navigation, route}) {
           color: isDark ? '#fff' : '#000',
         }}
         flagButtonStyle={{
-          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     color: '#000',
-    width: '100%',
+    width: Width * 0.8,
     height: 50,
     padding: 10,
     margin: 4,

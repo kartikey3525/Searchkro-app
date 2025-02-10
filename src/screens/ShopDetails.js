@@ -4,7 +4,6 @@ import {
   TextInput,
   StyleSheet,
   Text,
-  FlatList,
   TouchableOpacity,
   Image,
   ScrollView,
@@ -185,18 +184,14 @@ export default function ShopDetails({navigation}) {
           Product categories
         </Text>
         <View style={{width: '95%', marginLeft: 14}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            horizontal={true}
-            showsVerticalScrollIndicator={false}
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
+            style={{marginTop: '2%', padding: 5}}>
+            {recentPostList.map((item, index) => (
+              <View key={item.id}>{renderRectangleList(item, index)}</View>
+            ))}
+          </ScrollView>
         </View>
 
         <TouchableOpacity
@@ -378,15 +373,13 @@ export default function ShopDetails({navigation}) {
         </TouchableOpacity>
 
         <View style={{height: 440}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-            }}
-            showsHorizontalScrollIndicator={false}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={render2RectangleList}
-          />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{marginTop: '2%'}}>
+            {recentPostList.map((item, index) => (
+              <View key={item.id}>{render2RectangleList(item, index)}</View>
+            ))}
+          </ScrollView>
         </View>
 
         <Text
@@ -395,6 +388,7 @@ export default function ShopDetails({navigation}) {
             {
               alignSelf: 'flex-start',
               fontSize: 18,
+              color: isDark ? 'white' : 'black',
               left: 25,
               marginTop: 5,
               marginBottom: 0,
@@ -403,21 +397,31 @@ export default function ShopDetails({navigation}) {
           Photos
         </Text>
         <View style={{width: '95%', marginLeft: 10}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            scrollEnabled={false}
-            numColumns={3}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={renderPhotosList}
-          />
+          <View style={{marginTop: '2%', padding: 5}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}>
+              {Array.from(
+                {length: Math.ceil(recentPostList.length / 3)},
+                (_, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    {recentPostList
+                      .slice(rowIndex * 3, rowIndex * 3 + 3)
+                      .map((item, index) => (
+                        <View key={item.id} style={{flex: 1, margin: 5}}>
+                          {renderPhotosList(item, index)}
+                        </View>
+                      ))}
+                  </View>
+                ),
+              )}
+            </ScrollView>
+          </View>
         </View>
       </View>
     </View>
@@ -435,23 +439,22 @@ export default function ShopDetails({navigation}) {
               left: 25,
               marginTop: 5,
               marginBottom: 0,
+              color: isDark ? 'white' : 'black',
             },
           ]}>
           Product categories
         </Text>
         <View style={{width: '95%', marginLeft: 14}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            horizontal={true}
-            showsVerticalScrollIndicator={false}
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
+            style={{marginTop: '2%', padding: 5}}>
+            {recentPostList.map((item, index) => (
+              <View key={item.id} style={{marginRight: 10}}>
+                {renderRectangleList(item, index)}
+              </View>
+            ))}
+          </ScrollView>
         </View>
 
         <TouchableOpacity
@@ -479,6 +482,7 @@ export default function ShopDetails({navigation}) {
               alignSelf: 'flex-start',
               fontSize: 18,
               left: 25,
+              color: isDark ? 'white' : 'black',
               marginTop: 5,
               marginBottom: 0,
             },
@@ -544,6 +548,7 @@ export default function ShopDetails({navigation}) {
                   {
                     alignSelf: 'flex-start',
                     fontSize: 14,
+                    color: isDark ? 'white' : 'black',
                     marginTop: 5,
                     marginBottom: 0,
                   },
@@ -565,6 +570,7 @@ export default function ShopDetails({navigation}) {
                 {
                   alignSelf: 'flex-start',
                   fontSize: 12,
+                  color: isDark ? 'white' : 'black',
                   color: 'grey',
                   marginTop: 10,
                   marginBottom: 0,
@@ -579,6 +585,7 @@ export default function ShopDetails({navigation}) {
                 {
                   alignSelf: 'flex-start',
                   fontSize: 14,
+                  color: isDark ? 'white' : 'black',
                   marginTop: 10,
                   marginBottom: 0,
                 },
@@ -608,6 +615,7 @@ export default function ShopDetails({navigation}) {
             {
               alignSelf: 'flex-start',
               fontSize: 14,
+              color: isDark ? 'white' : 'black',
               marginTop: 10,
               marginLeft: 25,
               marginBottom: 0,
@@ -631,16 +639,14 @@ export default function ShopDetails({navigation}) {
           </Text>
         </TouchableOpacity>
 
-        <View style={{height: 440}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-            }}
-            showsHorizontalScrollIndicator={false}
-            data={recentPostList}
-            keyExtractor={item => item.id}
-            renderItem={render2RectangleList}
-          />
+        <View style={{height: 440, marginTop: '2%'}}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {recentPostList.map((item, index) => (
+              <View key={item.id} style={{marginBottom: 10}}>
+                {render2RectangleList(item, index)}
+              </View>
+            ))}
+          </ScrollView>
         </View>
       </View>
     </View>
@@ -654,6 +660,7 @@ export default function ShopDetails({navigation}) {
           {
             alignSelf: 'flex-start',
             fontSize: 18,
+            color: isDark ? 'white' : 'black',
             left: 25,
             marginTop: 5,
             marginBottom: 0,
@@ -662,21 +669,31 @@ export default function ShopDetails({navigation}) {
         Photos
       </Text>
       <View style={{width: '100%', marginLeft: 14}}>
-        <FlatList
-          style={{
-            marginTop: '2%',
-            padding: 5,
-          }}
-          key={flatListKey}
-          horizontal={false}
-          scrollEnabled={false}
-          numColumns={3}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          data={recentPostList}
-          keyExtractor={item => item.id}
-          renderItem={renderPhotosList}
-        />
+        <View style={{marginTop: '2%', padding: 5}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}>
+            {Array.from(
+              {length: Math.ceil(recentPostList.length / 3)},
+              (_, rowIndex) => (
+                <View
+                  key={rowIndex}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  {recentPostList
+                    .slice(rowIndex * 3, rowIndex * 3 + 3)
+                    .map((item, index) => (
+                      <View key={item.id} style={{flex: 1, margin: 5}}>
+                        {renderPhotosList(item, index)}
+                      </View>
+                    ))}
+                </View>
+              ),
+            )}
+          </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -688,9 +705,7 @@ export default function ShopDetails({navigation}) {
     photos: Photos,
   });
 
-  const flatListKey = `flat-list-${numColumns}`;
-
-  const renderRectangleList = ({item, index}) => {
+  const renderRectangleList = (item, index) => {
     return (
       <TouchableOpacity
         style={{
@@ -698,7 +713,7 @@ export default function ShopDetails({navigation}) {
           marginBottom: 15,
           alignItems: 'center',
         }}
-        onPress={() => navigation.navigate('details', {item: item})}>
+        onPress={() => navigation.navigate('details', {item})}>
         <View
           style={[
             styles.rectangle,
@@ -721,11 +736,11 @@ export default function ShopDetails({navigation}) {
     );
   };
 
-  const render2RectangleList = ({item, index}) => {
+  const render2RectangleList = (item, index) => {
     return (
       <Pressable
         style={{
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderBottomWidth: 1,
           borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
         }}
@@ -736,7 +751,7 @@ export default function ShopDetails({navigation}) {
             {
               overflow: 'hidden',
               flexDirection: 'row',
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
             },
           ]}>
           <View
@@ -771,9 +786,7 @@ export default function ShopDetails({navigation}) {
                 style={[
                   styles.modalContent,
                   {
-                    backgroundColor: isDark ? 'black' : 'white',
-                    borderWidth: 1,
-                    borderColor: 'rgb(255, 255, 255)',
+                    backgroundColor: isDark ? '#121212' : 'white',
                   },
                 ]}>
                 <TouchableOpacity
@@ -998,7 +1011,7 @@ export default function ShopDetails({navigation}) {
     );
   };
 
-  const renderPhotosList = ({item, index}) => {
+  const renderPhotosList = (item, index) => {
     return (
       <View
         style={{

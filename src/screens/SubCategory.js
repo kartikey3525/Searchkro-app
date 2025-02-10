@@ -155,12 +155,9 @@ export default function SubCategory({navigation, route}) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.74, flexGrow: 1}}>
-          <FlatList
-            showsHorizontalScrollIndicator={false} // Hides the horizontal scrollbar
-            data={route.params.item}
-            keyExtractor={item => item.id.toString()}
-            renderItem={rendersquareList}
-          />
+          {route.params.item.map((item, index) => (
+            <View key={item.id}>{rendersquareList({item, index})}</View>
+          ))}
         </ScrollView>
       </View>
     </View>

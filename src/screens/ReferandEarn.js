@@ -87,7 +87,7 @@ export default function ReferandEarn({navigation}) {
           styles.rectangle2,
           {
             flexDirection: 'row',
-            backgroundColor: isDark ? '#121212' : '#fff',
+            backgroundColor: isDark ? '#000' : '#fff',
           },
         ]}>
         <Image

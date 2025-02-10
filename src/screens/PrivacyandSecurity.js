@@ -26,8 +26,7 @@ export default function PrivacyandSecurity({navigation}) {
     setModalVisible(false);
   };
   return (
-    <View
-      style={[styles.screen, {backgroundColor: isDark ? '#121212' : '#fff'}]}>
+    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <View style={styles.header}>
         <Entypo
           onPress={() => navigation.goBack()}

@@ -451,7 +451,7 @@ export default function ProfileSettings({navigation, route}) {
           style={[
             styles.textInput,
             {
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               color: isDark ? '#fff' : '#000',
             },
           ]}
@@ -509,7 +509,7 @@ export default function ProfileSettings({navigation, route}) {
             {
               height: 93,
               color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
             },
           ]}
           onChangeText={setdescription}
@@ -562,11 +562,11 @@ export default function ProfileSettings({navigation, route}) {
           borderRadius: 10,
         }}
         textContainerStyle={{
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
         }}
         textInputStyle={{
           height: 50,
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           color: isDark ? '#fff' : '#000',
           fontSize: 16,
         }}
@@ -574,7 +574,7 @@ export default function ProfileSettings({navigation, route}) {
           color: isDark ? '#fff' : '#000',
         }}
         flagButtonStyle={{
-          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
@@ -631,7 +631,7 @@ export default function ProfileSettings({navigation, route}) {
             style={[
               styles.textInput,
               {
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
                 color: isDark ? '#fff' : '#000',
               },
             ]}
@@ -659,7 +659,7 @@ export default function ProfileSettings({navigation, route}) {
             style={[
               styles.textInput,
               {
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
                 color: isDark ? '#fff' : '#000',
               },
             ]}

@@ -24,7 +24,7 @@ const Dropdown = ({
       style={[
         half ? styles.singleInputContainer : styles.multiInputContainer,
         {
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderColor: isDark ? '#333' : 'rgba(173, 173, 173, 0.31)',
         },
       ]}

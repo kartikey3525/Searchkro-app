@@ -403,43 +403,43 @@ export default function HomeScreen({navigation}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  color: isDark ? '#fff' : '#000',
+                  marginTop: 2,
+                }}>
+                {errorMessage || 'Your Locaiton'}
+              </Text>
+
               {location ? (
                 <Text
                   numberOfLines={1}
                   style={{
                     fontSize: 12,
                     fontWeight: 'bold',
+                    width: Width * 0.53,
                     marginTop: 6,
-                    width: '100%',
                     color: isDark ? '#fff' : '#000',
                   }}>
                   Latitude: {location.latitude}, Longitude: {location.longitude}
                 </Text>
               ) : (
                 <Text
+                  numberOfLines={1}
                   style={{
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                    color: isDark ? '#fff' : '#000',
-                    marginTop: 2,
+                    fontSize: 13,
+                    fontWeight: '500',
+                    marginTop: 0,
+                    width: Width * 0.53,
+                    color: isDark
+                      ? 'rgba(252, 252, 252, 0.4)'
+                      : 'rgba(0, 0, 0, 0.4)',
                   }}>
-                  {errorMessage || 'Your Locaiton'}
+                  {errorMessage || '6391 Elgin St. Celina, Delaware 10299...'}
                 </Text>
               )}
-
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: 13,
-                  fontWeight: '500',
-                  marginTop: 0,
-                  width: Width * 0.53,
-                  color: isDark
-                    ? 'rgba(252, 252, 252, 0.4)'
-                    : 'rgba(0, 0, 0, 0.4)',
-                }}>
-                6391 Elgin St. Celina, Delaware 10299...
-              </Text>
             </View>
           </View>
 
@@ -447,7 +447,7 @@ export default function HomeScreen({navigation}) {
             <TouchableOpacity
               onPress={() => navigation.navigate('Notification')}
               style={{
-                backgroundColor: 'rgba(207, 207, 207, 0.12)',
+                backgroundColor: isDark ? '#000' : 'rgba(0, 0, 0, 0.12)',
                 height: 40,
                 width: '11%',
                 alignSelf: 'center',
@@ -483,7 +483,7 @@ export default function HomeScreen({navigation}) {
           <TouchableOpacity
             onPress={() => navigation.navigate('messages')}
             style={{
-              backgroundColor: 'rgba(207, 207, 207, 0.12)',
+              backgroundColor: isDark ? '#000' : 'rgba(0, 0, 0, 0.12)',
               height: 40,
               width: '11%',
               alignSelf: 'center',

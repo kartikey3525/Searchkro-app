@@ -32,7 +32,11 @@ export default function ProfileScreen({navigation}) {
   return (
     <View style={[styles.container]}>
       <Image
-        source={require('../assets/profilebg.png')}
+        source={
+          isDark
+            ? require('../assets/profilebg-dark.png')
+            : require('../assets/profilebg.png')
+        }
         style={{width: Width, height: Height, bottom: 20}}
       />
 
@@ -889,16 +893,25 @@ export default function ProfileScreen({navigation}) {
         transparent={modalVisible2}
         visible={modalVisible2}
         animationType="slide">
-        <View style={styles.modalContainer3}>
-          <View style={styles.modalContent3}>
+        <View style={[styles.modalContainer3]}>
+          <View
+            style={[
+              styles.modalContent3,
+              {backgroundColor: isDark ? '#000' : '#fff'},
+            ]}>
             <Text
               style={[
                 styles.modalText,
-                {fontWeight: 'bold', marginBottom: 10, fontSize: 20},
+                {
+                  fontWeight: 'bold',
+                  marginBottom: 10,
+                  fontSize: 20,
+                  color: isDark ? '#fff' : '#000',
+                },
               ]}>
               Log out ?
             </Text>
-            <Text style={styles.modalText}>
+            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
               Are you sure you want to log out your account ?
             </Text>
             <View style={styles.modalButtons}>
@@ -906,8 +919,15 @@ export default function ProfileScreen({navigation}) {
                 onPress={() => {
                   setModalVisible2(false);
                 }}
-                style={styles.cancelButton}>
-                <Text style={[styles.buttonText, {color: 'black'}]}>
+                style={[
+                  styles.cancelButton,
+                  {backgroundColor: isDark ? '#121212' : '#fff'},
+                ]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {color: isDark ? '#fff' : 'black'},
+                  ]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
