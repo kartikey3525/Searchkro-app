@@ -150,7 +150,7 @@ export default function RatedScreen({navigation}) {
             overflow: 'hidden',
             flexDirection: 'row',
             height: 100,
-            backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+            backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
           },
         ]}>
         <Image
@@ -420,7 +420,7 @@ export default function RatedScreen({navigation}) {
         </>
       )}
       <TouchableOpacity
-        style={[styles.blueBotton, {margin: '15%'}]}
+        style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
         onPress={() => navigation.navigate('shopdetails')}>
         <Text
           style={[
@@ -441,7 +441,7 @@ export default function RatedScreen({navigation}) {
 const styles = StyleSheet.create({
   screen: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    width: '100%',
   },
   addSelector: {
     width: '20%',

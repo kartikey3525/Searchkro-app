@@ -308,7 +308,7 @@ export default function Login({navigation}) {
 
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
-        <Text style={[{textAlign: 'left', color: '#9DA49E', margin: 5}]}>
+        <Text style={[{textAlign: 'left', color: '#9DA49E', margin: 10}]}>
           OR
         </Text>
         <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   blueBotton: {
     backgroundColor: '#00AEEF',
     width: '90%',
-    height: Height * 0.07,
+    height: Height * 0.06,
     borderRadius: 10,
     margin: 5,
     // marginBottom: 20,
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   whiteBotton: {
     backgroundColor: '#fff',
     width: '90%',
-    height: Height * 0.07,
+    height: Height * 0.06,
     borderRadius: 10,
     margin: 5,
     flexDirection: 'row',

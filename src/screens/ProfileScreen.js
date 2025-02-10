@@ -60,7 +60,7 @@ export default function ProfileScreen({navigation}) {
                 {
                   color: isDark ? 'white' : 'black',
                   fontSize: 24,
-                  marginTop: '10%',
+                  marginTop: '4%',
                   alignSelf: 'flex-start',
                   width: '100%',
                   margin: 10,
@@ -722,7 +722,10 @@ export default function ProfileScreen({navigation}) {
             <View
               style={{
                 flexDirection: 'row',
-                backgroundColor: 'rgba(243, 243, 243, 1)',
+                backgroundColor: isDark
+                  ? 'rgba(25, 25, 25, 1)'
+                  : 'rgba(243, 243, 243, 1)',
+
                 width: '100%',
                 height: 5,
               }}
@@ -771,12 +774,10 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.11)'
-                      : 'rgba(255, 255, 255, 0.11)',
+                    borderColor: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                     backgroundColor: isDark
-                      ? 'rgb(255, 255, 255)'
-                      : 'rgb(0, 0, 0)',
+                      ? 'rgb(0, 0, 0)'
+                      : 'rgb(255, 255, 255)',
                   }}></View>
               )}
               <Text
@@ -836,12 +837,10 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.11)'
-                      : 'rgba(255, 255, 255, 0.11)',
+                    borderColor: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                     backgroundColor: isDark
-                      ? 'rgb(255, 255, 255)'
-                      : 'rgb(0, 0, 0)',
+                      ? 'rgb(0, 0, 0)'
+                      : 'rgb(255, 255, 255)',
                   }}></View>
               )}
               <Text
@@ -901,12 +900,10 @@ export default function ProfileScreen({navigation}) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2.3,
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.11)'
-                      : 'rgba(255, 255, 255, 0.11)',
+                    borderColor: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                     backgroundColor: isDark
-                      ? 'rgb(255, 255, 255)'
-                      : 'rgb(0, 0, 0)',
+                      ? 'rgb(0, 0, 0)'
+                      : 'rgb(255, 255, 255)',
                   }}></View>
               )}
               <Text
@@ -932,7 +929,16 @@ export default function ProfileScreen({navigation}) {
         transparent={modalVisible2}
         visible={modalVisible2}
         animationType="slide">
-        <View style={[styles.modalContainer3]}>
+        <Pressable
+          style={[
+            styles.modalContainer3,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.35)'
+                : 'rgba(0, 0, 0, 0.3)',
+            },
+          ]}
+          onPress={() => setModalVisible2(false)}>
           <View
             style={[
               styles.modalContent3,
@@ -960,7 +966,11 @@ export default function ProfileScreen({navigation}) {
                 }}
                 style={[
                   styles.cancelButton,
-                  {backgroundColor: isDark ? '#121212' : '#fff'},
+                  {
+                    backgroundColor: isDark ? '#121212' : '#fff',
+                    borderColor: isDark ? null : '#000',
+                    borderWidth: 1,
+                  },
                 ]}>
                 <Text
                   style={[
@@ -977,7 +987,7 @@ export default function ProfileScreen({navigation}) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </View>
   );

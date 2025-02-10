@@ -449,7 +449,7 @@ export default function ShopScreen({navigation}) {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={{height: Height * 0.8, flexGrow: 1}}>
+          style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
           {recentPostList.map((item, index) => (
             <View key={item.id}>{render2RectangleList({item, index})}</View>
           ))}
