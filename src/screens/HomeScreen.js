@@ -447,13 +447,15 @@ export default function HomeScreen({navigation}) {
             <TouchableOpacity
               onPress={() => navigation.navigate('Notification')}
               style={{
-                backgroundColor: isDark ? '#000' : 'rgba(0, 0, 0, 0.12)',
+                backgroundColor: isDark ? '#000' : 'rgba(177, 177, 177, 0.14)',
                 height: 40,
                 width: '11%',
                 alignSelf: 'center',
                 borderRadius: 10,
                 borderWidth: 1,
-                borderColor: isDark ? 'rgb(149, 149, 149)' : 'rgb(0, 0, 0)',
+                borderColor: isDark
+                  ? 'rgb(149, 149, 149)'
+                  : 'rgb(255, 255, 255)',
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginRight: 6,
@@ -483,12 +485,12 @@ export default function HomeScreen({navigation}) {
           <TouchableOpacity
             onPress={() => navigation.navigate('messages')}
             style={{
-              backgroundColor: isDark ? '#000' : 'rgba(0, 0, 0, 0.12)',
+              backgroundColor: isDark ? '#000' : 'rgba(177, 177, 177, 0.14)',
               height: 40,
               width: '11%',
               alignSelf: 'center',
               borderWidth: 1,
-              borderColor: isDark ? 'rgb(149, 149, 149)' : 'rgb(0, 0, 0)',
+              borderColor: isDark ? 'rgb(149, 149, 149)' : 'rgb(255, 255, 255)',
               borderRadius: 10,
               justifyContent: 'center',
               alignItems: 'center',

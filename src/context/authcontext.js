@@ -21,6 +21,7 @@ const AuthProvider = ({children}) => {
 
   const [recentPosts, setrecentPosts] = useState([]);
   const [nearbyPosts, setnearbyPosts] = useState([]);
+  const [filteredPosts, setfilteredPosts] = useState([]);
 
   const [userdata, setUserdata] = useState([]);
 
@@ -214,6 +215,42 @@ const AuthProvider = ({children}) => {
       const NearbyPosts = response.data.data;
       setnearbyPosts(NearbyPosts);
       // console.log('NearbyPosts:', NearbyPosts);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // console.log('Error 107', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109', 'Failed to load categories');
+      }
+    }
+  };
+
+  const getFilteredPosts = async categories => {
+    try {
+      const payload = {
+        distance: 5,
+        rating: '',
+        topRated: '',
+        key: '',
+        categories: categories,
+        myPost: false, // true, false
+        userId: '',
+      };
+
+      const headers = {
+        Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/buyer/post/allPosts`,
+        payload,
+        {headers},
+      );
+
+      // console.log('Response:', response.data.data);
+
+      const FilteredPosts = response.data.data;
+      setfilteredPosts(FilteredPosts);
+      // console.log('FilteredPosts:', FilteredPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // console.log('Error 107', error.response?.data || 'No error response');
@@ -420,6 +457,8 @@ const AuthProvider = ({children}) => {
         posts,
         setisposting,
         isposting,
+        getFilteredPosts,
+        filteredPosts,
       }}>
       {children}
     </AuthContext.Provider>

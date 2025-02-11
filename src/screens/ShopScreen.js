@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -24,14 +24,22 @@ const Height = Dimensions.get('window').height;
 import {ScrollView} from 'react-native-gesture-handler';
 import {Slider} from '@miblanchard/react-native-slider';
 import RatingButtons from '../components/RatingButtons';
+import {useIsFocused} from '@react-navigation/native';
+import {AuthContext} from '../context/authcontext';
 
-export default function ShopScreen({navigation}) {
+export default function ShopScreen({navigation, route}) {
   const {theme} = useContext(ThemeContext);
+  const isFocused = useIsFocused();
+
   const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState([0, 2]);
-  const [value1, setValue1] = useState();
-  const [value2, setValue2] = useState();
+  const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
+
+  useEffect(() => {
+    getFilteredPosts(route?.params?.selectedcategory);
+    console.log('get fil post', route?.params?.selectedcategory);
+  }, [isFocused]);
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -47,6 +55,11 @@ export default function ShopScreen({navigation}) {
     {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
+
+  const formatDate = timestamp => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString(); // Returns only the date
+  };
 
   const render2RectangleList = ({item, index}) => {
     return (
@@ -67,7 +80,8 @@ export default function ShopScreen({navigation}) {
             },
           ]}>
           <Image
-            source={item.img}
+            // source={item.img}
+            source={{uri: item.images[0]}}
             style={{
               width: '30%',
               height: '90%',
@@ -112,7 +126,7 @@ export default function ShopScreen({navigation}) {
                     color: isDark ? '#fff' : '#000',
                   },
                 ]}>
-                4.5
+                {item.rating.averageRating}
               </Text>
               <Rating
                 type="star"
@@ -120,7 +134,7 @@ export default function ShopScreen({navigation}) {
                 isDisabled={true}
                 readonly
                 ratingBackgroundColor="#ccc"
-                startingValue={3}
+                startingValue={item.rating.averageRating}
                 imageSize={15}
               />
             </View>
@@ -158,7 +172,7 @@ export default function ShopScreen({navigation}) {
                     left: 5,
                   },
                 ]}>
-                dddddddddddddddddddddddddddddddddddddddddddddd
+                {formatDate(item.createdAt)}
               </Text>
             </View>
 
@@ -194,7 +208,7 @@ export default function ShopScreen({navigation}) {
                     left: 5,
                   },
                 ]}>
-                dddddddddddddddddddddddddddddddddddddddddddddd
+                {item.location}
               </Text>
             </View>
 
@@ -218,7 +232,7 @@ export default function ShopScreen({navigation}) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                onPress={() => Linking.openURL(`tel:${8860315531}`)}>
+                onPress={() => Linking.openURL(`tel:${item.contactNumber}`)}>
                 <Ionicons name={'call'} size={16} color="rgba(7, 201, 29, 1)" />
               </Pressable>
               <Pressable
@@ -450,7 +464,7 @@ export default function ShopScreen({navigation}) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
-          {recentPostList.map((item, index) => (
+          {filteredPosts.map((item, index) => (
             <View key={item.id}>{render2RectangleList({item, index})}</View>
           ))}
         </ScrollView>

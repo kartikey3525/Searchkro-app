@@ -495,7 +495,7 @@ export default function SellerProfile({navigation, route}) {
               width: '42%',
               borderColor: isDark ? 'rgb(97, 97, 97)' : 'rgb(108, 108, 108)',
               marginLeft: 20,
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
             },
           ]}>
           <TextInput
@@ -504,7 +504,7 @@ export default function SellerProfile({navigation, route}) {
               styles.textInput,
               {
                 color: isDark ? '#fff' : '#000',
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               },
             ]}
             onChangeText={setEmail}
@@ -569,11 +569,11 @@ export default function SellerProfile({navigation, route}) {
           borderRadius: 10,
         }}
         textContainerStyle={{
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
         }}
         textInputStyle={{
           height: 50,
-          backgroundColor: isDark ? '#121212' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           color: isDark ? '#fff' : '#000',
           fontSize: 16,
         }}
@@ -581,7 +581,7 @@ export default function SellerProfile({navigation, route}) {
           color: isDark ? '#fff' : '#000',
         }}
         flagButtonStyle={{
-          backgroundColor: isDark ? '#1E1E1E' : '#fff',
+          backgroundColor: isDark ? '#000' : '#fff',
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
@@ -696,7 +696,7 @@ export default function SellerProfile({navigation, route}) {
             style={[
               styles.textInput,
               {
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
                 color: isDark ? '#fff' : '#000',
               },
             ]}
@@ -724,7 +724,7 @@ export default function SellerProfile({navigation, route}) {
             style={[
               styles.textInput,
               {
-                backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
                 color: isDark ? '#fff' : '#000',
               },
             ]}
@@ -779,7 +779,7 @@ export default function SellerProfile({navigation, route}) {
           style={[
             styles.textInput,
             {
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               color: isDark ? '#fff' : '#000',
             },
           ]}
@@ -862,7 +862,7 @@ export default function SellerProfile({navigation, route}) {
           style={[
             styles.textInput,
             {
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               color: isDark ? '#fff' : '#000',
             },
           ]}
@@ -920,7 +920,7 @@ export default function SellerProfile({navigation, route}) {
             {
               height: 93,
               color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
             },
           ]}
           onChangeText={setdescription}

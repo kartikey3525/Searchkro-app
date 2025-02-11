@@ -16,12 +16,17 @@ import {ThemeContext} from '../context/themeContext';
 
 import {ScrollView} from 'react-native-gesture-handler';
 import {AuthContext} from '../context/authcontext';
+import {useIsFocused} from '@react-navigation/native';
 
 export default function SubCategory({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const {isposting} = useContext(AuthContext);
+  const isFocused = useIsFocused();
 
+  const {isposting} = useContext(AuthContext);
+  useEffect(() => {
+    console.log('get fil post', route?.params?.selectedcategory);
+  }, [isFocused]);
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'men', img: require('../assets/phone.png')},
     {id: 2, title: 'women', img: require('../assets/Laptop.png')},
@@ -44,17 +49,27 @@ export default function SubCategory({navigation, route}) {
           height: Height * 0.08,
           justifyContent: 'flex-start',
         }}
-        onPress={() =>
-          !isposting
-            ? navigation.navigate('Insubcategory', {
+        onPress={() => {
+          if (!isposting) {
+            if (item.subCategories && item.subCategories.length > 0) {
+              // Navigate to Insubcategory if subCategories exist
+              navigation.navigate('Insubcategory', {
                 item: item.subCategories,
                 selectedcategory: route?.params?.selectedcategory,
-              })
-            : navigation.navigate('postdetails', {
-                item: item,
+              });
+            } else {
+              // Navigate to shop if there are no subcategories
+              navigation.navigate('shopScreen', {
                 selectedcategory: route?.params?.selectedcategory,
-              })
-        }>
+              });
+            }
+          } else {
+            navigation.navigate('postdetails', {
+              item: item,
+              selectedcategory: route?.params?.selectedcategory,
+            });
+          }
+        }}>
         <Text
           style={{
             fontSize: 17,
