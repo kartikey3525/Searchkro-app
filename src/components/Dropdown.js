@@ -32,7 +32,7 @@ const Dropdown = ({
       placeholderStyle={{
         fontSize: 16,
         fontWeight: '400',
-        color: isDark ? '#E0E0E0' : '#000',
+        color: isDark ? '#fff' : '#000',
       }}
       dropDownContainerStyle={[
         styles.dropdownContainer,
@@ -54,8 +54,8 @@ const Dropdown = ({
       setOpen={setOpen}
       setItems={setItems}
       textStyle={{color: isDark ? 'white' : 'black'}}
-      ArrowDownIconStyle={{tintColor: isDark ? 'white' : 'black'}} // Fix for arrow color
-      ArrowUpIconStyle={{tintColor: isDark ? 'white' : 'black'}} // Fix for arrow color
+      ArrowDownIconStyle={{tintColor: isDark ? 'white' : 'black'}}
+      ArrowUpIconStyle={{tintColor: isDark ? 'white' : 'black'}}
     />
   );
 };

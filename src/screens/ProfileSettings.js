@@ -31,6 +31,7 @@ import Feather from 'react-native-vector-icons/Feather';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchImageLibrary} from 'react-native-image-picker';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -141,8 +142,7 @@ export default function ProfileSettings({navigation, route}) {
     }
   };
   const getLocation = async () => {
-    // Check permissions for Android
-    if (Platform.OS === 'android') {
+    try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
@@ -155,23 +155,41 @@ export default function ProfileSettings({navigation, route}) {
       );
 
       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        setErrorMessage('Location permission denied');
+        Alert.alert('Permission Denied', 'Location access is required.');
         return;
       }
-    }
 
-    // Get the location
-    try {
+      // Get location with a longer timeout and fallback options
       Geolocation.getCurrentPosition(
         position => {
           const {latitude, longitude} = position.coords;
           setLocation({latitude, longitude});
+          console.log('User location:', latitude, longitude);
         },
         error => {
           console.error('Location error:', error);
-          //   Alert.alert('Error', 'Unable to fetch location.');
+
+          // Specific error handling
+          switch (error.code) {
+            case 1:
+              Alert.alert('Permission Denied', 'Enable location permission.');
+              break;
+            case 2:
+              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
+              break;
+            case 3:
+              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
+              break;
+            default:
+              Alert.alert('Error', error.message);
+          }
         },
-        {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
+        {
+          enableHighAccuracy: false, // Try setting false if high accuracy fails
+          timeout: 60000, // Increase timeout from 35s to 60s
+          maximumAge: 10000,
+          distanceFilter: 10, // Get location updates every 10 meters
+        },
       );
     } catch (error) {
       console.error('Error fetching location:', error);
@@ -192,7 +210,6 @@ export default function ProfileSettings({navigation, route}) {
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
-    email: '',
     description: '',
     opensAt: '',
     closeAt: '',
@@ -200,11 +217,8 @@ export default function ProfileSettings({navigation, route}) {
     location: '',
     media: '',
     selectedCategories: '',
-    bussinessAddress: '',
     ownerName: '',
     shopName: '',
-    selectedScale: '',
-    selectedAvailabity: '',
   });
 
   const validateInputs = () => {
@@ -213,7 +227,6 @@ export default function ProfileSettings({navigation, route}) {
 
     let valid = true;
     let newErrors = {
-      email: '',
       description: '',
       opensAt: '',
       closeAt: '',
@@ -221,11 +234,8 @@ export default function ProfileSettings({navigation, route}) {
       location: '',
       media: '',
       selectedCategories: '',
-      bussinessAddress: '',
       ownerName: '',
       shopName: '',
-      selectedScale: '',
-      selectedAvailabity: '',
     };
 
     // Validate Email or Phone Number
@@ -289,7 +299,6 @@ export default function ProfileSettings({navigation, route}) {
 
   const handlePress = async () => {
     setErrors({
-      email: '',
       description: '',
       opensAt: '',
       closeAt: '',
@@ -297,11 +306,8 @@ export default function ProfileSettings({navigation, route}) {
       location: '',
       media: '',
       selectedCategories: '',
-      bussinessAddress: '',
       ownerName: '',
       shopName: '',
-      selectedScale: '',
-      selectedAvailabity: '',
     });
     if (!validateInputs()) return;
 
@@ -309,19 +315,15 @@ export default function ProfileSettings({navigation, route}) {
     try {
       console.log('Success', 'Login successful!');
       navigation.navigate('uploadimage', {
-        email: email,
-        description: description,
-        opensAt: opensAt,
-        closeAt: closeAt,
-        phone: phone,
-        selectedCategories: selectedCategories,
-        location: location,
+        description: '',
+        opensAt: '',
+        closeAt: '',
+        phone: '',
+        location: '',
         media: '',
-        bussinessAddress: '',
+        selectedCategories: '',
         ownerName: '',
         shopName: '',
-        selectedScale: '',
-        selectedAvailabity: '',
       });
     } catch (error) {
       //   Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -337,36 +339,7 @@ export default function ProfileSettings({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-          marginBottom: 20,
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              textAlign: 'center',
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-              width: Width * 0.75,
-            },
-          ]}>
-          Profile
-        </Text>
-      </View>
+      <Header header={'Profile'} />
 
       <Text
         style={[

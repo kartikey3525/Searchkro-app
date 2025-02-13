@@ -168,7 +168,7 @@ export default function ForgetPassword({navigation}) {
           onChangeText={setEmail}
           placeholder="enter your email address"
           mode="outlined"
-          placeholderTextColor={'black'}
+          placeholderTextColor={isDark ? '#fff' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />

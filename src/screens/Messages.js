@@ -14,6 +14,8 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
 import {ThemeContext} from '../context/themeContext';
+import SearchBar from '../components/SearchBar';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -207,54 +209,10 @@ export default function Messages({navigation}) {
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20}}
-        />
-        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
-          New message
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 15,
-        }}>
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDark ? '#121212' : '#fff',
-              borderColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
-            },
-          ]}>
-          <Image
-            source={require('../assets/search-icon.png')}
-            style={{
-              width: 20,
-              height: 20,
-              alignSelf: 'center',
-              left: 10,
-            }}
-            resizeMode="contain"
-          />
-          <TextInput
-            // value={'text'}
-            style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
-            // onChangeText={setText}
-            placeholderTextColor={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-            placeholder="Search"
-            autoCapitalize="none"
-            onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-          />
-        </View>
-      </View>
+      <Header header={'New message'} />
+
+      <SearchBar placeholder={'Search '} />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {recentPostList.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>

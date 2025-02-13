@@ -7,12 +7,13 @@ import ProfileScreen from '../screens/ProfileScreen';
 import FloatingButton from '../components/FloatingButton';
 import NotificationScreen from '../screens/NotificationScreen';
 import CategoryScreen from '../screens/CategoryScreen';
-import {Image, View} from 'react-native';
+import {Dimensions, Image, View} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 import Preferences from '../screens/Preferences';
 import PostHistory from '../screens/PostHistory';
 import SellerProfile from '../screens/SellerProfile';
-
+const Width = Dimensions.get('window').width;
+const Height = Dimensions.get('window').height;
 const Tab = createBottomTabNavigator();
 
 const BottomTabs = () => {
@@ -33,14 +34,14 @@ const BottomTabs = () => {
         },
         tabBarStyle: {
           position: 'absolute',
-          height: '7.4%',
+          height: '8%',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           backgroundColor: isDark ? '#000' : '#ffffff',
           elevation: 5,
         },
         tabBarIconStyle: {
-          marginTop: 1,
+          marginTop: 5,
         },
         tabBarActiveTintColor: 'rgba(0, 174, 239, 1)', // Active label color
         tabBarInactiveTintColor: 'gray', // Inactive label color
@@ -132,6 +133,7 @@ const BottomTabs = () => {
           name="Notification"
           component={NotificationScreen}
           options={{
+            tabBarStyle: {display: 'none'}, // Hides the bottom tab bar
             tabBarIcon: ({focused, size}) => (
               <Image
                 source={

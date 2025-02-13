@@ -22,6 +22,7 @@ const Height = Dimensions.get('window').height;
 import {useContext} from 'react';
 import DatePicker from 'react-native-date-picker';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 // import PhoneInput from 'react-phone-number-input/input';
 // import PhoneTextInput from '../components/PhoneTextInput';
@@ -128,36 +129,7 @@ export default function EditProfile({navigation}) {
         styles.screen,
         {backgroundColor: isDark ? 'black' : 'white'},
       ]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          marginTop: 10,
-          justifyContent: 'flex-start',
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            {
-              fontFamily: 'Poppins-Bold',
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              marginLeft: '25%',
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)',
-            },
-          ]}>
-          Edit profile
-        </Text>
-      </View>
+      <Header header={'Edit profile '} />
 
       <View
         style={[

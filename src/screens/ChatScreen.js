@@ -117,7 +117,7 @@ const ChatScreen = ({navigation, route}) => {
                 color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
               },
             ]}>
-            {route?.params ? route?.params?.item.title : 'seller name'}
+            {route?.params ? route?.params?.item?.title : 'seller name'}
           </Text>
           <Text
             numberOfLines={2}

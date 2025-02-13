@@ -29,18 +29,21 @@ import {BarChart, YAxis, Grid} from 'react-native-svg-charts';
 import {G, Rect} from 'react-native-svg'; // Use G and Rect for custom SVG if necessary
 import * as scale from 'd3-scale';
 import HorizontalRatingButtons from '../components/HorizontalRating';
+import Header from '../components/Header';
 
-export default function ShopDetails({navigation}) {
+export default function ShopDetails({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [numColumns, setNumColumns] = useState(4);
+  const [Data, setData] = useState([]);
   const isFocused = useIsFocused();
   const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
     useContext(AuthContext);
 
   useEffect(() => {
-    // getCategories();
+    // getCategories();clh
+    setData(route?.params?.item);
+    // console.log('route data', route?.params?.item);
   }, [isFocused]);
 
   const data = [
@@ -132,8 +135,7 @@ export default function ShopDetails({navigation}) {
               marginBottom: 0,
             },
           ]}>
-          Chauhan Market Rd, near Fortis Hospital, Rasoolpur Nawada, Rasoolpur,
-          Sector 62, Navaada, Noida, Uttar Pradesh 201301
+          {Data?.location}
         </Text>
 
         <Text
@@ -166,7 +168,7 @@ export default function ShopDetails({navigation}) {
               marginBottom: 0,
             },
           ]}>
-          9876549812
+          {Data?.contactNumber}
         </Text>
 
         <Text
@@ -285,7 +287,7 @@ export default function ShopDetails({navigation}) {
                     marginBottom: 0,
                   },
                 ]}>
-                4.5
+                {Data?.rating?.averageRating}
               </Text>
               <Octicons
                 name="star-fill"
@@ -553,7 +555,7 @@ export default function ShopDetails({navigation}) {
                     marginBottom: 0,
                   },
                 ]}>
-                4.5
+                {Data?.rating?.averageRating}
               </Text>
               <Octicons
                 name="star-fill"
@@ -891,7 +893,7 @@ export default function ShopDetails({navigation}) {
                 isDisabled={true}
                 readonly
                 ratingBackgroundColor="#ccc"
-                startingValue={3}
+                startingValue={Data?.rating?.averageRating}
                 imageSize={15}
               />
             </View>
@@ -1053,34 +1055,7 @@ export default function ShopDetails({navigation}) {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
-          <View
-            style={{
-              alignItems: 'center',
-              width: Width,
-              flexDirection: 'row',
-              height: 60,
-              justifyContent: 'flex-start',
-            }}>
-            <Entypo
-              onPress={() => navigation.goBack()}
-              name="chevron-thin-left"
-              size={20}
-              color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-              style={{marginLeft: 20, padding: 5}}
-            />
-            <Text
-              style={[
-                {
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  alignSelf: 'center',
-                  marginLeft: '25%',
-                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                },
-              ]}>
-              Shop Details
-            </Text>
-          </View>
+          <Header header={'Shop Details'} />
 
           <Image
             source={require('../assets/shop-pic.png')}
@@ -1137,8 +1112,7 @@ export default function ShopDetails({navigation}) {
                       ? 'rgba(255, 255, 255, 1)'
                       : 'rgba(0, 0, 0, 0.4)',
                   }}>
-                  {' '}
-                  6391 Elgin St. Celina, Delaware 10299...
+                  {Data?.location}
                 </Text>
               </View>
             </View>
@@ -1167,7 +1141,7 @@ export default function ShopDetails({navigation}) {
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
                 ]}>
-                4.5
+                {Data?.rating?.averageRating}
               </Text>
               <Rating
                 type="star"
@@ -1175,7 +1149,7 @@ export default function ShopDetails({navigation}) {
                 isDisabled={true}
                 readonly
                 ratingBackgroundColor="rgba(255, 219, 17, 1)"
-                startingValue={3}
+                startingValue={Data?.rating?.averageRating}
                 imageSize={15}
               />
             </View>
@@ -1241,8 +1215,7 @@ export default function ShopDetails({navigation}) {
                         ? 'rgba(255, 255, 255, 1)'
                         : 'rgba(0, 0, 0, 0.86)',
                     }}>
-                    {' '}
-                    6391 Elgin St. Celina, Delaware 10299...
+                    {Data?.description}
                   </Text>
                 </View>
               </View>
@@ -1257,7 +1230,7 @@ export default function ShopDetails({navigation}) {
             }}>
             <Pressable style={styles.iconStyle}>
               <Ionicons
-                onPress={() => Linking.openURL(`tel:${8860315531}`)}
+                onPress={() => Linking.openURL(`tel:${Data?.contactNumber}`)}
                 name="call"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
@@ -1381,7 +1354,7 @@ export default function ShopDetails({navigation}) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.smallblueBotton}
-          onPress={() => Linking.openURL(`tel:${8860315531}`)}>
+          onPress={() => Linking.openURL(`tel:${Data?.contactNumber}`)}>
           <Text
             style={[
               styles.smallText,

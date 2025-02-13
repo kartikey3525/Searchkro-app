@@ -13,6 +13,7 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -137,18 +138,8 @@ export default function NotificationScreen({navigation}) {
     <View
       showsVerticalScrollIndicator={false}
       style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20}}
-        />
-        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
-          Notifications
-        </Text>
-      </View>
+      <Header header={'Notifications'} />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{height: Height * 0.8, flexGrow: 1}}>

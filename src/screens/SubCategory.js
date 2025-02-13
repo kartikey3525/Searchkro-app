@@ -17,6 +17,8 @@ import {ThemeContext} from '../context/themeContext';
 import {ScrollView} from 'react-native-gesture-handler';
 import {AuthContext} from '../context/authcontext';
 import {useIsFocused} from '@react-navigation/native';
+import SearchBar from '../components/SearchBar';
+import Header from '../components/Header';
 
 export default function SubCategory({navigation, route}) {
   const {theme} = useContext(ThemeContext);
@@ -25,7 +27,7 @@ export default function SubCategory({navigation, route}) {
 
   const {isposting} = useContext(AuthContext);
   useEffect(() => {
-    console.log('get fil post', route?.params?.selectedcategory);
+    // console.log('get fil post', route?.params?.selectedcategory);
   }, [isFocused]);
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'men', img: require('../assets/phone.png')},
@@ -92,35 +94,7 @@ export default function SubCategory({navigation, route}) {
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgb(255, 255, 255)' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            styles.bigText,
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              marginLeft: '21%',
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
-            },
-          ]}>
-          Sub Categories
-        </Text>
-      </View>
+      <Header header={'Sub Categories'} />
 
       <View
         style={{
@@ -128,44 +102,7 @@ export default function SubCategory({navigation, route}) {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 15,
-          }}>
-          <View
-            style={[
-              styles.inputContainer,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(26, 26, 26, 1)'
-                  : 'rgb(255, 255, 255)',
-                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
-              },
-            ]}>
-            <Image
-              source={require('../assets/search-icon.png')}
-              style={{
-                width: 20,
-                height: 20,
-                alignSelf: 'center',
-                left: 10,
-              }}
-              resizeMode="contain"
-            />
-            <TextInput
-              // value={'text'}
-              style={styles.searchInput}
-              // onChangeText={setText}
-              placeholderTextColor={'rgba(94, 95, 96, 1)'}
-              placeholder="Search Categories"
-              autoCapitalize="none"
-              onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-            />
-          </View>
-        </View>
+        <SearchBar placeholder={'Search Categories'} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}

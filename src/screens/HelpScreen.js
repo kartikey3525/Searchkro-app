@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -18,18 +19,7 @@ export default function HelpScreen({navigation}) {
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20}}
-        />
-        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
-          Help and Support
-        </Text>
-      </View>
+      <Header header={'Help and Support'} />
 
       {/** Navigation Buttons with Correct Screen Names */}
       <TouchableOpacity

@@ -20,6 +20,7 @@ import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 export default function RatedScreen({navigation}) {
   const [email, setEmail] = useState('');
@@ -113,35 +114,7 @@ export default function RatedScreen({navigation}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-          marginBottom: 20,
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              marginLeft: '21%',
-              color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
-            },
-          ]}>
-          Rated review
-        </Text>
-      </View>
+      <Header header={'Rated review'} />
 
       <View
         style={[

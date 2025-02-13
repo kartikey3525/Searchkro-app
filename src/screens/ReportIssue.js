@@ -10,7 +10,7 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -22,6 +22,7 @@ import * as ImagePicker from 'react-native-image-picker';
 import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
+import {useIsFocused} from '@react-navigation/native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -29,73 +30,55 @@ export default function ReportIssue({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [media, setMedia] = useState([]);
   const [description, setdescription] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const {PostReportissue, PostsHistory} = useContext(AuthContext);
+
+  useEffect(() => {
+    // console.log('get PostReportissue', PostsHistory[0]);
+  }, [useIsFocused()]);
 
   const [errors, setErrors] = useState({
-    email: '',
-    password: '',
+    media: '',
+    description: '',
   });
-  const {handleRegister, handleLogin, handleResetPassword} =
-    useContext(AuthContext);
 
   const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
-
-    if (!email && !password) {
+    if (media.length === 0) {
       setErrors(prevState => ({
         ...prevState,
-        email: 'Email or phone number is required.',
+        media: 'Please select at least one image.',
       }));
-      return false;
     }
 
-    if (email && phoneRegex.test(email)) {
-      // phone number is valid
-    } else if (email && emailRegex.test(email)) {
-      // email is valid
-    } else {
+    if (!description.trim()) {
       setErrors(prevState => ({
         ...prevState,
-        email: 'Please enter a valid email address or phone number.',
+        description: 'Description is required.',
       }));
-      return false;
-    }
-
-    if (!password.trim()) {
+      valid = false;
+    } else if (description.length < 6) {
       setErrors(prevState => ({
         ...prevState,
-        password: 'Password is required.',
+        description: 'Description must be at least 6 characters long.',
       }));
-      return false;
+      valid = false;
     }
 
-    if (password.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password must be at least 6 characters long.',
-      }));
-      return false;
-    }
-
-    setErrors({email: '', password: ''});
+    setErrors({media: '', description: ''});
     return true;
   };
 
   const handlePress = async () => {
-    setErrors({email: '', password: ''});
+    setErrors({media: '', description: ''});
     if (!validateInputs()) return;
 
-    setIsLoading(true);
     try {
-      await handleLogin(email, password);
-      console.log('Success', 'Login successful!');
-      navigation.navigate('OTPScreen', {emailPhone: email, password: password});
+      await PostReportissue(media, description);
+      // console.log('Success', ' Report Post successful!');
+      // navigation.navigate('BottomTabs');
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -384,7 +367,7 @@ export default function ReportIssue({navigation}) {
 
       <TouchableOpacity
         style={[styles.blueBotton, {margin: '15%'}]}
-        onPress={() => navigation.navigate('BottomTabs')}>
+        onPress={handlePress}>
         <Text
           style={[
             styles.smallText,

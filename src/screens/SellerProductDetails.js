@@ -12,6 +12,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 const {width, height} = Dimensions.get('window');
 
@@ -38,34 +39,7 @@ export default function SellerProductDetails({navigation}) {
     <ScrollView
       showsVerticalScrollIndicator={false}
       style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: width,
-          flexDirection: 'row',
-          height: 60,
-          justifyContent: 'flex-start',
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-              marginLeft: '25%',
-            },
-          ]}>
-          Product Details
-        </Text>
-      </View>
+      <Header header={'Product Details'} />
 
       {/* Image Scrolling */}
       <View style={styles.carouselContainer}>
@@ -128,10 +102,7 @@ export default function SellerProductDetails({navigation}) {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Chatscreen', {
-              chatId: `seller_${'buyerId'}`,
-              userId: 'sellerId',
-            });
+            navigation.navigate('Chatscreen', {item: product});
           }}
           style={[styles.button, {backgroundColor: 'rgba(15, 92, 246, 1)'}]}>
           <Ionicons name="chatbubble-outline" size={20} color="#fff" />

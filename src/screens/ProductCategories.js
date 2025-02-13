@@ -417,13 +417,4 @@ const styles = StyleSheet.create({
     height: 45,
     padding: 1,
   },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    color: 'black',
-    height: 45,
-    left: 16,
-  },
 });

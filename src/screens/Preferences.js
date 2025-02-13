@@ -19,11 +19,12 @@ import {ThemeContext} from '../context/themeContext';
 export default function Preferences({navigation}) {
   const [numColumns, setNumColumns] = useState(4);
   const isFocused = useIsFocused();
-  const {userRole, getSellerCategories, getPosts, posts} =
+  const {userRole, getCategories, fullCategorydata, posts, isposting} =
     useContext(AuthContext);
 
   useEffect(() => {
-    // getCategories();
+    getCategories();
+    // console.log('posts', posts);
   }, [isFocused]);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -54,7 +55,12 @@ export default function Preferences({navigation}) {
           alignItems: 'center',
           width: Width * 0.5, // Take half the screen width for two columns
         }}
-        onPress={() => navigation.navigate('preferencedetails', {item: item})}>
+        onPress={() =>
+          navigation.navigate('preferencedetails', {
+            item: item.subCategories,
+            selectedcategory: [item.name],
+          })
+        }>
         <View
           style={[
             styles.rectangle,
@@ -63,12 +69,15 @@ export default function Preferences({navigation}) {
               backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
             },
           ]}>
-          <Image source={item.img} style={{width: '100%', height: '100%'}} />
+          <Image
+            source={{uri: item.image}}
+            style={{width: '100%', height: '100%'}}
+          />
         </View>
         <Text
           numberOfLines={1}
           style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
-          {item.title}
+          {item.name}
         </Text>
       </TouchableOpacity>
     );
@@ -133,15 +142,17 @@ export default function Preferences({navigation}) {
               width: Width,
               flexDirection: 'row',
               height: 60,
+              marginTop: 10,
               justifyContent: 'flex-start',
             }}>
-            <Entypo
-              onPress={() => navigation.goBack()}
-              name="chevron-thin-left"
-              size={20}
-              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-              style={{marginLeft: 20, padding: 5}}
-            />
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Entypo
+                name="chevron-thin-left"
+                size={20}
+                color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+                style={{marginLeft: 20, padding: 5}}
+              />
+            </TouchableOpacity>
             <Text
               style={[
                 {
@@ -167,7 +178,7 @@ export default function Preferences({navigation}) {
             numColumns={2}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            data={userRole === 'buyer' ? recentPostList : posts}
+            data={userRole === 'buyer' ? fullCategorydata : posts}
             keyExtractor={item => (userRole === 'buyer' ? item.id : item._id)} // Ensure unique key as a string
             renderItem={
               userRole === 'buyer'

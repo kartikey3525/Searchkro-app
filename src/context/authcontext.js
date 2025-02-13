@@ -3,9 +3,8 @@ import {useNavigation} from '@react-navigation/native';
 import {Alert} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
-// let apiURL = 'http://192.168.1.24:8080';
-let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
-
+let apiURL = 'http://192.168.1.31:8080';
+// let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
 
 const AuthContext = createContext();
 
@@ -22,6 +21,8 @@ const AuthProvider = ({children}) => {
   const [recentPosts, setrecentPosts] = useState([]);
   const [nearbyPosts, setnearbyPosts] = useState([]);
   const [filteredPosts, setfilteredPosts] = useState([]);
+  const [PostsHistory, setPostsHistory] = useState([]);
+  const [Reportissue, setReportissue] = useState([]);
 
   const [userdata, setUserdata] = useState([]);
 
@@ -130,7 +131,7 @@ const AuthProvider = ({children}) => {
       //   },
       // ];
       // console.log('newData130', newData);
-      setcategorydata(categories.data);
+      setFullCategorydata(categories.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log('Error', error.response.data.body);
@@ -260,6 +261,78 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const getPostsHistory = async categories => {
+    try {
+      const payload = {
+        startDistance: '',
+        endDistance: '33',
+        latitude: '40.758896',
+        longitude: '-73.985130',
+        rating: 2,
+        topRated: true, // true, false
+        key: '',
+        categories: [
+          // "Rentals"
+        ],
+        myPost: true, // true, false
+        userId: '',
+      };
+
+      const headers = {
+        Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/buyer/post/allPosts`,
+        payload,
+        {headers},
+      );
+
+      // console.log('Response:', response.data.data);
+
+      const PostsHistory = response.data.data;
+      setPostsHistory(PostsHistory);
+      console.log('PostsHistory:', PostsHistory);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // console.log('Error 107', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109', 'Failed to load categories');
+      }
+    }
+  };
+
+  const PostReportissue = async (media, description) => {
+    try {
+      const payload = {
+        images: media,
+        description: description,
+      };
+
+      const headers = {
+        Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/issues/reportIssue`,
+        payload,
+        {headers},
+      );
+
+      // console.log('Response:', response.data.data);
+
+      console.log('Success', ' Report Post successful!');
+
+      navigation.navigate('BottomTabs');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // console.log('Error 107', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109', 'Failed to load categories');
+      }
+    }
+  };
+
   const createPost = async (
     selectedCategories,
     description,
@@ -307,8 +380,8 @@ const AuthProvider = ({children}) => {
         {headers},
       );
 
-      console.log('Response 171:', response.data);
-      Alert.alert('Success', 'Post created successfully!');
+      // console.log('Response 171:', response.data);
+      // Alert.alert('Success', 'Post created successfully!');
       navigation.navigate('BottomTabs');
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
@@ -459,6 +532,10 @@ const AuthProvider = ({children}) => {
         isposting,
         getFilteredPosts,
         filteredPosts,
+        getPostsHistory,
+        PostsHistory,
+        PostReportissue,
+        Reportissue,
       }}>
       {children}
     </AuthContext.Provider>

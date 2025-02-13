@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -17,11 +17,19 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 import {ScrollView} from 'react-native-gesture-handler';
+import {useIsFocused} from '@react-navigation/native';
+import {AuthContext} from '../context/authcontext';
 
 export default function PostHistory({navigation}) {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const {getPostsHistory, PostsHistory} = useContext(AuthContext);
+
+  useEffect(() => {
+    getPostsHistory();
+    console.log('get PostsHistory', PostsHistory[0]);
+  }, [useIsFocused()]);
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -309,13 +317,5 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     height: 50,
     padding: 1,
-  },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    height: 45,
-    left: 16,
   },
 });

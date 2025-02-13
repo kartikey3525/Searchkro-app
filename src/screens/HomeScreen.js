@@ -20,6 +20,7 @@ import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
+import SearchBar from '../components/SearchBar';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -38,6 +39,7 @@ export default function HomeScreen({navigation}) {
     getCategories,
     getRecentPosts,
     categorydata,
+    fullCategorydata,
     nearbyPosts,
     userRole,
     getSellerCategories,
@@ -71,8 +73,7 @@ export default function HomeScreen({navigation}) {
     }
   };
   const getLocation = async () => {
-    // Check permissions for Android
-    if (Platform.OS === 'android') {
+    try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
@@ -85,23 +86,41 @@ export default function HomeScreen({navigation}) {
       );
 
       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        setErrorMessage('Location permission denied');
+        Alert.alert('Permission Denied', 'Location access is required.');
         return;
       }
-    }
 
-    // Get the location
-    try {
+      // Get location with a longer timeout and fallback options
       Geolocation.getCurrentPosition(
         position => {
           const {latitude, longitude} = position.coords;
           setLocation({latitude, longitude});
+          console.log('User location:', latitude, longitude);
         },
         error => {
           console.error('Location error:', error);
-          // Alert.alert('Error', 'Unable to fetch location.');
+
+          // Specific error handling
+          switch (error.code) {
+            case 1:
+              Alert.alert('Permission Denied', 'Enable location permission.');
+              break;
+            case 2:
+              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
+              break;
+            case 3:
+              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
+              break;
+            default:
+              Alert.alert('Error', error.message);
+          }
         },
-        {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
+        {
+          enableHighAccuracy: false, // Try setting false if high accuracy fails
+          timeout: 60000, // Increase timeout from 35s to 60s
+          maximumAge: 10000,
+          distanceFilter: 10, // Get location updates every 10 meters
+        },
       );
     } catch (error) {
       console.error('Error fetching location:', error);
@@ -343,10 +362,29 @@ export default function HomeScreen({navigation}) {
             style={{width: '100%', height: '100%'}}
           />
         </View>
-        <Text numberOfLines={1} style={[styles.recListText, {fontSize: 15}]}>
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.recListText,
+            {
+              fontSize: 15,
+              width: 160,
+
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}>
           {item.title}
         </Text>
-        <Text numberOfLines={2} style={styles.recListText}>
+        <Text
+          numberOfLines={2}
+          style={[
+            styles.recListText,
+            {
+              color: isDark ? '#fff' : '#000',
+
+              width: 160,
+            },
+          ]}>
           {item.description}
         </Text>
       </TouchableOpacity>
@@ -368,6 +406,7 @@ export default function HomeScreen({navigation}) {
           marginTop: '2%',
           width: '100%',
           justifyContent: 'center',
+          height: Height * 0.9,
           alignItems: 'center',
         }}>
         <View
@@ -461,7 +500,11 @@ export default function HomeScreen({navigation}) {
                 marginRight: 6,
               }}>
               <Image
-                source={require('../assets/notification.png')}
+                source={
+                  isDark
+                    ? require('../assets/notification-dark.png')
+                    : require('../assets/notification.png')
+                }
                 style={{
                   width: 28,
                   height: 26,
@@ -510,48 +553,14 @@ export default function HomeScreen({navigation}) {
             />
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 15,
-          }}>
-          <View
-            style={[
-              styles.inputContainer,
-              {
-                backgroundColor: isDark ? '#000' : '#fff',
-                borderColor: isDark ? 'rgba(94, 95, 96, 1)' : 'rgb(0, 0, 0)',
-              },
-            ]}>
-            <Image
-              source={require('../assets/search-icon.png')}
-              style={{
-                width: 20,
-                height: 20,
-                alignSelf: 'center',
-                left: 10,
-              }}
-              resizeMode="contain"
-            />
-            <TextInput
-              // value={'text'}
-              style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
-              // onChangeText={setText}
-              placeholderTextColor={'rgba(94, 95, 96, 1)'}
-              placeholder="Search here"
-              autoCapitalize="none"
-              onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-            />
-          </View>
-        </View>
+
+        <SearchBar placeholder={'Search here'} />
 
         {userRole === 'buyer' ? (
           <>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              style={{height: Height * 0.695, flexGrow: 1}}>
+              style={{height: Height * 0.69, flexGrow: 1}}>
               <FlatList
                 style={{
                   width: Width,
@@ -639,7 +648,7 @@ export default function HomeScreen({navigation}) {
                 scrollEnabled={false}
                 numColumns={4}
                 showsHorizontalScrollIndicator={false} // Hides the horizontal scrollbar
-                data={categorydata}
+                data={fullCategorydata}
                 keyExtractor={item => item.id.toString()}
                 renderItem={rendersquareList}
               />

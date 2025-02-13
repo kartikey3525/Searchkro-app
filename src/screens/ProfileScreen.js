@@ -37,7 +37,7 @@ export default function ProfileScreen({navigation}) {
             ? require('../assets/profilebg-dark.png')
             : require('../assets/profilebg.png')
         }
-        style={{width: Width, height: Height, bottom: 20}}
+        style={{width: Width, height: Height}}
       />
 
       <View
@@ -141,62 +141,64 @@ export default function ProfileScreen({navigation}) {
                 shadowColor: isDark ? '#fff' : '#000',
                 borderRadius: 5,
               }}>
-              <Pressable
-                style={{
-                  width: Width * 0.9,
-                  height: Height * 0.065,
-                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
-                  justifyContent: 'center',
-                  borderBottomWidth: 1,
-                  borderColor: isDark
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'rgba(0, 0, 0, 0.1)',
-                  borderTopStartRadius: 5,
-                  borderTopRightRadius: 5,
-                }}
-                onPress={() => navigation.navigate('profilesettings')}>
-                <View
+              {userRole === 'buyer' ? (
+                <Pressable
                   style={{
-                    flexDirection: 'row',
+                    width: Width * 0.9,
+                    height: Height * 0.065,
                     backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
-                    alignSelf: 'flex-start',
-                    alignItems: 'center',
-                    borderRadius: 5,
-                  }}>
-                  <Image
-                    source={require('../assets/profile-2.png')}
+                    justifyContent: 'center',
+                    borderBottomWidth: 1,
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.1)'
+                      : 'rgba(0, 0, 0, 0.1)',
+                    borderTopStartRadius: 5,
+                    borderTopRightRadius: 5,
+                  }}
+                  onPress={() => navigation.navigate('profilesettings')}>
+                  <View
                     style={{
-                      width: 25,
-                      height: 20,
-                      marginLeft: 15,
-                    }}
-                    resizeMode="contain"
-                  />
-
-                  <Text
-                    style={[
-                      styles.recListText,
-                      {
-                        fontSize: 15,
-                        width: Width * 0.66,
-                        color: isDark ? 'white' : 'black',
+                      flexDirection: 'row',
+                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                      alignSelf: 'flex-start',
+                      alignItems: 'center',
+                      borderRadius: 5,
+                    }}>
+                    <Image
+                      source={require('../assets/profile-2.png')}
+                      style={{
+                        width: 25,
+                        height: 20,
                         marginLeft: 15,
-                        fontWeight: '600',
-                        letterSpacing: 0.5,
-                      },
-                    ]}>
-                    Profile Settings
-                  </Text>
+                      }}
+                      resizeMode="contain"
+                    />
 
-                  <AntDesign
-                    onPress={() => navigation.goBack()}
-                    name="right"
-                    size={16}
-                    color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
-                    style={{padding: 5}}
-                  />
-                </View>
-              </Pressable>
+                    <Text
+                      style={[
+                        styles.recListText,
+                        {
+                          fontSize: 15,
+                          width: Width * 0.66,
+                          color: isDark ? 'white' : 'black',
+                          marginLeft: 15,
+                          fontWeight: '600',
+                          letterSpacing: 0.5,
+                        },
+                      ]}>
+                      Profile Settings
+                    </Text>
+
+                    <AntDesign
+                      onPress={() => navigation.goBack()}
+                      name="right"
+                      size={16}
+                      color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
+                      style={{padding: 5}}
+                    />
+                  </View>
+                </Pressable>
+              ) : null}
 
               <Pressable
                 style={{
@@ -995,11 +997,13 @@ export default function ProfileScreen({navigation}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: Width,
+    height: Height,
     backgroundColor: 'white',
   },
   modalContainer: {
-    flex: 1,
+    width: Width,
+    height: Height,
     backgroundColor: 'rgba(255, 255, 255, 0.79)',
   },
 
@@ -1086,17 +1090,9 @@ const styles = StyleSheet.create({
     height: 45,
     padding: 1,
   },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    color: 'black',
-    height: 45,
-    left: 16,
-  },
   modalContainer2: {
-    flex: 1,
+    width: Width,
+    height: Height,
     justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -1147,7 +1143,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   modalContainer3: {
-    flex: 1,
+    width: Width,
+    height: Height,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',

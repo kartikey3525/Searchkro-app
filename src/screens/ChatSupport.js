@@ -18,6 +18,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import io from 'socket.io-client';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -98,18 +99,7 @@ export default function ChatSupport({navigation}) {
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20}}
-        />
-        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
-          Chat Support
-        </Text>
-      </View>
+      <Header header={'Chat Support'} />
 
       {/* Chat Messages List */}
       <View style={styles.chatContainer}>

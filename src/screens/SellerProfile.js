@@ -140,8 +140,7 @@ export default function SellerProfile({navigation, route}) {
     }
   };
   const getLocation = async () => {
-    // Check permissions for Android
-    if (Platform.OS === 'android') {
+    try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
@@ -154,23 +153,41 @@ export default function SellerProfile({navigation, route}) {
       );
 
       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        setErrorMessage('Location permission denied');
+        Alert.alert('Permission Denied', 'Location access is required.');
         return;
       }
-    }
 
-    // Get the location
-    try {
+      // Get location with a longer timeout and fallback options
       Geolocation.getCurrentPosition(
         position => {
           const {latitude, longitude} = position.coords;
           setLocation({latitude, longitude});
+          console.log('User location:', latitude, longitude);
         },
         error => {
           console.error('Location error:', error);
-          Alert.alert('Error', 'Unable to fetch location.');
+
+          // Specific error handling
+          switch (error.code) {
+            case 1:
+              Alert.alert('Permission Denied', 'Enable location permission.');
+              break;
+            case 2:
+              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
+              break;
+            case 3:
+              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
+              break;
+            default:
+              Alert.alert('Error', error.message);
+          }
         },
-        {enableHighAccuracy: true, timeout: 35000, maximumAge: 10000},
+        {
+          enableHighAccuracy: false, // Try setting false if high accuracy fails
+          timeout: 60000, // Increase timeout from 35s to 60s
+          maximumAge: 10000,
+          distanceFilter: 10, // Get location updates every 10 meters
+        },
       );
     } catch (error) {
       console.error('Error fetching location:', error);

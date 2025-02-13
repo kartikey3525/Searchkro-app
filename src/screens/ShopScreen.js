@@ -37,8 +37,8 @@ export default function ShopScreen({navigation, route}) {
   const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
 
   useEffect(() => {
-    getFilteredPosts(route?.params?.selectedcategory);
-    console.log('get fil post', route?.params?.selectedcategory);
+    getFilteredPosts(route?.params?.selectedcategory, value);
+    // console.log('get fil post', filteredPosts[0]);
   }, [isFocused]);
 
   const [recentPostList, setrecentPostList] = useState([
@@ -401,7 +401,7 @@ export default function ShopScreen({navigation, route}) {
           <View
             style={[
               styles.inputContainer,
-              {backgroundColor: isDark ? 'rgba(39, 39, 39, 1)' : '#fff'},
+              {backgroundColor: isDark ? 'rgb(0, 0, 0)' : '#fff'},
             ]}>
             <Image
               source={require('../assets/search-icon.png')}
@@ -436,7 +436,7 @@ export default function ShopScreen({navigation, route}) {
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
             style={{
-              backgroundColor: isDark ? 'rgba(39, 39, 39, 1)' : 'white',
+              backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
               height: 50,
               width: '13%',
               alignSelf: 'center',

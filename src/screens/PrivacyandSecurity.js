@@ -10,6 +10,7 @@ import {
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {ThemeContext} from '../context/themeContext';
+import Header from '../components/Header';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -27,22 +28,7 @@ export default function PrivacyandSecurity({navigation}) {
   };
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20}}
-        />
-        <Text
-          style={[
-            styles.headerText,
-            {textAlign: 'center', color: isDark ? '#fff' : '#000'},
-          ]}>
-          Privacy and Security
-        </Text>
-      </View>
+      <Header header={'Privacy and Security'} />
 
       <TouchableOpacity
         onPress={() => setModalVisible(true)}

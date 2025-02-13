@@ -19,6 +19,7 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 import * as ImagePicker from 'react-native-image-picker';
+import Header from '../components/Header';
 
 export default function UploadImage({navigation, route}) {
   const {theme} = useContext(ThemeContext);
@@ -135,18 +136,7 @@ export default function UploadImage({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#121212' : '#FFFFFF'},
       ]}>
-      <View style={styles.header}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text style={[styles.headerText, {color: isDark ? '#fff' : '#000'}]}>
-          Upload photos
-        </Text>
-      </View>
+      <Header header={'Upload photos'} />
 
       <Text
         style={[
@@ -310,13 +300,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(6, 196, 217, 1)',
     marginBottom: 10,
   },
-  imageContainer: {
-    flexDirection: 'row',
-    marginLeft: '6%',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 10,
-  },
   mediaItem: {
     width: '20%', // Slight margin for spacing
     margin: '2%',
@@ -331,63 +314,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     resizeMode: 'cover',
   },
-  phoneInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: '#A3A3A3',
-    width: '90%',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: 'rgba(231, 231, 231, 1)',
-    width: '90%',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  textInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    color: '#000',
-    width: '86%',
-    height: 50,
-    padding: 10,
-    margin: 4,
-  },
-  smallText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1D1E20',
-    textAlign: 'center',
-    width: 250,
-    marginBottom: 30,
-    fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
-  },
-
-  bigText: {
-    fontSize: 30,
-    color: 'black',
-    textAlign: 'center',
-    marginTop: 20,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    fontFamily: 'Poppins-Bold',
-  },
-  blueBotton: {
-    backgroundColor: '#00AEEF',
-    width: '90%',
-    height: 56,
-    borderRadius: 10,
-    margin: '20%',
-    marginBottom: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   screen: {
+    width: Width,
+    height: Height,
     alignItems: 'center',
   },
   whiteBotton: {

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -21,12 +21,22 @@ const Height = Dimensions.get('window').height;
 import {Slider} from '@miblanchard/react-native-slider';
 import RatingButtons from '../components/RatingButtons';
 import {ThemeContext} from '../context/themeContext';
+import {useIsFocused} from '@react-navigation/native';
+import {AuthContext} from '../context/authcontext';
+import Header from '../components/Header';
 
-export default function PreferenceDetails({navigation}) {
+export default function PreferenceDetails({navigation, route}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState([0, 2]);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+
+  const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
+
+  useEffect(() => {
+    getFilteredPosts(route?.params?.selectedcategory);
+    // console.log('get fil post', filteredPosts[0]);
+  }, [useIsFocused()]);
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -61,7 +71,7 @@ export default function PreferenceDetails({navigation}) {
             },
           ]}>
           <Image
-            source={item.img}
+            source={{uri: item.images[0]}}
             style={{
               width: '94%',
               height: '50%',
@@ -112,7 +122,7 @@ export default function PreferenceDetails({navigation}) {
                       width: 30,
                     },
                   ]}>
-                  4.5
+                  {item.rating.averageRating}
                 </Text>
                 <Rating
                   type="star"
@@ -120,7 +130,7 @@ export default function PreferenceDetails({navigation}) {
                   isDisabled={true}
                   readonly
                   ratingBackgroundColor="#ccc"
-                  startingValue={3}
+                  startingValue={item.rating.averageRating}
                   imageSize={15}
                 />
               </View>
@@ -157,7 +167,7 @@ export default function PreferenceDetails({navigation}) {
                       : 'rgba(29, 30, 32, 1)',
                   },
                 ]}>
-                dddddddddddddddddddddddddddddddddddddddddddddd
+                {item.location}
               </Text>
             </View>
 
@@ -184,12 +194,13 @@ export default function PreferenceDetails({navigation}) {
                 Description :
               </Text>
               <Text
-                numberOfLines={4}
+                numberOfLines={3}
                 style={[
                   styles.recListText,
                   {
                     lineHeight: 16,
                     letterSpacing: 1.2,
+                    width: 350,
                     marginTop: 0,
                     color: isDark
                       ? 'rgba(255, 255, 255, 1)'
@@ -198,10 +209,7 @@ export default function PreferenceDetails({navigation}) {
                     fontSize: 12,
                   },
                 ]}>
-                The MacBook Air is Apple’s lightest and most versatile laptop,
-                powered by the next-generation M2 chip. It delivers exceptional
-                performance, stunning visuals, and incredible battery life in a
-                sleek and portable design.
+                {item.description}
               </Text>
             </View>
           </View>
@@ -209,39 +217,10 @@ export default function PreferenceDetails({navigation}) {
       </Pressable>
     );
   };
- 
+
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            styles.bigText,
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              width: Width * 0.72,
-              textAlign: 'center',
-              color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-            },
-          ]}>
-          Preferences
-        </Text>
-      </View>
+      <Header header={'Preferences'} />
 
       <View
         style={{
@@ -255,7 +234,7 @@ export default function PreferenceDetails({navigation}) {
           style={{
             padding: 5,
           }}
-          data={recentPostList}
+          data={filteredPosts}
           keyExtractor={item => item.id}
           renderItem={render2RectangleList}
         />
@@ -289,13 +268,5 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     height: 50,
     padding: 1,
-  },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    height: 45,
-    left: 16,
   },
 });
