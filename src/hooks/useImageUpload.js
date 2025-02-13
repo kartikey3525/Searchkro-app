@@ -1,11 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Alert} from 'react-native';
-import firestore from '@react-native-firebase/firestore';
 
 export default function useImageUpload() {
   const [uploading, setUploading] = useState(false);
   const [transferred, setTransferred] = useState(0);
-  const [database, setDatabase] = useState(firestore());
   const [imageDownloadUrl, setImageDownloadUrl] = useState(null);
   const [error, setError] = useState(false);
 
