@@ -10,7 +10,7 @@ import {
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {Rating} from 'react-native-ratings';
+import {Rating} from '@kolking/react-native-rating';
 
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
@@ -178,16 +178,14 @@ export default function RatedScreen({navigation}) {
         style={{
           flexDirection: 'row',
           alignSelf: 'flex-start',
-          marginLeft: 25,
+          marginLeft: 30,
+          marginBottom: 10,
         }}>
         <Rating
-          type="star"
-          ratingColor="#FFD700"
-          isDisabled={true}
-          readonly
-          ratingBackgroundColor="#ccc"
-          startingValue={3}
-          imageSize={30}
+          size={32}
+          rating={4}
+          starColor="#FFD700"
+          baseColor={isDark ? '#48484A' : '#D1D1D6'}
         />
       </View>
       <Text

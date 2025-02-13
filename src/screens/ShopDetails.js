@@ -15,8 +15,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
-import {Rating} from 'react-native-ratings';
+import Entypo from 'react-native-vector-icons/Entypo'; 
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
 
@@ -30,6 +29,7 @@ import {G, Rect} from 'react-native-svg'; // Use G and Rect for custom SVG if ne
 import * as scale from 'd3-scale';
 import HorizontalRatingButtons from '../components/HorizontalRating';
 import Header from '../components/Header';
+import RatingTest from '../components/RatingTest';
 
 export default function ShopDetails({navigation, route}) {
   const {theme} = useContext(ThemeContext);
@@ -887,15 +887,7 @@ export default function ShopDetails({navigation, route}) {
               style={{
                 flexDirection: 'row',
               }}>
-              <Rating
-                type="star"
-                ratingColor="#FFD700"
-                isDisabled={true}
-                readonly
-                ratingBackgroundColor="#ccc"
-                startingValue={Data?.rating?.averageRating}
-                imageSize={15}
-              />
+              <RatingTest fixedRating={Data?.rating?.averageRating} />
             </View>
           </View>
         </View>
@@ -1136,22 +1128,14 @@ export default function ShopDetails({navigation, route}) {
                   {
                     fontWeight: 'bold',
                     marginTop: 0,
-                    fontSize: 16,
-                    width: 30,
+                    fontSize: 14,
+                    width: 32,
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
                 ]}>
                 {Data?.rating?.averageRating}
               </Text>
-              <Rating
-                type="star"
-                ratingColor="rgba(255, 219, 17, 1)"
-                isDisabled={true}
-                readonly
-                ratingBackgroundColor="rgba(255, 219, 17, 1)"
-                startingValue={Data?.rating?.averageRating}
-                imageSize={15}
-              />
+              <RatingTest fixedRating={Data?.rating?.averageRating} />
             </View>
 
             <View

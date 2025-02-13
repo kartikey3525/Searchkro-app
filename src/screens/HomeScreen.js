@@ -13,7 +13,6 @@ import {
   PermissionsAndroid,
   Alert,
 } from 'react-native';
-import {Rating} from 'react-native-ratings';
 import {useIsFocused} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import {ThemeContext} from '../context/themeContext';
@@ -21,6 +20,7 @@ import {ThemeContext} from '../context/themeContext';
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 import SearchBar from '../components/SearchBar';
+import RatingTest from '../components/RatingTest';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -276,31 +276,15 @@ export default function HomeScreen({navigation}) {
                   fontWeight: 'bold',
                   marginTop: 0,
                   fontSize: 13,
-                  width: 25,
+                  width: 20,
+                  marginLeft: 12,
                   color: isDark ? '#fff' : '#000',
                 },
               ]}>
               {item?.rating?.averageRating}
             </Text>
-            <Rating
-              startingValue={item?.rating?.averageRating}
-              type="star"
-              // type="custom"
-              ratingColor="#FFD700"
-              isDisabled={true}
-              // starContainerStyle={{
-              //   backgroundColor: isDark ? 'black' : '#fff',
-              // }}
-              // ratingContainerStyle={{
-              //   backgroundColor: isDark ? 'black' : '#fff',
-              // }}
-              // style={{
-              //   backgroundColor: isDark ? 'black' : '#fff',
-              // }}
-              // ratingBackgroundColor={isDark ? 'black' : '#fff'}
-              readonly
-              imageSize={15}
-            />
+
+            <RatingTest fixedRating={item?.rating?.averageRating} />
           </View>
 
           <View
@@ -460,7 +444,7 @@ export default function HomeScreen({navigation}) {
                     fontWeight: 'bold',
                     width: Width * 0.53,
                     marginTop: 6,
-                    color: isDark ? '#fff' : '#000',
+                    color: isDark ? 'rgba(94, 95, 96, 1)' : '#000',
                   }}>
                   Latitude: {location.latitude}, Longitude: {location.longitude}
                 </Text>

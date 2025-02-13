@@ -224,6 +224,7 @@ export default function Login({navigation}) {
           autoCapitalize="none"
         />
       </View>
+
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     color: '#1D1E20',
     textAlign: 'center',
     width: 250,
-    marginBottom: 20,
+    marginBottom: 10,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
 

@@ -13,8 +13,7 @@ import {
 } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
-import {Rating} from 'react-native-ratings';
+import Entypo from 'react-native-vector-icons/Entypo'; 
 import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
@@ -26,6 +25,7 @@ import {Slider} from '@miblanchard/react-native-slider';
 import RatingButtons from '../components/RatingButtons';
 import {useIsFocused} from '@react-navigation/native';
 import {AuthContext} from '../context/authcontext';
+import RatingTest from '../components/RatingTest';
 
 export default function ShopScreen({navigation, route}) {
   const {theme} = useContext(ThemeContext);
@@ -122,21 +122,13 @@ export default function ShopScreen({navigation, route}) {
                     fontWeight: 'bold',
                     marginTop: 0,
                     fontSize: 13,
-                    width: 30,
+                    width: 28,
                     color: isDark ? '#fff' : '#000',
                   },
                 ]}>
                 {item.rating.averageRating}
               </Text>
-              <Rating
-                type="star"
-                ratingColor="#FFD700"
-                isDisabled={true}
-                readonly
-                ratingBackgroundColor="#ccc"
-                startingValue={item.rating.averageRating}
-                imageSize={15}
-              />
+              <RatingTest fixedRating={item?.rating?.averageRating} />
             </View>
 
             <View

@@ -1,29 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Pressable,
-  Modal,
-} from 'react-native';
-import Octicons from 'react-native-vector-icons/Octicons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
-import {Rating} from 'react-native-ratings';
+import {View, StyleSheet, Text, FlatList, Image, Pressable} from 'react-native';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import {Slider} from '@miblanchard/react-native-slider';
-import RatingButtons from '../components/RatingButtons';
 import {ThemeContext} from '../context/themeContext';
 import {useIsFocused} from '@react-navigation/native';
 import {AuthContext} from '../context/authcontext';
 import Header from '../components/Header';
+import RatingTest from '../components/RatingTest';
 
 export default function PreferenceDetails({navigation, route}) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,25 +99,17 @@ export default function PreferenceDetails({navigation, route}) {
                     styles.recListText,
                     {
                       fontWeight: 'bold',
-                      marginTop: 0,
+                      marginTop: 5,
                       color: isDark
                         ? 'rgba(255, 255, 255, 1)'
                         : 'rgba(29, 30, 32, 1)',
                       fontSize: 13,
-                      width: 30,
+                      width: 22,
                     },
                   ]}>
                   {item.rating.averageRating}
                 </Text>
-                <Rating
-                  type="star"
-                  ratingColor="#FFD700"
-                  isDisabled={true}
-                  readonly
-                  ratingBackgroundColor="#ccc"
-                  startingValue={item.rating.averageRating}
-                  imageSize={15}
-                />
+                <RatingTest fixedRating={item?.rating?.averageRating} />
               </View>
             </View>
 
