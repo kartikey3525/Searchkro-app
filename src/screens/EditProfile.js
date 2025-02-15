@@ -97,7 +97,7 @@ export default function EditProfile({navigation}) {
     try {
       // await handleLogin(email, password);
       console.log('Success', 'profile update successful!');
-      // navigation.navigate('Profilescreen' );
+      navigation.navigate('Profilescreen' );
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -390,7 +390,12 @@ export default function EditProfile({navigation}) {
           setValue(text);
         }}
       />
-
+ <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.phone}>
+        {errors.phone}
+      </HelperText>
       <Dropdown
         item={[
           {label: 'Male', value: 'male'},

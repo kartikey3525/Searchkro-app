@@ -12,6 +12,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
@@ -54,6 +55,16 @@ export default function ProfileScreen({navigation}) {
           // onPress={() => navigation.navigate('Home')}
         >
           <View style={styles.modalContent}>
+
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+
+             <Entypo
+                      onPress={() => navigation.goBack()}
+                      name="chevron-thin-left"
+                      size={20}
+                      color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
+                      style={{padding: 5}}
+                    />
             <Text
               style={[
                 styles.recListText,
@@ -64,11 +75,12 @@ export default function ProfileScreen({navigation}) {
                   alignSelf: 'flex-start',
                   width: '100%',
                   margin: 10,
-                  marginLeft: 2,
+                  marginLeft: 20, 
                 },
               ]}>
               Profile
             </Text>
+            </View>
 
             <View
               style={{
