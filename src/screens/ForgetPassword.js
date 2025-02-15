@@ -20,12 +20,7 @@ import {ThemeContext} from '../context/themeContext';
 export default function ForgetPassword({navigation}) {
   const [email, setEmail] = useState('');
   const [description, setdescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [value, setValue] = useState('');
-  const [formattedValue, setFormattedValue] = useState('');
-  const [valid, setValid] = useState(false);
-  const [showMessage, setShowMessage] = useState(false);
-  const phoneInput = useRef(null);
+  const [isLoading, setIsLoading] = useState(false); 
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
@@ -56,22 +51,6 @@ export default function ForgetPassword({navigation}) {
       setErrors(prevState => ({
         ...prevState,
         email: 'Please enter a valid email address or phone number.',
-      }));
-      return false;
-    }
-
-    if (!description.trim()) {
-      setErrors(prevState => ({
-        ...prevState,
-        description: 'description is required.',
-      }));
-      return false;
-    }
-
-    if (description.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        description: 'description must be at least 6 characters long.',
       }));
       return false;
     }
@@ -154,14 +133,14 @@ export default function ForgetPassword({navigation}) {
       <View
         style={[
           styles.inputContainer,
-          {backgroundColor: isDark ? '#121212' : '#fff'},
+          {backgroundColor: isDark ? '#000' : '#fff'},
         ]}>
         <TextInput
           value={email}
           style={[
             styles.textInput,
             {
-              backgroundColor: isDark ? '#121212' : '#fff',
+              backgroundColor: isDark ? '#000' : '#fff',
               color: isDark ? '#fff' : 'rgb(0, 0, 0)',
             },
           ]}

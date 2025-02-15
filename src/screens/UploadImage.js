@@ -4,8 +4,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  PermissionsAndroid,
+  ScrollView, 
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -13,26 +12,26 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {Dimensions} from 'react-native'; 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import {ThemeContext} from '../context/themeContext';
-import * as ImagePicker from 'react-native-image-picker';
+import {ThemeContext} from '../context/themeContext'; 
 import Header from '../components/Header';
+import useImagePicker from '../hooks/useImagePicker';
 
 export default function UploadImage({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [media, setMedia] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); 
 
   const [errors, setErrors] = useState({
     email: '',
     password: '',
   });
   const {handleRegister, handleLogin, createPost} = useContext(AuthContext);
+  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
+
 
   const validateInputs = () => {
     if (media.length === 0) {
@@ -64,71 +63,7 @@ export default function UploadImage({navigation, route}) {
       setIsLoading(false);
     }
   };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([...media, ...response.assets]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
-  };
-
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'App Camera Permission',
-            message: 'App needs access to your camera to take photos',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Camera permission granted');
-          launchCamera();
-        } else {
-          console.log('Camera permission denied');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      console.log('Camera permission not required on iOS');
-      launchCamera();
-    }
-  };
-
-  const launchCamera = () => {
-    let options = {
-      includeBase64: false,
-      mediaType: 'photo',
-      maxWidth: 400,
-      maxHeight: 400,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.launchCamera(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        console.log('Image URI:', response.assets?.[0]?.uri);
-        if (response.assets && response.assets.length > 0) {
-          setMedia(prevMedia => [...prevMedia, {uri: response.assets[0].uri}]);
-        }
-      }
-    });
-  };
-
+ 
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}

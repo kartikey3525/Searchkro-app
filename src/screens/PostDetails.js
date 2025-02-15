@@ -3,25 +3,23 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
-  PermissionsAndroid,
+  TouchableOpacity, 
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
+import {Dimensions} from 'react-native'; 
 import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native';
-import Geolocation from '@react-native-community/geolocation';
+import {useIsFocused} from '@react-navigation/native'; 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import LocationPermission from '../hooks/uselocation';
 
 export default function PostDetails({navigation, route}) {
   const [email, setEmail] = useState('');
@@ -38,79 +36,7 @@ export default function PostDetails({navigation, route}) {
   const isDark = theme === 'dark';
   const {isposting, setisposting} = useContext(AuthContext);
 
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Access Required',
-          message: 'This app needs to access your location.',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission granted');
-        getLocation();
-      } else {
-        // Alert.alert('Permission Denied', 'Location access is required.');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
-  const getLocation = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app requires location access to function properly.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission Denied', 'Location access is required.');
-        return;
-      }
-
-      // Get location with a longer timeout and fallback options
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          setLocation({latitude, longitude});
-          console.log('User location:', latitude, longitude);
-        },
-        error => {
-          console.error('Location error:', error);
-
-          // Specific error handling
-          switch (error.code) {
-            case 1:
-              Alert.alert('Permission Denied', 'Enable location permission.');
-              break;
-            case 2:
-              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
-              break;
-            case 3:
-              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
-              break;
-            default:
-              Alert.alert('Error', error.message);
-          }
-        },
-        {
-          enableHighAccuracy: false, // Try setting false if high accuracy fails
-          timeout: 60000, // Increase timeout from 35s to 60s
-          maximumAge: 10000,
-          distanceFilter: 10, // Get location updates every 10 meters
-        },
-      );
-    } catch (error) {
-      console.error('Error fetching location:', error);
-    }
-  };
+ 
 
   const handleCategoryChange = value => {
     setSelectedCategories(value); // Update selected categories
@@ -119,8 +45,7 @@ export default function PostDetails({navigation, route}) {
   const {getCategories, fullCategorydata, createPost} = useContext(AuthContext);
 
   useEffect(() => {
-    getCategories();
-    requestLocationPermission();
+    getCategories(); 
     setisposting(false);
     setSelectedCategories(route?.params?.selectedcategory); // Set the selected category by ID
   }, [isFocused]);
@@ -218,6 +143,8 @@ export default function PostDetails({navigation, route}) {
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+      <LocationPermission setLocation={setLocation} />
+
       <Header header={'Post Details'} />
 
       <Dropdown
@@ -281,7 +208,7 @@ export default function PostDetails({navigation, route}) {
 
       <PhoneInput
         ref={phoneInput}
-        defaultValue={phone}
+        value={phone}
         containerStyle={{
           width: Width * 0.9,
           height: 60,

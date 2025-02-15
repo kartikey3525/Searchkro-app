@@ -4,11 +4,9 @@ import {
   Image,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
-  PermissionsAndroid,
+  TouchableOpacity, 
   ScrollView,
-  Modal,
-  Platform,
+  Modal, 
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -20,16 +18,15 @@ import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native';
-import Geolocation from '@react-native-community/geolocation';
+import {useIsFocused} from '@react-navigation/native'; 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import * as ImagePicker from 'react-native-image-picker';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; 
 import {ThemeContext} from '../context/themeContext';
 import Feather from 'react-native-vector-icons/Feather';
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {launchImageLibrary} from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; 
+import LocationPermission from '../hooks/uselocation';
+import useImagePicker from '../hooks/useImagePicker';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -47,7 +44,6 @@ export default function SellerProfile({navigation, route}) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedScale, setSelectedScale] = useState([]);
   const [selectedAvailabity, setSelectedAvailabity] = useState([]);
-  const [media, setMedia] = useState(null);
   const [location, setLocation] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,156 +51,23 @@ export default function SellerProfile({navigation, route}) {
   const isFocused = useIsFocused();
   const [errorMessage, setErrorMessage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'App Camera Permission',
-            message: 'App needs access to your camera to take photos',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Camera permission granted');
-          launchCamera();
-        } else {
-          console.log('Camera permission denied');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      console.log('Camera permission not required on iOS');
-      launchCamera();
-    }
-  };
-
-  const launchCamera = () => {
-    let options = {
-      includeBase64: false,
-      mediaType: 'photo',
-      maxWidth: 400,
-      maxHeight: 400,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.launchCamera(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        console.log('Image URI:', response.assets?.[0]?.uri);
-        if (response.assets && response.assets.length > 0) {
-          setMedia([{uri: response.assets[0].uri}]); // Store the image
-        }
-      }
-    });
-  };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([{uri: response.assets[0].uri}]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
-  };
-
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Access Required',
-          message: 'This app needs to access your location.',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission granted');
-        getLocation();
-      } else {
-        Alert.alert('Permission Denied', 'Location access is required.');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
-  const getLocation = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app requires location access to function properly.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission Denied', 'Location access is required.');
-        return;
-      }
-
-      // Get location with a longer timeout and fallback options
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          setLocation({latitude, longitude});
-          console.log('User location:', latitude, longitude);
-        },
-        error => {
-          console.error('Location error:', error);
-
-          // Specific error handling
-          switch (error.code) {
-            case 1:
-              Alert.alert('Permission Denied', 'Enable location permission.');
-              break;
-            case 2:
-              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
-              break;
-            case 3:
-              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
-              break;
-            default:
-              Alert.alert('Error', error.message);
-          }
-        },
-        {
-          enableHighAccuracy: false, // Try setting false if high accuracy fails
-          timeout: 60000, // Increase timeout from 35s to 60s
-          maximumAge: 10000,
-          distanceFilter: 10, // Get location updates every 10 meters
-        },
-      );
-    } catch (error) {
-      console.error('Error fetching location:', error);
-    }
-  };
-
+  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
+ 
   const handleCategoryChange = value => {
     setSelectedCategories(value); // Update selected categories
   };
 
+  const handleAvailabityChange = value => {
+    setSelectedAvailabity(value); // Update selected categories
+  };
+
+  const handleScaleChange = value => {
+    setSelectedScale(value); // Update selected categories
+  };
   const {getCategories, fullCategorydata, createPost} = useContext(AuthContext);
 
   useEffect(() => {
-    getCategories();
-    requestLocationPermission();
-    // console.log('data', fullCategorydata);
-    setSelectedCategories(['selected']);
+    getCategories();  
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
@@ -233,7 +96,7 @@ export default function SellerProfile({navigation, route}) {
       phone: '',
       location: '',
       media: '',
-      selectedCategories: '',
+      selectedCategories: '', 
       bussinessAddress: '',
       Socialmedia: '',
       ownerName: '',
@@ -243,13 +106,14 @@ export default function SellerProfile({navigation, route}) {
     };
 
     // Validate Email or Phone Number
-    if (!email.trim()) {
-      newErrors.email = 'Email is required.';
+    if (!email.trim() && selectedAvailabity.length === 0) {
+      newErrors.email = 'Email or availability is required.';
       valid = false;
-    } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-      newErrors.email = 'Enter a valid email address .';
+    } else if (email.trim() && !emailRegex.test(email) && !phoneRegex.test(email)) {
+      newErrors.email = 'Enter a valid email address.';
       valid = false;
     }
+    
 
     // Validate Description
     if (!description.trim()) {
@@ -259,6 +123,7 @@ export default function SellerProfile({navigation, route}) {
       newErrors.description = 'Description must be at least 6 characters long.';
       valid = false;
     }
+ 
 
     // Validate Phone Number
     if (!phone.trim()) {
@@ -271,15 +136,11 @@ export default function SellerProfile({navigation, route}) {
 
     // Validate Category Selection
     if (selectedCategories.length === 0) {
-      newErrors.category = 'Please select at least one category.';
+      newErrors.selectedCategories = 'Please select at least one category.';
       valid = false;
-    }
-    if (selectedAvailabity.length === 0) {
-      newErrors.category = 'Please select at least one category.';
-      valid = false;
-    }
+    } 
     if (selectedScale.length === 0) {
-      newErrors.category = 'Please select at least one category.';
+      newErrors.selectedScale = 'Please select at least one scale.';
       valid = false;
     }
     // Validate Location
@@ -289,31 +150,29 @@ export default function SellerProfile({navigation, route}) {
     }
 
     if (!bussinessAddress.trim()) {
-      newErrors.bussinessAddress = 'Description is required.';
+      newErrors.bussinessAddress = 'bussiness Address is required.';
       valid = false;
     } else if (bussinessAddress.length < 6) {
       newErrors.bussinessAddress =
-        'Description must be at least 6 characters long.';
+        'bussiness Address must be at least 6 characters long.';
       valid = false;
     }
 
     if (!Socialmedia.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
+      newErrors.Socialmedia = 'Social media is required.';
       valid = false;
     } else if (Socialmedia.length < 6) {
-      newErrors.Socialmedia = 'Description must be at least 6 characters long.';
+      newErrors.Socialmedia = 'Social media must be at least 6 characters long.';
       valid = false;
     }
 
     if (!shopName.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
-      valid = false;
+      newErrors.shopName = 'Shop name is required.';
     }
-
     if (!ownerName.trim()) {
-      newErrors.Socialmedia = 'Description is required.';
-      valid = false;
+      newErrors.ownerName = 'Owner name is required.';
     }
+    
 
     setErrors(newErrors);
     return valid;
@@ -326,7 +185,7 @@ export default function SellerProfile({navigation, route}) {
       phone: '',
       location: '',
       media: '',
-      selectedCategories: '',
+      selectedCategories: '', 
       bussinessAddress: '',
       Socialmedia: '',
       ownerName: '',
@@ -367,6 +226,9 @@ export default function SellerProfile({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
+
+      <LocationPermission setLocation={setLocation} />
+
       <View
         style={{
           alignItems: 'center',
@@ -407,7 +269,7 @@ export default function SellerProfile({navigation, route}) {
       </View>
 
       <View style={{}}>
-        {media ? (
+        {media && media.length > 0 ? (
           <>
             <Image
               source={{uri: media[0].uri}}
@@ -542,7 +404,7 @@ export default function SellerProfile({navigation, route}) {
           half={true}
           single={true}
           selectedValues={selectedAvailabity}
-          onChangeValue={handleCategoryChange}
+          onChangeValue={handleAvailabityChange}
         />
       </View>
       <HelperText
@@ -576,7 +438,7 @@ export default function SellerProfile({navigation, route}) {
 
       <PhoneInput
         ref={phoneInput}
-        defaultValue={phone}
+        value={phone}
         containerStyle={{
           width: Width * 0.9,
           height: 60,
@@ -606,7 +468,7 @@ export default function SellerProfile({navigation, route}) {
         layout="second"
         onChangeText={text => setphone(text)}
       />
-      <HelperText type="error" visible={!!errors.phone} style={{height: 10}}>
+      <HelperText type="error" visible={!!errors.phone} style={{alignSelf: 'flex-start', marginLeft: 10}}>
         {errors.phone}
       </HelperText>
 
@@ -648,11 +510,11 @@ export default function SellerProfile({navigation, route}) {
         half={false}
         single={true}
         selectedValues={selectedScale}
-        onChangeValue={handleCategoryChange}
+        onChangeValue={handleScaleChange}
       />
 
-      <HelperText type="error" visible={!!errors.category} style={{height: 10}}>
-        {errors.category}
+      <HelperText type="error" visible={!!errors.selectedScale}  style={{alignSelf: 'flex-start', marginLeft: 10}}>
+        {errors.selectedScale}
       </HelperText>
 
       <View
@@ -709,7 +571,7 @@ export default function SellerProfile({navigation, route}) {
             },
           ]}>
           <TextInput
-            value={ownerName}
+            value={shopName}
             style={[
               styles.textInput,
               {
@@ -717,7 +579,7 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setownerName}
+            onChangeText={setshopName}
             placeholder="Shop name"
             mode="outlined"
             placeholderTextColor={'grey'}
@@ -737,7 +599,7 @@ export default function SellerProfile({navigation, route}) {
             },
           ]}>
           <TextInput
-            value={shopName}
+            value={ownerName}
             style={[
               styles.textInput,
               {
@@ -745,7 +607,7 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setshopName}
+            onChangeText={item => setownerName(item)}
             placeholder="Owner name"
             mode="outlined"
             placeholderTextColor={'grey'}
@@ -754,13 +616,20 @@ export default function SellerProfile({navigation, route}) {
           />
         </View>
       </View>
+      {errors.shopName?(
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
-      </HelperText>
+        visible={!!errors.shopName}>
+        {errors.shopName}
+      </HelperText>):null}
 
+     {errors.ownerName?( <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.ownerName}>
+        {errors.ownerName}
+      </HelperText>):null}
       <View
         style={{
           alignSelf: 'flex-start',
@@ -811,8 +680,8 @@ export default function SellerProfile({navigation, route}) {
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
+        visible={!!errors.bussinessAddress}>
+        {errors.bussinessAddress}
       </HelperText>
 
       <View
@@ -894,8 +763,8 @@ export default function SellerProfile({navigation, route}) {
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
+        visible={!!errors.Socialmedia}>
+        {errors.Socialmedia}
       </HelperText>
 
       <View
@@ -985,17 +854,17 @@ export default function SellerProfile({navigation, route}) {
           })) || []
         }
         placeholder={'Select Categories'}
-        selectedValues={selectedCategories} // Pass the selected categories to the dropdown
-        onChangeValue={handleCategoryChange} // Handle category selection changes
+        selectedValues={selectedCategories}  
+        onChangeValue={handleCategoryChange}  
       />
 
-      <HelperText type="error" visible={!!errors.category} style={{height: 10}}>
-        {errors.category}
+      <HelperText type="error" visible={!!errors.selectedCategories} style={{alignSelf: 'flex-start', marginLeft: 10}}>
+        {errors.selectedCategories}
       </HelperText>
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('BottomTabs')}
         // onPress={() => handlePress()}
       >
         <Text

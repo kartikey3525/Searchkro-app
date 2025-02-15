@@ -1123,13 +1123,12 @@ export default function ShopDetails({navigation, route}) {
               }}>
               <Text
                 numberOfLines={1}
-                style={[
-                  styles.recListText,
+                style={[ 
                   {
                     fontWeight: 'bold',
                     marginTop: 0,
                     fontSize: 14,
-                    width: 32,
+                    paddingRight: 8,
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
                 ]}>

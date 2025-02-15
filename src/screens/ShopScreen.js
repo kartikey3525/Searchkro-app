@@ -120,9 +120,8 @@ export default function ShopScreen({navigation, route}) {
                   styles.recListText,
                   {
                     fontWeight: 'bold',
-                    marginTop: 0,
+                    marginTop: 0,paddingRight:5,
                     fontSize: 13,
-                    width: 28,
                     color: isDark ? '#fff' : '#000',
                   },
                 ]}>
@@ -316,10 +315,7 @@ export default function ShopScreen({navigation, route}) {
       </View>
     );
   };
-
-  const renderAboveThumbComponent = () => {
-    return <View style={styles.container}></View>;
-  };
+ 
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
@@ -457,7 +453,7 @@ export default function ShopScreen({navigation, route}) {
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
           {filteredPosts.map((item, index) => (
-            <View key={item.id}>{render2RectangleList({item, index})}</View>
+            <View key={item.id ?? `post-${index}`}>{render2RectangleList({item, index})}</View>
           ))}
         </ScrollView>
       </View>
@@ -663,8 +659,7 @@ export default function ShopScreen({navigation, route}) {
                 minimumValue={0}
                 maximumValue={5}
                 step={1}
-                thumbTintColor="#00AEEF"
-                renderAboveThumbComponent={renderAboveThumbComponent}
+                thumbTintColor="#00AEEF" 
               />
             </SliderContainer>
             <TouchableOpacity

@@ -28,7 +28,7 @@ export default function PostHistory({navigation}) {
 
   useEffect(() => {
     getPostsHistory();
-    console.log('get PostsHistory', PostsHistory[0]);
+    // console.log('get PostsHistory', PostsHistory[0]);
   }, [useIsFocused()]);
 
   const [recentPostList, setrecentPostList] = useState([
@@ -72,7 +72,8 @@ export default function PostHistory({navigation}) {
             },
           ]}>
           <Image
-            source={item.img}
+            // source={item.img}
+            source={{uri: item.images[0]}}
             style={{
               width: '36%',
               height: '86%',
@@ -126,14 +127,14 @@ export default function PostHistory({navigation}) {
             </View>
           </View>
           <Entypo
-            onPress={() => toggleModal(item.id)} // Use toggleModal instead of setModalVisible
+            onPress={() => toggleModal(item._id)} // Use toggleModal instead of setModalVisible
             name="dots-three-vertical"
             size={24}
             color={isDark ? 'rgb(154, 154, 154)' : 'rgb(0, 0, 0)'}
             style={{alignSelf: 'flex-start', marginTop: 10}}
           />
         </View>
-        {selectedItemId === item.id && (
+        {selectedItemId === item._id && (
           <Pressable
             style={{
               position: 'absolute',
@@ -141,7 +142,7 @@ export default function PostHistory({navigation}) {
               top: 10,
               right: 24,
             }}
-            onPress={() => toggleModal(item.id)}>
+            onPress={() => toggleModal(item._id)}>
             <View
               style={[
                 styles.modalContent,
@@ -154,7 +155,7 @@ export default function PostHistory({navigation}) {
                   alignItems: 'center',
                   marginLeft: 20,
                 }}
-                onPress={() => deleteItem(item.id)}>
+                onPress={() => deleteItem(item._id)}>
                 <Ionicons
                   name={'trash-outline'}
                   size={16}
@@ -191,7 +192,7 @@ export default function PostHistory({navigation}) {
                   alignItems: 'center',
                   marginLeft: 20,
                 }}
-                onPress={() => deleteItem(item.id)}>
+                onPress={() => deleteItem(item._id)}>
                 <Ionicons
                   name={'trash-outline'}
                   size={16}
@@ -260,7 +261,7 @@ export default function PostHistory({navigation}) {
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1}}>
           <View style={{marginTop: '2%', padding: 5}}>
-            {recentPostList.map((item, index) => (
+            {PostsHistory.map((item, index) => (
               <View key={item.id}>{render2RectangleList({item, index})}</View>
             ))}
           </View>

@@ -2,19 +2,13 @@ import React, {useState, useContext, useEffect} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
+  StyleSheet, 
   Image,
-  Dimensions,
-  Modal,
-  TouchableOpacity,
+  Dimensions, 
   TextInput,
   FlatList,
-} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+} from 'react-native'; 
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import io from 'socket.io-client';
 import {ThemeContext} from '../context/themeContext';
@@ -89,11 +83,25 @@ export default function ChatSupport({navigation}) {
         image,
         senderId: userId,
       };
-
-      socket.emit('sendMessage', {chatId, ...newMessage});
-      setMessages(prevMessages => [newMessage, ...prevMessages]);
+  
+      // Send user's message
+      socket.emit('sendMessage', { chatId, ...newMessage });
+      setMessages((prevMessages) => [newMessage, ...prevMessages]);
+  
+      // Clear input
       setText('');
       setImage(null);
+  
+      // Send a dummy response after 1 second
+      setTimeout(() => {
+        const botResponse = {
+          id: Date.now() + 1,
+          text: "hello ! how are you :)",
+          image: null,
+          senderId: "bot",
+        };
+        setMessages((prevMessages) => [botResponse, ...prevMessages]);
+      }, 1000);
     }
   };
 

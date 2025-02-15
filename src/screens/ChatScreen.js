@@ -61,13 +61,28 @@ const ChatScreen = ({navigation, route}) => {
         image,
         senderId: userId,
       };
-
-      socket.emit('sendMessage', {chatId, ...newMessage});
-      setMessages(prevMessages => [newMessage, ...prevMessages]);
+  
+      // Send user's message
+      socket.emit('sendMessage', { chatId, ...newMessage });
+      setMessages((prevMessages) => [newMessage, ...prevMessages]);
+  
+      // Clear input
       setText('');
       setImage(null);
+  
+      // Send a dummy response after 1 second
+      setTimeout(() => {
+        const botResponse = {
+          id: Date.now() + 1,
+          text: "hello ! how are you :)",
+          image: null,
+          senderId: "bot",
+        };
+        setMessages((prevMessages) => [botResponse, ...prevMessages]);
+      }, 1000);
     }
   };
+  
 
   const pickImage = () => {
     launchImageLibrary({mediaType: 'photo'}, response => {

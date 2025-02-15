@@ -13,20 +13,20 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import {Rating} from '@kolking/react-native-rating';
 
 import {useState} from 'react';
-import {AuthContext} from '../context/authcontext';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {AuthContext} from '../context/authcontext'; 
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import useImagePicker from '../hooks/useImagePicker';
 
 export default function RatedScreen({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [media, setMedia] = useState([]);
+  // const [media, setMedia] = useState([]);
   const [description, setdescription] = useState('');
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -37,6 +37,9 @@ export default function RatedScreen({navigation}) {
   });
   const {handleRegister, handleLogin, handleResetPassword} =
     useContext(AuthContext);
+
+  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
+
 
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -97,15 +100,7 @@ export default function RatedScreen({navigation}) {
       setIsLoading(false);
     }
   };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([...media, ...response.assets]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
-  };
+ 
 
   return (
     <ScrollView

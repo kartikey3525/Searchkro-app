@@ -6,23 +6,21 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Modal,
-  Platform,
-  PermissionsAndroid,
+  Modal, 
 } from 'react-native';
 import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useState} from 'react';
-import {AuthContext} from '../context/authcontext';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {AuthContext} from '../context/authcontext'; 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'react-native-image-picker';
 import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
+import useImagePicker from '../hooks/useImagePicker';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -31,10 +29,10 @@ export default function ReportIssue({navigation}) {
   const isDark = theme === 'dark';
 
   const [isLoading, setIsLoading] = useState(false);
-  const [media, setMedia] = useState([]);
   const [description, setdescription] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const {PostReportissue, PostsHistory} = useContext(AuthContext);
+  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
 
   useEffect(() => {
     // console.log('get PostReportissue', PostsHistory[0]);
@@ -46,13 +44,16 @@ export default function ReportIssue({navigation}) {
   });
 
   const validateInputs = () => {
+    let valid = true;
+  
     if (media.length === 0) {
       setErrors(prevState => ({
         ...prevState,
         media: 'Please select at least one image.',
       }));
+      valid = false;
     }
-
+  
     if (!description.trim()) {
       setErrors(prevState => ({
         ...prevState,
@@ -66,90 +67,28 @@ export default function ReportIssue({navigation}) {
       }));
       valid = false;
     }
-
-    setErrors({media: '', description: ''});
-    return true;
+  
+    return valid;
   };
+  
 
   const handlePress = async () => {
-    setErrors({media: '', description: ''});
-    if (!validateInputs()) return;
-
+    setErrors({media: '', description: ''}); // Reset errors first
+  
+    if (!validateInputs()) return; // Stop execution if validation fails
+  
+    setIsLoading(true);
     try {
       await PostReportissue(media, description);
-      // console.log('Success', ' Report Post successful!');
-      // navigation.navigate('BottomTabs');
+      console.log('Success', 'Report Post successful!');
+      navigation.navigate('BottomTabs');
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([...media, ...response.assets]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
-  };
-
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'App Camera Permission',
-            message: 'App needs access to your camera to take photos',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Camera permission granted');
-          launchCamera();
-        } else {
-          console.log('Camera permission denied');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      console.log('Camera permission not required on iOS');
-      launchCamera();
-    }
-  };
-
-  const launchCamera = () => {
-    let options = {
-      includeBase64: false,
-      mediaType: 'photo',
-      maxWidth: 400,
-      maxHeight: 400,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.launchCamera(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        console.log('Image URI:', response.assets?.[0]?.uri);
-        if (response.assets && response.assets.length > 0) {
-          setMedia([{uri: response.assets[0].uri}]); // Store the image
-        }
-      }
-    });
-  };
-
+  
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}

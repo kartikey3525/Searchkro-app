@@ -15,7 +15,6 @@ import {AuthContext} from '../context/authcontext';
 import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
-import {launchImageLibrary} from 'react-native-image-picker';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -23,95 +22,87 @@ import {useContext} from 'react';
 import DatePicker from 'react-native-date-picker';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import useImagePicker from '../hooks/useImagePicker';
 
-// import PhoneInput from 'react-phone-number-input/input';
-// import PhoneTextInput from '../components/PhoneTextInput';
 export default function EditProfile({navigation}) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [gender, setgender] = useState([]);
+
   const [date, setDate] = useState(new Date());
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(false);
-  const [media, setMedia] = useState([]);
   const [open, setOpen] = useState('');
   const phoneInput = useRef(null);
   const [value, setValue] = useState('');
 
   const [errors, setErrors] = useState({
     email: '',
-    password: '',
+    value: '',
+    name: '',
+    phone: '',
+    gender: '',
   });
   const {handleRegister, handleLogin, handleResetPassword} =
     useContext(AuthContext);
 
+  const {media, selectMedia, requestCameraPermission, setMedia} =
+    useImagePicker();
+
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
+    let newErrors = {email: '', phone: '', name: '', gender: ''};
+    let isValid = true;
 
-    if (!email && !password) {
-      setErrors(prevState => ({
-        ...prevState,
-        email: 'Email or phone number is required.',
-      }));
-      return false;
+    if (!name.trim()) {
+      newErrors.name = 'Name is required.';
+      isValid = false;
+    } else if (name.length < 6) {
+      newErrors.name = 'Name must be at least 6 characters long.';
+      isValid = false;
     }
 
-    if (email && phoneRegex.test(email)) {
-      // phone number is valid
-    } else if (email && emailRegex.test(email)) {
-      // email is valid
-    } else {
-      setErrors(prevState => ({
-        ...prevState,
-        email: 'Please enter a valid email address or phone number.',
-      }));
-      return false;
+    if (!email.trim()) {
+      newErrors.email = 'Email or phone number is required.';
+      isValid = false;
+    } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+      newErrors.email = 'Please enter a valid email address or phone number.';
+      isValid = false;
     }
 
-    if (!password.trim()) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password is required.',
-      }));
-      return false;
+    if (!value.trim()) {
+      newErrors.phone = 'Phone number is required.';
+      isValid = false;
+    } else if (phoneInput.current && !phoneInput.current.isValidNumber(value)) {
+      newErrors.phone = 'Enter a valid phone number.';
+      isValid = false;
     }
 
-    if (password.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password must be at least 6 characters long.',
-      }));
-      return false;
+    if (gender.length === 0) {
+      newErrors.gender = 'Please select at least one category.';
+      isValid = false;
     }
 
-    setErrors({email: '', password: ''});
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handlePress = async () => {
-    setErrors({email: '', password: ''});
+    setErrors({email: '', phone: '', name: '', gender: ''});
     if (!validateInputs()) return;
 
     setIsLoading(true);
     try {
-      await handleLogin(email, password);
-      console.log('Success', 'Login successful!');
-      navigation.navigate('OTPScreen', {emailPhone: email, password: password});
+      // await handleLogin(email, password);
+      console.log('Success', 'profile update successful!');
+      // navigation.navigate('Profilescreen' );
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([...media, ...response.assets]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
   };
 
   const formatDate = date => {
@@ -120,6 +111,10 @@ export default function EditProfile({navigation}) {
     )
       .toString()
       .padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
+  const handleCategoryChange = value => {
+    setgender(value); // Update selected categories
   };
 
   return (
@@ -241,7 +236,7 @@ export default function EditProfile({navigation}) {
           resizeMode="contain"
         />
         <TextInput
-          value={email}
+          value={name}
           style={[
             styles.textInput,
             {
@@ -249,7 +244,7 @@ export default function EditProfile({navigation}) {
               color: isDark ? 'white' : 'black',
             },
           ]}
-          onChangeText={setEmail}
+          onChangeText={setName}
           placeholder="Name"
           mode="outlined"
           placeholderTextColor={isDark ? 'white' : 'black'}
@@ -260,11 +255,12 @@ export default function EditProfile({navigation}) {
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
+        visible={!!errors.name}>
+        {errors.name}
       </HelperText>
 
-      <View
+      <Pressable
+        onPress={() => setOpen(true)}
         style={[
           styles.inputContainer,
           {
@@ -287,7 +283,7 @@ export default function EditProfile({navigation}) {
 
         <TextInput
           value={formatDate(date)}
-          onChangeText={setEmail}
+          editable={false}
           placeholder="Date"
           mode="outlined"
           style={[
@@ -301,12 +297,12 @@ export default function EditProfile({navigation}) {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-      </View>
+      </Pressable>
       <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
+        visible={!!errors.date}>
+        {errors.date}
       </HelperText>
 
       <View
@@ -353,7 +349,7 @@ export default function EditProfile({navigation}) {
 
       <PhoneInput
         ref={phoneInput}
-        defaultValue={value}
+        value={value}
         containerStyle={{
           width: Width * 0.9,
           height: 60,
@@ -396,6 +392,19 @@ export default function EditProfile({navigation}) {
       />
 
       <Dropdown
+        item={[
+          {label: 'Male', value: 'male'},
+          {
+            label: 'Female',
+            value: 'female',
+          },
+          {
+            label: 'Others',
+            value: 'othetrs',
+          },
+        ]}
+        selectedValues={gender}
+        onChangeValue={handleCategoryChange}
         style={[
           styles.inputContainer,
           {
@@ -406,10 +415,18 @@ export default function EditProfile({navigation}) {
         ]}
         placeholder="Gender"
       />
+      <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.gender}>
+        {errors.gender}
+      </HelperText>
 
       <TouchableOpacity
         style={[styles.blueBotton, {margin: '10%'}]}
-        onPress={() => navigation.navigate('Profilescreen')}>
+        // onPress={() => navigation.navigate('Profilescreen')}
+
+        onPress={ handlePress}>
         <Text
           style={[
             styles.smallText,

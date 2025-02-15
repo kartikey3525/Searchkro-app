@@ -104,7 +104,7 @@ export default function PreferenceDetails({navigation, route}) {
                         ? 'rgba(255, 255, 255, 1)'
                         : 'rgba(29, 30, 32, 1)',
                       fontSize: 13,
-                      width: 22,
+                     paddingRight: 5
                     },
                   ]}>
                   {item.rating.averageRating}

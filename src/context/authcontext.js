@@ -31,15 +31,15 @@ const AuthProvider = ({children}) => {
 
   useEffect(() => {
     getDeviceToken();
-    // messaging().onMessage(async (remoteMessage) => {
-    //   console.log('New foreground message:', remoteMessage);
-    //   Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
-    // });
+    messaging().onMessage(async (remoteMessage) => {
+      console.log('New foreground message:', remoteMessage);
+      Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
+    });
 
-    // // Background & Quit state notifications
-    // messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-    //   console.log('New background message:', remoteMessage);
-    // });
+    // Background & Quit state notifications
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+      console.log('New background message:', remoteMessage);
+    });
 
     console.log('token', userdata.token);
   }, []);
@@ -264,17 +264,12 @@ const AuthProvider = ({children}) => {
   const getPostsHistory = async categories => {
     try {
       const payload = {
-        startDistance: '',
-        endDistance: '33',
-        latitude: '40.758896',
-        longitude: '-73.985130',
-        rating: 2,
-        topRated: true, // true, false
+        distance: 5,
+        rating: '',
+        topRated: '',
         key: '',
-        categories: [
-          // "Rentals"
-        ],
-        myPost: true, // true, false
+        categories: categories,
+        myPost: false, // true, false
         userId: '',
       };
 
@@ -288,11 +283,9 @@ const AuthProvider = ({children}) => {
         {headers},
       );
 
-      // console.log('Response:', response.data.data);
-
       const PostsHistory = response.data.data;
       setPostsHistory(PostsHistory);
-      console.log('PostsHistory:', PostsHistory);
+      // console.log('PostsHistory:', response.data.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // console.log('Error 107', error.response?.data || 'No error response');

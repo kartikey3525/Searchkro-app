@@ -4,12 +4,9 @@ import {
   Image,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
-  PermissionsAndroid,
+  TouchableOpacity, 
   ScrollView,
-  Modal,
-  Platform,
-  Alert,
+  Modal, 
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -21,181 +18,39 @@ import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native';
-import Geolocation from '@react-native-community/geolocation';
+import {useIsFocused} from '@react-navigation/native'; 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import * as ImagePicker from 'react-native-image-picker';
-import {ThemeContext} from '../context/themeContext';
-import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; 
+import {ThemeContext} from '../context/themeContext'; 
 
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {launchImageLibrary} from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; 
 import Header from '../components/Header';
+import LocationPermission from '../hooks/uselocation';
+import useImagePicker from '../hooks/useImagePicker';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function ProfileSettings({navigation, route}) {
   const {theme} = useContext(ThemeContext);
-  const isDark = theme === 'dark';
-  const [email, setEmail] = useState('');
+  const isDark = theme === 'dark'; 
   const [description, setdescription] = useState('');
   const [opensAt, setopensAt] = useState('');
   const [closeAt, setcloseAt] = useState('');
-  const [ownerName, setownerName] = useState('');
+  const [categories, setcategories] = useState('');
   const [shopName, setshopName] = useState('');
   const [phone, setphone] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedScale, setSelectedScale] = useState([]);
-  const [selectedAvailabity, setSelectedAvailabity] = useState([]);
-  const [media, setMedia] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]); 
   const [location, setLocation] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const phoneInput = useRef(null);
-  const isFocused = useIsFocused();
-  const [errorMessage, setErrorMessage] = useState(null);
+  const isFocused = useIsFocused(); 
   const [modalVisible, setModalVisible] = useState(false);
 
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'App Camera Permission',
-            message: 'App needs access to your camera to take photos',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
+  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
 
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Camera permission granted');
-          launchCamera();
-        } else {
-          console.log('Camera permission denied');
-        }
-      } catch (err) {
-        console.warn(err);
-      }
-    } else {
-      console.log('Camera permission not required on iOS');
-      launchCamera();
-    }
-  };
-
-  const launchCamera = () => {
-    let options = {
-      includeBase64: false,
-      mediaType: 'photo',
-      maxWidth: 400,
-      maxHeight: 400,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.launchCamera(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        console.log('Image URI:', response.assets?.[0]?.uri);
-        if (response.assets && response.assets.length > 0) {
-          setMedia(prevMedia => [...prevMedia, {uri: response.assets[0].uri}]); // Store the image
-        }
-      }
-    });
-  };
-
-  const selectMedia = () => {
-    launchImageLibrary({mediaType: 'mixed', selectionLimit: 0}, response => {
-      if (response.assets) {
-        setMedia([...media, ...response.assets]);
-        setErrors(prevErrors => ({...prevErrors, media: ''}));
-      }
-    });
-  };
-
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Access Required',
-          message: 'This app needs to access your location.',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission granted');
-        getLocation();
-      } else {
-        // Alert.alert('Permission Denied', 'Location access is required.');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
-  const getLocation = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app requires location access to function properly.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission Denied', 'Location access is required.');
-        return;
-      }
-
-      // Get location with a longer timeout and fallback options
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          setLocation({latitude, longitude});
-          console.log('User location:', latitude, longitude);
-        },
-        error => {
-          console.error('Location error:', error);
-
-          // Specific error handling
-          switch (error.code) {
-            case 1:
-              Alert.alert('Permission Denied', 'Enable location permission.');
-              break;
-            case 2:
-              Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
-              break;
-            case 3:
-              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
-              break;
-            default:
-              Alert.alert('Error', error.message);
-          }
-        },
-        {
-          enableHighAccuracy: false, // Try setting false if high accuracy fails
-          timeout: 60000, // Increase timeout from 35s to 60s
-          maximumAge: 10000,
-          distanceFilter: 10, // Get location updates every 10 meters
-        },
-      );
-    } catch (error) {
-      console.error('Error fetching location:', error);
-    }
-  };
-
+ 
   const handleCategoryChange = value => {
     setSelectedCategories(value); // Update selected categories
   };
@@ -203,10 +58,7 @@ export default function ProfileSettings({navigation, route}) {
   const {getCategories, fullCategorydata, createPost} = useContext(AuthContext);
 
   useEffect(() => {
-    getCategories();
-    requestLocationPermission();
-    // console.log('data', fullCategorydata);
-    setSelectedCategories(['selected']);
+    getCategories();   
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
@@ -216,14 +68,12 @@ export default function ProfileSettings({navigation, route}) {
     phone: '',
     location: '',
     media: '',
-    selectedCategories: '',
+    categories: '',
     ownerName: '',
     shopName: '',
   });
 
-  const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
+  const validateInputs = () => { 
 
     let valid = true;
     let newErrors = {
@@ -233,17 +83,16 @@ export default function ProfileSettings({navigation, route}) {
       phone: '',
       location: '',
       media: '',
-      selectedCategories: '',
+      categories: '',
       ownerName: '',
       shopName: '',
     };
-
-    // Validate Email or Phone Number
-    if (!email.trim()) {
-      newErrors.email = 'Email is required.';
+ 
+    if (!shopName.trim()) {
+      newErrors.shopName = 'shopName is required.';
       valid = false;
-    } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-      newErrors.email = 'Enter a valid email address .';
+    } else if (shopName.length < 4) {
+      newErrors.shopName = 'shopName must be at least 4 characters long.';
       valid = false;
     }
 
@@ -264,7 +113,10 @@ export default function ProfileSettings({navigation, route}) {
       newErrors.closeAt = 'closeAt is required.';
       valid = false;
     }
-
+    if (media.length === 0) {
+      newErrors.media = 'Please select at least one image.';
+      valid = false;
+    } 
     // Validate Phone Number
     if (!phone.trim()) {
       newErrors.phone = 'Phone number is required.';
@@ -273,25 +125,11 @@ export default function ProfileSettings({navigation, route}) {
       newErrors.phone = 'Enter a valid phone number.';
       valid = false;
     }
-
     // Validate Category Selection
     if (selectedCategories.length === 0) {
-      newErrors.category = 'Please select at least one category.';
+      newErrors.categories = 'Please select at least one category.';
       valid = false;
-    }
-    if (selectedAvailabity.length === 0) {
-      newErrors.category = 'Please select at least one category.';
-      valid = false;
-    }
-    if (selectedScale.length === 0) {
-      newErrors.category = 'Please select at least one category.';
-      valid = false;
-    }
-    // Validate Location
-    if (!location) {
-      newErrors.location = 'Please allow location access.';
-      valid = false;
-    }
+    }   
 
     setErrors(newErrors);
     return valid;
@@ -305,7 +143,7 @@ export default function ProfileSettings({navigation, route}) {
       phone: '',
       location: '',
       media: '',
-      selectedCategories: '',
+      categories: '',
       ownerName: '',
       shopName: '',
     });
@@ -313,18 +151,8 @@ export default function ProfileSettings({navigation, route}) {
 
     setIsLoading(true);
     try {
-      console.log('Success', 'Login successful!');
-      navigation.navigate('uploadimage', {
-        description: '',
-        opensAt: '',
-        closeAt: '',
-        phone: '',
-        location: '',
-        media: '',
-        selectedCategories: '',
-        ownerName: '',
-        shopName: '',
-      });
+      console.log('Success', 'updated successfully!');
+      navigation.navigate('BottomTabs');
     } catch (error) {
       //   Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -339,6 +167,9 @@ export default function ProfileSettings({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
+
+      <LocationPermission setLocation={setLocation} />
+
       <Header header={'Profile'} />
 
       <Text
@@ -428,7 +259,7 @@ export default function ProfileSettings({navigation, route}) {
               color: isDark ? '#fff' : '#000',
             },
           ]}
-          onChangeText={setshopName}
+          onChangeText={setshopName => setshopName(shopName)}
           placeholder="Shop Name"
           mode="outlined"
           placeholderTextColor={isDark ? '#ccc' : 'black'}
@@ -525,7 +356,7 @@ export default function ProfileSettings({navigation, route}) {
 
       <PhoneInput
         ref={phoneInput}
-        defaultValue={phone}
+        value={phone}
         containerStyle={{
           width: Width * 0.9,
           height: 60,
@@ -550,8 +381,7 @@ export default function ProfileSettings({navigation, route}) {
           backgroundColor: isDark ? '#000' : '#fff',
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
-        }}
-        defaultCode="IN"
+        }} 
         layout="second"
         onChangeText={text => setphone(text)}
       />
@@ -684,11 +514,13 @@ export default function ProfileSettings({navigation, route}) {
         selectedValues={selectedCategories} // Pass the selected categories to the dropdown
         onChangeValue={handleCategoryChange} // Handle category selection changes
       />
-
-      <HelperText type="error" visible={!!errors.category} style={{height: 10}}>
-        {errors.category}
+ 
+      <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.categories}>
+        {errors.categories}
       </HelperText>
-
       {/* Uploaded Images */}
       {media.length > 0 && (
         <>
@@ -749,7 +581,7 @@ export default function ProfileSettings({navigation, route}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('BottomTabs')}
         // onPress={() => handlePress()}
       >
         <Text

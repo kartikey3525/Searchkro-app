@@ -12,11 +12,14 @@ import React, {useContext, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {ThemeContext} from '../context/themeContext';
+import { HelperText } from 'react-native-paper';
 
 export default function AddressScreen({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
+    const [location, setLocation] = useState( '');
+  
   const [suggestedLocations, setSuggestedLocations] = useState([
     {id: 1, location: 'New York'},
     {id: 2, location: 'Los Angeles'},
@@ -25,6 +28,45 @@ export default function AddressScreen({navigation}) {
     {id: 5, location: 'Phoenix'},
   ]);
 
+   const [errors, setErrors] = useState({
+      location: '',
+    });
+  
+    const validateInputs = () => {
+      let newErrors = { location: '' };
+      let valid = true;
+    
+      if (!location.trim()) {
+        newErrors.location = 'Location is required.';
+        valid = false;
+      } else if (location.length < 6) {
+        newErrors.location = 'Location must be at least 6 characters long.';
+        valid = false;
+      }
+    
+      setErrors(newErrors);
+      return valid;
+    };
+    
+    
+  
+    const handlePress = async () => {
+      setErrors({location: ''}); // Reset errors first
+    
+      if (!validateInputs()) return; // Stop execution if validation fails
+    
+      setIsLoading(true);
+      try {
+        // await PostReportissue(media, location);
+        console.log('Success', 'Report Post successful!');
+        navigation.navigate('BottomTabs');
+      } catch (error) {
+        Alert.alert('Error', 'Something went wrong. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
   return (
     <View
       style={[
@@ -55,7 +97,7 @@ export default function AddressScreen({navigation}) {
           style={{marginLeft: 0}}
         />
         <TextInput
-          // value={'text'}
+         value={location}
           style={[
             styles.textInput,
             {
@@ -63,11 +105,19 @@ export default function AddressScreen({navigation}) {
               backgroundColor: isDark ? '#000000' : 'rgb(255, 255, 255)',
             },
           ]}
-          // onChangeText={setText}
-          placeholderTextColor={'black'}
+          onChangeText={Selection => setLocation(Selection)}
+          placeholderTextColor={ isDark ? 'rgb(184, 184, 184)' : 'black'}
+          placeholder='Location'
           autoCapitalize="none"
         />
+
       </View>
+ <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start',  }}
+        visible={!!errors.location}>
+        {errors.location}
+      </HelperText>
 
       <TouchableOpacity
         onPress={() => navigation.navigate('MapAddress')}
@@ -139,7 +189,9 @@ export default function AddressScreen({navigation}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('BottomTabs')}>
+        // onPress={handlePress}
+         onPress={() => navigation.navigate('BottomTabs')}
+        >
         <Text
           style={[
             styles.smallText,
@@ -208,17 +260,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     justifyContent: 'center',
-  },
-  whiteBotton: {
-    backgroundColor: '#fff',
-    width: '90%',
-    height: 56,
-    borderRadius: 10,
-    margin: 10,
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#A3A3A3',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  }, 
 });
