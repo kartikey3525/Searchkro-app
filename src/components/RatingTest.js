@@ -12,7 +12,7 @@ export default function RatingTest({fixedRating}) {
       <Rating
         size={14}
         rating={fixedRating}
-        starColor="#FFD700" // Gold for selected stars
+        starColor="rgba(255, 219, 17, 1)" // Gold for selected stars
         baseColor={isDark ? '#48484A' : '#D1D1D6'} // White in light mode, Black in dark mode
         disabled
       />

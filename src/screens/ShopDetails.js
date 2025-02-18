@@ -40,10 +40,9 @@ export default function ShopDetails({navigation, route}) {
   const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
     useContext(AuthContext);
 
-  useEffect(() => {
-    // getCategories();clh
+  useEffect(() => { 
     setData(route?.params?.item);
-    // console.log('route data', route?.params?.item);
+    //  console.log('route data', route?.params?.item[0]);
   }, [isFocused]);
 
   const data = [
@@ -1238,7 +1237,7 @@ export default function ShopDetails({navigation, route}) {
                 styles.iconStyle,
                 {backgroundColor: 'rgba(255, 219, 17, 1)'},
               ]}
-              onPress={() => navigation.navigate('ratedscreen', {})}>
+              onPress={() => navigation.navigate('ratedscreen', {item:route.params.item})}>
               <Octicons
                 name="star-fill"
                 size={26}

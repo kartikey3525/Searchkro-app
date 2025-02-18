@@ -5,6 +5,7 @@ import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 let apiURL = 'http://192.168.1.31:8080';
 // let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 const AuthContext = createContext();
 
@@ -25,24 +26,34 @@ const AuthProvider = ({children}) => {
   const [Reportissue, setReportissue] = useState([]);
 
   const [userdata, setUserdata] = useState([]);
+  const [fcmToken, setFcmToken] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isposting, setisposting] = useState(false);
 
   useEffect(() => {
     getDeviceToken();
-    messaging().onMessage(async (remoteMessage) => {
+
+    GoogleSignin.configure({
+      webClientId: 'searchkro-d6ff3.firebaseapp.com',
+      offlineAccess: true, // Enable offline access
+    });
+
+    messaging().onMessage(async remoteMessage => {
       console.log('New foreground message:', remoteMessage);
-      Alert.alert(remoteMessage.notification.title, remoteMessage.notification.body);
+      Alert.alert(
+        remoteMessage.notification.title,
+        remoteMessage.notification.body,
+      );
     });
 
     // Background & Quit state notifications
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('New background message:', remoteMessage);
     });
-
-    console.log('token', userdata.token);
   }, []);
+
+ 
 
   const getDeviceToken = async () => {
     try {
@@ -64,6 +75,8 @@ const AuthProvider = ({children}) => {
       const token = await messaging().getToken();
       if (token) {
         console.log('Device Token:', token);
+        setFcmToken(userdata.token);
+
         return token; // Use this token for sending notifications
       } else {
         console.log('Failed to get device token');
@@ -326,6 +339,36 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const PostRating = async (postId, rate, feedback, images) => {
+    console.log('rate',rate)
+    try {
+      const payload = {
+        rate, // User-selected rating
+        feedback, // User feedback (optional)
+        images, // Array of image URLs (optional)
+      };
+  
+      const headers = {
+        Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+  
+      const response = await axios.post(
+        `${apiURL}/api/rate/rating?postId=${postId}`, // Dynamic Post ID
+        payload,
+        { headers }
+      );
+  
+      console.log('Success', 'Rating Posted Successfully!', response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log('Error:', error.response?.data || 'No error response');
+      } else {
+        console.log('Error:', 'Failed to post rating');
+      }
+    }
+  };
+
+  
   const createPost = async (
     selectedCategories,
     description,
@@ -495,6 +538,29 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices(); // Ensure Google Play Services is available
+      const {fcmToken} = await GoogleSignin.signIn(); // Start Google login flow
+
+      const googleCredential = auth.GoogleAuthProvider.credential(fcmToken);
+      return await auth().signInWithCredential(googleCredential);
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await GoogleSignin.signOut();
+      await auth().signOut();
+      Alert.alert('Signed Out', 'You have been logged out!');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -529,6 +595,10 @@ const AuthProvider = ({children}) => {
         PostsHistory,
         PostReportissue,
         Reportissue,
+        fcmToken,
+        signInWithGoogle,
+        signOut,
+        PostRating,
       }}>
       {children}
     </AuthContext.Provider>

@@ -31,7 +31,7 @@ export default function Login({navigation}) {
     password: '',
     username: '',
   });
-  const {handleRegister, handleLogin, handleResetPassword} =
+  const {signInWithGoogle, handleLogin, handleResetPassword} =
     useContext(AuthContext);
 
   const {theme} = useContext(ThemeContext);
@@ -319,7 +319,12 @@ export default function Login({navigation}) {
           styles.whiteBotton,
           {backgroundColor: isDark ? '#000' : '#fff'},
         ]}
-        onPress={() => navigation.navigate('BottomTabs')}>
+        // onPress={() => navigation.navigate('BottomTabs')}
+       onPress={() => signInWithGoogle()}
+
+        
+        
+        >
         <Image
           source={require('../assets/Google.png')}
           style={{

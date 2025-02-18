@@ -119,7 +119,7 @@ export default function WelcomeScreen2({navigation}) {
           <TouchableOpacity
             style={[
               styles.blueBotton,
-              {backgroundColor: isDarkMode ? '#0077B6' : '#00AEEF'},
+              {backgroundColor:  '#00AEEF'},
             ]}
             onPress={() => navigation.navigate('commonscreen')}>
             <AntDesign name="arrowright" size={24} color="white" />

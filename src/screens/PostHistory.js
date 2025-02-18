@@ -262,7 +262,7 @@ export default function PostHistory({navigation}) {
           style={{height: Height * 0.8, flexGrow: 1}}>
           <View style={{marginTop: '2%', padding: 5}}>
             {PostsHistory.map((item, index) => (
-              <View key={item.id}>{render2RectangleList({item, index})}</View>
+              <View key={item.id ?? `post-${index}`}>{render2RectangleList({item, index})}</View>
             ))}
           </View>
         </ScrollView>

@@ -201,8 +201,7 @@ export default function ProfileScreen({navigation}) {
                       Profile Settings
                     </Text>
 
-                    <AntDesign
-                      onPress={() => navigation.goBack()}
+                    <AntDesign 
                       name="right"
                       size={16}
                       color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -256,7 +255,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -308,7 +307,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -361,7 +360,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -415,7 +414,7 @@ export default function ProfileScreen({navigation}) {
                       </Text>
 
                       <AntDesign
-                        onPress={() => navigation.goBack()}
+                        
                         name="right"
                         size={16}
                         color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -468,7 +467,7 @@ export default function ProfileScreen({navigation}) {
                       </Text>
 
                       <AntDesign
-                        onPress={() => navigation.goBack()}
+                        
                         name="right"
                         size={16}
                         color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -523,7 +522,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -577,7 +576,7 @@ export default function ProfileScreen({navigation}) {
                     </Text>
 
                     <AntDesign
-                      onPress={() => navigation.goBack()}
+                      
                       name="right"
                       size={16}
                       color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -631,7 +630,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -686,7 +685,7 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    onPress={() => navigation.goBack()}
+                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
