@@ -25,12 +25,12 @@ export default function CategoryScreen({navigation, route}) {
   const isFocused = useIsFocused();
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-
-  const {getCategories, fullCategorydata, isposting} = useContext(AuthContext);
-
-  useEffect(() => {
-    getCategories();
-  }, [isFocused]);
+  
+  const {getCategories, fullCategorydata, userRole, isposting} =
+  useContext(AuthContext);
+  
+  const [filteredLists, setFilteredLists] = useState(fullCategorydata);
+  
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'Phone', img: require('../assets/phone.png')},
     {id: 2, title: 'Laptop', img: require('../assets/Laptop.png')},
@@ -45,6 +45,17 @@ export default function CategoryScreen({navigation, route}) {
     {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
+  
+  useEffect(() => {
+    getCategories(); 
+
+    if (fullCategorydata && Array.isArray(fullCategorydata)) {
+      setFilteredLists(fullCategorydata);
+    } else {
+      console.error('fullCategorydata is not an array:', fullCategorydata);
+    }
+ 
+  }, [isFocused]);
 
   const rendersquareList = ({item, index}) => {
     return (
@@ -120,12 +131,16 @@ export default function CategoryScreen({navigation, route}) {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <SearchBar placeholder={'Search Categories'} />
-
+        <SearchBar
+          placeholder={'Search Categories'}
+          lists={fullCategorydata}  
+          setFilteredLists={setFilteredLists} 
+          searchKey="name"
+        />
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.73, flexGrow: 1}}>
-          {fullCategorydata.map((item, index) => (
+          {filteredLists.map((item, index) => (
             <View key={item.id}>{rendersquareList({item, index})}</View>
           ))}
         </ScrollView>

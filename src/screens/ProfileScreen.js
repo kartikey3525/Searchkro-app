@@ -22,7 +22,7 @@ export default function ProfileScreen({navigation}) {
   const {theme, changeTheme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [selectedtheme, setselectedtheme] = useState('SystemDefault');
-  const {userRole} = useContext(AuthContext);
+  const {userRole,handleLogout} = useContext(AuthContext);
 
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,16 +30,21 @@ export default function ProfileScreen({navigation}) {
 
   useEffect(() => {}, [isFocused]);
 
+  const handleDelete = () => {
+    handleLogout() 
+    setModalVisible2(false);
+  };
+
   return (
-    <View style={[styles.container]}>
-      <Image
+    <View style={[styles.container,{backgroundColor: isDark ? '#000' : '#fff'}]}>
+      {/* <Image
         source={
           isDark
             ? require('../assets/profilebg-dark.png')
             : require('../assets/profilebg.png')
         }
         style={{width: Width, height: Height}}
-      />
+      /> */}
 
       <View
         style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}>
@@ -71,7 +76,6 @@ export default function ProfileScreen({navigation}) {
                 {
                   color: isDark ? 'white' : 'black',
                   fontSize: 24,
-                  marginTop: '4%',
                   alignSelf: 'flex-start',
                   width: '100%',
                   margin: 10,
@@ -89,7 +93,7 @@ export default function ProfileScreen({navigation}) {
                 height: Height * 0.12,
                 backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                 alignSelf: 'center',
-                alignItems: 'center',
+                alignItems: 'center',shadowColor:isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                 elevation: 10,
                 borderRadius: 5,
               }}>
@@ -149,8 +153,7 @@ export default function ProfileScreen({navigation}) {
                 width: Width * 0.9,
                 height: Height * userRole === 'buyer' ? 0.63 : 0.63,
                 marginTop: 14,
-                elevation: 5,
-                shadowColor: isDark ? '#fff' : '#000',
+                elevation: 15, 
                 borderRadius: 5,
               }}>
               {userRole === 'buyer' ? (
@@ -994,7 +997,7 @@ export default function ProfileScreen({navigation}) {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                // onPress={handleDelete}
+               onPress={handleDelete}
                 style={styles.deleteButton}>
                 <Text style={styles.buttonText}>Logout</Text>
               </TouchableOpacity>

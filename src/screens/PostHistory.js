@@ -24,7 +24,7 @@ export default function PostHistory({navigation}) {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const {getPostsHistory, PostsHistory} = useContext(AuthContext);
+  const {getPostsHistory, PostsHistory,deletePost} = useContext(AuthContext);
 
   useEffect(() => {
     getPostsHistory();
@@ -54,6 +54,15 @@ export default function PostHistory({navigation}) {
     }
   };
 
+  const deleteItem = (id) => {
+    console.log(`Delete item with ID: ${id}`);
+    deletePost(id);
+    getPostsHistory();
+    // Implement deletion logic here, such as:
+    // 1. Removing from local state
+    // 2. Calling an API to delete from the database
+  };
+  
   const render2RectangleList = ({item, index}) => {
     return (
       <Pressable
@@ -86,7 +95,7 @@ export default function PostHistory({navigation}) {
 
           <View style={{alignSelf: 'flex-start'}}>
             <Text
-              numberOfLines={2}
+              numberOfLines={1}
               style={[
                 styles.recListText,
                 {
@@ -99,7 +108,7 @@ export default function PostHistory({navigation}) {
                   width: Width * 0.45,
                 },
               ]}>
-              {item.title}
+              {item.description}
             </Text>
 
             <View
@@ -123,6 +132,8 @@ export default function PostHistory({navigation}) {
                   },
                 ]}>
                 post : at 21th Nov 2024, 12:23pm
+               {/* {item.openTime} */}
+
               </Text>
             </View>
           </View>

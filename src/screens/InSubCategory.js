@@ -22,6 +22,7 @@ import Header from '../components/Header';
 export default function InSubCategory({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+const [filteredLists, setFilteredLists] = useState(route.params.item);
 
   const [categoryIcons, setcategoryIcons] = useState([
     {id: 1, title: 'shirt', img: require('../assets/phone.png')},
@@ -92,12 +93,17 @@ export default function InSubCategory({navigation, route}) {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <SearchBar placeholder={'Search Categories'} />
+         <SearchBar
+          placeholder={'Search Categories'}
+          lists={route.params.item}  
+          setFilteredLists={setFilteredLists} 
+          searchKey="name"
+        />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.74, flexGrow: 1}}>
-          {categoryIcons.map((item, index) => (
+          {filteredLists.map((item, index) => (
             <View key={item.id}>{rendersquareList({item, index})}</View>
           ))}
         </ScrollView>

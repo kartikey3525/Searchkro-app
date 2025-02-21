@@ -27,7 +27,7 @@ export default function Messages({navigation}) {
   const [recentPostList, setRecentPostList] = useState([
     {
       id: 1,
-      title: 'Lindsey Culhane requested a payment of $780.1',
+      title: 'aindsey Culhane requested a payment of $780.2',
       img: require('../assets/User-image.png'),
       time: '9:00 am',
       status: 'Active',
@@ -99,6 +99,7 @@ export default function Messages({navigation}) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [filteredLists, setFilteredLists] = useState(recentPostList);
 
   const handleLongPress = item => {
     const updatedList = recentPostList.map(listItem =>
@@ -211,10 +212,14 @@ export default function Messages({navigation}) {
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <Header header={'New message'} />
 
-      <SearchBar placeholder={'Search '} />
-
+      <SearchBar
+          placeholder={'Search '}
+          lists={recentPostList}  
+          setFilteredLists={setFilteredLists} 
+          searchKey="title"
+        />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {recentPostList.map((item, index) => render2RectangleList(item, index))}
+        {filteredLists.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>
       {/* Confirmation Modal */}
       {/* <Modal transparent={true} visible={modalVisible} animationType="slide">

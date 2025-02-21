@@ -35,12 +35,19 @@ export default function ShopScreen({navigation, route}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState([0, 2]);
   const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
-
+  const [selectedRating, setSelectedRating] = useState(null);
+  
   useEffect(() => {
-    getFilteredPosts(route?.params?.selectedcategory, value);
-    // console.log('get fil post', filteredPosts[0]);
+    // console.log('getFilteredPosts called')
+    getFilteredPosts(route?.params?.selectedcategory,selectedRating);
+
+    // const filteredData = filteredPosts
+    // ? data.filter(item => item.rating >= parseFloat(selectedRating))
+    // : data;
   }, [isFocused]);
 
+    const [filteredLists, setFilteredLists] = useState( filteredPosts ?? [],)
+  
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
     {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
@@ -81,7 +88,7 @@ export default function ShopScreen({navigation, route}) {
           ]}>
           <Image
             // source={item.img}
-            source={{uri: item.images[0]}}
+            source={{uri: item.profile[0]}}
             style={{
               width: '30%',
               height: '90%',
@@ -107,7 +114,7 @@ export default function ShopScreen({navigation, route}) {
                   width: Width * 0.56,
                 },
               ]}>
-              {item.title}
+              {item.name}
             </Text>
             <View
               style={{
@@ -125,9 +132,13 @@ export default function ShopScreen({navigation, route}) {
                     color: isDark ? '#fff' : '#000',
                   },
                 ]}>
-                {item.rating.averageRating}
+                {/* {item.rating.averageRating} */}
+                5
               </Text>
-              <RatingTest fixedRating={item?.rating?.averageRating} />
+              <RatingTest fixedRating=
+              // {item?.rating?.averageRating}
+              {5}
+               />
             </View>
 
             <View
@@ -199,7 +210,7 @@ export default function ShopScreen({navigation, route}) {
                     left: 5,
                   },
                 ]}>
-                {item.location}
+                {item.businessAddress}
               </Text>
             </View>
 
@@ -223,7 +234,7 @@ export default function ShopScreen({navigation, route}) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                onPress={() => Linking.openURL(`tel:${item.contactNumber}`)}>
+                onPress={() => Linking.openURL(`tel:${item.phone}`)}>
                 <Ionicons name={'call'} size={16} color="rgba(7, 201, 29, 1)" />
               </Pressable>
               <Pressable
@@ -315,7 +326,30 @@ export default function ShopScreen({navigation, route}) {
       </View>
     );
   };
+  const [searchText, setSearchText] = useState('');
  
+  const searchFilterFunction = (text) => {
+    setSearchText(text);
+  
+    if (text.trim() === '') {
+      setFilteredLists(filteredPosts); // Reset to full list when search is empty
+      return;
+    }
+  
+    const lowerCaseText = text.toLowerCase();
+  
+    // Ensure filteredPosts is an array before filtering
+    if (!Array.isArray(filteredPosts)) {
+      console.error('filteredPosts is not an array:', filteredPosts);
+      return;
+    }
+  
+    const filteredResults = filteredPosts.filter(item =>
+      item?.name?.toLowerCase().includes(lowerCaseText)
+    );
+  
+    setFilteredLists(filteredResults);
+  };
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
@@ -416,8 +450,11 @@ export default function ShopScreen({navigation, route}) {
                 isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
               }
               placeholder="Search here"
+              onChangeText={searchFilterFunction}
+          autoCorrect={false}
+          value={searchText}
               autoCapitalize="none"
-              onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
+              // onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
             />
           </View>
 
@@ -452,7 +489,7 @@ export default function ShopScreen({navigation, route}) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
-          {filteredPosts.map((item, index) => (
+          {filteredLists.map((item, index) => (
             <View key={item.id ?? `post-${index}`}>{render2RectangleList({item, index})}</View>
           ))}
         </ScrollView>
@@ -619,7 +656,7 @@ export default function ShopScreen({navigation, route}) {
               ]}>
               Rating
             </Text>
-            <RatingButtons />
+            <RatingButtons onSelectRating={setSelectedRating}/>
 
             <View
               style={{
@@ -664,7 +701,7 @@ export default function ShopScreen({navigation, route}) {
             </SliderContainer>
             <TouchableOpacity
               style={styles.blueBotton}
-              onPress={() => setModalVisible(false)}>
+              onPress={() => [setModalVisible(false),  ]}>
               <Text
                 style={[
                   styles.smallText,

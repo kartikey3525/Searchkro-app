@@ -24,7 +24,7 @@ export default function SubCategory({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const isFocused = useIsFocused();
-
+const [filteredLists, setFilteredLists] = useState(route.params.item);
   const {isposting} = useContext(AuthContext);
   useEffect(() => {
     // console.log('get fil post', route?.params?.selectedcategory);
@@ -102,12 +102,17 @@ export default function SubCategory({navigation, route}) {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <SearchBar placeholder={'Search Categories'} />
+        <SearchBar
+          placeholder={'Search Categories'}
+          lists={route.params.item}  
+          setFilteredLists={setFilteredLists} 
+          searchKey="name"
+        />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.74, flexGrow: 1}}>
-          {route.params.item.map((item, index) => (
+          {filteredLists.map((item, index) => (
             <View key={item.id}>{rendersquareList({item, index})}</View>
           ))}
         </ScrollView>

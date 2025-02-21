@@ -11,8 +11,7 @@ import Header from '../components/Header';
 import RatingTest from '../components/RatingTest';
 
 export default function PreferenceDetails({navigation, route}) {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [value, setValue] = useState([0, 2]);
+  
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 

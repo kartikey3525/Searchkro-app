@@ -80,8 +80,8 @@ export default function ReportIssue({navigation}) {
     setIsLoading(true);
     try {
       await PostReportissue(media, description);
-      console.log('Success', 'Report Post successful!');
-      navigation.navigate('BottomTabs');
+      // console.log('Success', 'Report Post successful!');
+      // navigation.navigate('BottomTabs');
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {

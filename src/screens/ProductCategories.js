@@ -18,26 +18,139 @@ const Height = Dimensions.get('window').height;
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {ThemeContext} from '../context/themeContext';
 
-export default function ProductCategories({navigation}) {
+export default function ProductCategories({navigation,route}) {
   const [numColumns, setNumColumns] = useState(4);
-  const isFocused = useIsFocused();
+  const isFocused = useIsFocused(); 
+  const {theme} = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
   const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
     useContext(AuthContext);
 
   useEffect(() => {
     // getCategories();
+    // console.log('route data', route.params.item)
   }, [isFocused]);
 
-  const {theme} = useContext(ThemeContext);
-  const isDark = theme === 'dark';
+  const [categories, setCategories] = useState([]);
+  const [filteredData, setFilteredData] = useState({});
+  const [index, setIndex] = useState(0);
+  const [routes, setRoutes] = useState([]);
 
-  const data = [
-    {value: 100, label: '5'},
-    {value: 80, label: '4'},
-    {value: 50, label: '3'},
-    {value: 40, label: '2'},
-    {value: 20, label: '1'},
-  ];
+  useEffect(() => {
+    if (route?.params?.item) {
+      const allItems = route.params.item;
+
+      // Extract unique categories
+      const categorySet = new Set();
+      allItems.forEach(item => {
+        item.categories.forEach(category => categorySet.add(category));
+      });
+
+      const uniqueCategories = Array.from(categorySet);
+
+      // Create routes for TabView
+      const categoryRoutes = uniqueCategories.map(category => ({
+        key: category.toLowerCase(),
+        title: category,
+      }));
+
+      setCategories(uniqueCategories);
+      setRoutes(categoryRoutes);
+
+      // Organize items by category
+      const categorizedData = {};
+      uniqueCategories.forEach(category => {
+        categorizedData[category] = allItems.filter(item =>
+          item.categories.includes(category)
+        );
+      });
+
+      setFilteredData(categorizedData);
+    }
+  }, [isFocused]);
+
+ 
+  useEffect(() => {
+    if (route?.params?.item) {
+      const allItems = route.params.item;
+
+      // Extract unique categories
+      const categorySet = new Set();
+      allItems.forEach(item => {
+        item.categories.forEach(category => categorySet.add(category));
+      });
+
+      const uniqueCategories = Array.from(categorySet);
+
+      // Create routes for TabView
+      const categoryRoutes = uniqueCategories.map(category => ({
+        key: category.toLowerCase(),
+        title: category,
+      }));
+
+      setCategories(uniqueCategories);
+      setRoutes(categoryRoutes);
+
+      // Organize items by category
+      const categorizedData = {};
+      uniqueCategories.forEach(category => {
+        categorizedData[category] = allItems.filter(item =>
+          item.categories.includes(category)
+        );
+      });
+
+      setFilteredData(categorizedData);
+    }
+  }, [isFocused]);
+
+  const renderRectangleList = (items) => {
+    return (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 5 }}>
+        {items.map((item) => (
+          <TouchableOpacity
+            key={item._id}
+            style={{
+              width: Width * 0.295, // 3 items per row
+              margin: 5, // Added margin for spacing
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={() => navigation.navigate('details', { item })}
+          >
+            <View
+              style={{
+                width: '100%',
+                height: 130,
+                backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+                borderRadius: 10,
+                overflow: 'hidden',
+              }}
+            >
+              <Image source={{ uri: item.images[0] }} style={{ width: '100%', height: '100%' }} />
+            </View>
+            <Text
+              numberOfLines={1}
+              style={{ color: isDark ? '#fff' : '#000', marginTop: 5 ,width: Width * 0.26,}}
+            >
+              {item.title}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
+  const renderScene = routes.reduce((scenes, route) => {
+    scenes[route.key] = () => (
+      <ScrollView>
+        {filteredData[route.title] ? renderRectangleList(filteredData[route.title]) : null}
+      </ScrollView>
+    );
+    return scenes;
+  }, {});
+
+ 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
     {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
@@ -53,13 +166,13 @@ export default function ProductCategories({navigation}) {
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
 
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    {key: 'jacket', title: 'jacket'},
-    {key: 'jeans', title: 'jeans'},
-    {key: 'hoddies', title: 'hoddies'},
-    {key: 'tshirts', title: 't-shirts'},
-  ]);
+  // const [index, setIndex] = useState(0);
+  // const [routes] = useState([
+  //   {key: 'jacket', title: 'jacket'},
+  //   {key: 'jeans', title: 'jeans'},
+  //   {key: 'hoddies', title: 'hoddies'},
+  //   {key: 'tshirts', title: 't-shirts'},
+  // ]);
 
   const jacket = () => (
     <View>
@@ -76,7 +189,7 @@ export default function ProductCategories({navigation}) {
             numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
+            data={route?.params?.item}
             keyExtractor={item => item.id}
             renderItem={renderRectangleList}
           />
@@ -100,7 +213,7 @@ export default function ProductCategories({navigation}) {
             numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
+            data={route?.params?.item}
             keyExtractor={item => item.id}
             renderItem={renderRectangleList}
           />
@@ -123,7 +236,7 @@ export default function ProductCategories({navigation}) {
             numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
+            data={route?.params?.item}
             keyExtractor={item => item.id}
             renderItem={renderRectangleList}
           />
@@ -147,7 +260,7 @@ export default function ProductCategories({navigation}) {
             numColumns={3}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            data={recentPostList}
+            data={route?.params?.item}
             keyExtractor={item => item.id}
             renderItem={renderRectangleList}
           />
@@ -156,43 +269,43 @@ export default function ProductCategories({navigation}) {
     </View>
   );
 
-  const renderScene = SceneMap({
-    jacket: jacket,
-    jeans: jeans,
-    hoddies: hoddies,
-    tshirts: tshirts,
-  });
+  // const renderScene = SceneMap({
+  //   jacket: jacket,
+  //   jeans: jeans,
+  //   hoddies: hoddies,
+  //   tshirts: tshirts,
+  // });
 
   const flatListKey = `flat-list-${numColumns}`;
 
-  const renderRectangleList = ({item, index}) => {
-    return (
-      <TouchableOpacity
-        style={{
-          justifyContent: 'center',
-          marginBottom: 15,
-          alignItems: 'center',
-        }}
-        onPress={() => navigation.navigate('details', {item: item})}>
-        <View
-          style={[
-            styles.rectangle,
-            {
-              overflow: 'hidden',
-              backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
-            },
-          ]}>
-          <Image source={item.img} style={{width: '100%', height: '100%'}} />
-        </View>
+  // const renderRectangleList = ({item, index}) => {
+  //   return (
+  //     <TouchableOpacity
+  //       style={{
+  //         justifyContent: 'center',
+  //         marginBottom: 15,
+  //         alignItems: 'center',
+  //       }}
+  //       onPress={() => navigation.navigate('details', {item: item})}>
+  //       <View
+  //         style={[
+  //           styles.rectangle,
+  //           {
+  //             overflow: 'hidden',
+  //             backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
+  //           },
+  //         ]}>
+  //         <Image source={{uri: item.images[0]}} style={{width: '100%', height: '100%'}} />
+  //       </View>
 
-        <Text
-          numberOfLines={1}
-          style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
-          {item.title}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  //       <Text
+  //         numberOfLines={1}
+  //         style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
+  //         {item.title}
+  //       </Text>
+  //     </TouchableOpacity>
+  //   );
+  // };
 
   const getTabHeight = () => {
     switch (index) {
@@ -266,7 +379,7 @@ export default function ProductCategories({navigation}) {
           </View>
 
           <View style={[styles.tabContainer, {height: getTabHeight()}]}>
-            <TabView
+            {/* <TabView
               swipeEnabled={false}
               navigationState={{index, routes}}
               renderScene={renderScene}
@@ -292,7 +405,37 @@ export default function ProductCategories({navigation}) {
                   pressColor="rgba(0, 0, 0, 0.1)"
                 />
               )}
-            />
+            /> */}
+
+{routes.length > 0 && (
+          <TabView
+            swipeEnabled={false}
+            navigationState={{ index, routes }}
+            renderScene={SceneMap(renderScene)}
+            onIndexChange={setIndex}
+            initialLayout={{ width: Width }}
+            renderTabBar={props => (
+              <TabBar
+                {...props}
+                indicatorStyle={{ backgroundColor: isDark ? 'white' : 'black' }}
+                style={{
+                  backgroundColor: isDark ? 'black' : 'white',
+                  borderBottomWidth: 1,
+                  borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)',
+                }}
+                labelStyle={{
+                  fontWeight: 'bold',
+                  // fontSize: 16,
+                  color: isDark ? 'white' : 'black',
+                }}
+                activeColor={isDark ? 'white' : 'black'}
+                inactiveColor="grey"
+                scrollEnabled={true} // Enables horizontal scrolling for tabs
+                tabStyle={{ width: 'auto' }} // Prevents tabs from breaking ont
+              />
+            )}
+          />
+        )}
           </View>
         </View>
       </ScrollView>

@@ -1,22 +1,16 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Image,
-  Dimensions,
-  Modal,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+  StyleSheet, 
+  Dimensions, 
+} from 'react-native'; 
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {ThemeContext} from '../context/themeContext';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
+import { useIsFocused } from '@react-navigation/native';
+import { AuthContext } from '../context/authcontext';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -24,6 +18,16 @@ const Height = Dimensions.get('window').height;
 export default function FAQScreen({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+
+  const isFocused = useIsFocused();
+  
+  const {getFAQs, FAQs} = useContext(AuthContext); 
+  const [filteredLists, setFilteredLists] = useState(FAQs);
+  
+  useEffect(() => {
+    getFAQs();
+    // console.log('FAQs screen', FAQs);
+  }, [isFocused]);
 
   const [selectedItemId, setSelectedItemId] = useState(null);
 
@@ -76,7 +80,7 @@ export default function FAQScreen({navigation}) {
             },
           ]}>
           <Text
-            onPress={() => toggleDescription(item.id)}
+            onPress={() => toggleDescription(item._id)}
             numberOfLines={1}
             style={[
               styles.recListText,
@@ -87,19 +91,19 @@ export default function FAQScreen({navigation}) {
                 color: isDark ? '#fff' : 'rgba(0, 0, 0, 0.67)',
               },
             ]}>
-            {item.title}
+            {item.question}
           </Text>
 
           <FontAwesome5
-            onPress={() => toggleDescription(item.id)}
-            name={selectedItemId === item.id ? 'angle-up' : 'angle-down'}
+            onPress={() => toggleDescription(item._id)}
+            name={selectedItemId === item._id ? 'angle-up' : 'angle-down'}
             size={18}
             color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
             style={{padding: 5}}
           />
         </View>
 
-        {selectedItemId === item.id && (
+        {selectedItemId === item._id && (
           <Text
             numberOfLines={3}
             style={[
@@ -113,7 +117,7 @@ export default function FAQScreen({navigation}) {
                 color: isDark ? 'rgb(176, 176, 176)' : 'rgba(94, 95, 96, 1)',
               },
             ]}>
-            {item.description}
+            {item.answer}
           </Text>
         )}
       </View>
@@ -124,9 +128,14 @@ export default function FAQScreen({navigation}) {
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <Header header={'FAQs'} />
 
-      <SearchBar placeholder={'Search for help'} />
-
-      {recentPostList.map((item, index) => render2RectangleList(item, index))}
+       
+      <SearchBar
+          placeholder={'Search for help'}
+          lists={FAQs}  
+          setFilteredLists={setFilteredLists} 
+          searchKey="question"
+        />
+      {filteredLists.map((item, index) => render2RectangleList(item, index))}
     </View>
   );
 }

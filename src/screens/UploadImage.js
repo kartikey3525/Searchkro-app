@@ -69,7 +69,7 @@ export default function UploadImage({navigation, route}) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         styles.screen,
-        {backgroundColor: isDark ? '#121212' : '#FFFFFF'},
+        {backgroundColor: isDark ? '#000' : '#FFFFFF'},
       ]}>
       <Header header={'Upload photos'} />
 

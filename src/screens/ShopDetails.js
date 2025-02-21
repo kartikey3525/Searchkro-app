@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
-  TextInput,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,7 +14,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo'; 
+import Entypo from 'react-native-vector-icons/Entypo';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
 
@@ -37,12 +36,22 @@ export default function ShopDetails({navigation, route}) {
 
   const [Data, setData] = useState([]);
   const isFocused = useIsFocused();
-  const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
-    useContext(AuthContext);
+  const {getFilteredPosts, singleShop, getSingleShop, categorydata} = useContext(AuthContext);
 
-  useEffect(() => { 
-    setData(route?.params?.item);
-    //  console.log('route data', route?.params?.item[0]);
+  useEffect(() => {
+    const  userId=route?.params?.item?.userId
+    // console.log('route id', userId);
+    route?.params?.item?.categoriesPost?.length > 0 ?null:
+    getSingleShop(userId); 
+
+    // getFilteredPosts(userId);
+    route?.params?.item?.categoriesPost?.length > 0 ?
+    setData(route?.params?.item):setData(singleShop)
+
+
+    //  console.log('route data', filteredPosts.length);
+
+    // }
   }, [isFocused]);
 
   const data = [
@@ -134,7 +143,7 @@ export default function ShopDetails({navigation, route}) {
               marginBottom: 0,
             },
           ]}>
-          {Data?.location}
+          {Data?.businessAddress}
         </Text>
 
         <Text
@@ -167,7 +176,7 @@ export default function ShopDetails({navigation, route}) {
               marginBottom: 0,
             },
           ]}>
-          {Data?.contactNumber}
+          {Data?.phone}
         </Text>
 
         <Text
@@ -189,16 +198,30 @@ export default function ShopDetails({navigation, route}) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={{marginTop: '2%', padding: 5}}>
-            {recentPostList.map((item, index) => (
-              <View key={item.id}>{renderRectangleList(item, index)}</View>
-            ))}
+            {route?.params?.item?.categoriesPost?.length > 0 ? (
+              route.params.item.categoriesPost.map((item, index) => (
+                <View key={item.id ?? `category-${index}`}>
+                  {renderRectangleList(item, index)}
+                </View>
+              ))
+            ) : (
+              singleShop.categoriesPost.map((item, index) => (
+                <View key={item.id ?? `category-${index}`}>
+                  {renderRectangleList(item, index)}
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 
         <TouchableOpacity
           style={styles.blueBotton}
           // onPress={() => setModalVisible(true)}
-          onPress={() => navigation.navigate('productcategories', {})}>
+          onPress={() =>
+            navigation.navigate('productcategories', {
+              item: route?.params?.item?.categoriesPost?.length > 0 ? route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+            })
+          }>
           <Text
             style={[
               styles.smallText,
@@ -399,29 +422,28 @@ export default function ShopDetails({navigation, route}) {
         </Text>
         <View style={{width: '95%', marginLeft: 10}}>
           <View style={{marginTop: '2%', padding: 5}}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false}>
-              {Array.from(
-                {length: Math.ceil(recentPostList.length / 3)},
-                (_, rowIndex) => (
-                  <View
-                    key={rowIndex}
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}>
-                    {recentPostList
-                      .slice(rowIndex * 3, rowIndex * 3 + 3)
-                      .map((item, index) => (
-                        <View key={item.id} style={{flex: 1, margin: 5}}>
-                          {renderPhotosList(item, index)}
-                        </View>
-                      ))}
-                  </View>
-                ),
-              )}
-            </ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false}>
+    {Array.from(
+      { length: Math.ceil((route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || []).length / 3) },
+      (_, rowIndex) => (
+        <View
+          key={rowIndex}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          {(route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || [])
+            .slice(rowIndex * 3, rowIndex * 3 + 3)
+            .map((item, index) => (
+              <View key={item.id || `photo-${index}`} style={{ flex: 1, margin: 5 }}>
+                {renderPhotosList(item, index)}
+              </View>
+            ))}
+        </View>
+      ),
+    )}
+  </ScrollView> 
+
           </View>
         </View>
       </View>
@@ -450,18 +472,34 @@ export default function ShopDetails({navigation, route}) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={{marginTop: '2%', padding: 5}}>
-            {recentPostList.map((item, index) => (
-              <View key={item.id} style={{marginRight: 10}}>
-                {renderRectangleList(item, index)}
-              </View>
-            ))}
+            {route?.params?.item?.categoriesPost?.length > 0 ? (
+              route.params.item.categoriesPost.map((item, index) => (
+                <View
+                  key={item.id ?? `category-${index}`}
+                  style={{marginRight: 10}}>
+                  {renderRectangleList(item, index)}
+                </View>
+              ))
+            ) : (
+              singleShop.categoriesPost.map((item, index) => (
+                <View
+                  key={item.id ?? `category-${index}`}
+                  style={{marginRight: 10}}>
+                  {renderRectangleList(item, index)}
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 
         <TouchableOpacity
           style={styles.blueBotton}
           // onPress={() => setModalVisible(true)}
-          onPress={() => navigation.navigate('productcategories', {})}>
+          onPress={() =>
+            navigation.navigate('productcategories', {
+              item: route?.params?.item?.categoriesPost?.length > 0 ?route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+            })
+          }>
           <Text
             style={[
               styles.smallText,
@@ -670,30 +708,29 @@ export default function ShopDetails({navigation, route}) {
         Photos
       </Text>
       <View style={{width: '100%', marginLeft: 14}}>
-        <View style={{marginTop: '2%', padding: 5}}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}>
-            {Array.from(
-              {length: Math.ceil(recentPostList.length / 3)},
-              (_, rowIndex) => (
-                <View
-                  key={rowIndex}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  {recentPostList
-                    .slice(rowIndex * 3, rowIndex * 3 + 3)
-                    .map((item, index) => (
-                      <View key={item.id} style={{flex: 1, margin: 5}}>
-                        {renderPhotosList(item, index)}
-                      </View>
-                    ))}
-                </View>
-              ),
-            )}
-          </ScrollView>
+        <View style={{marginTop: '2%', padding: 5}}> 
+  <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false}>
+    {Array.from(
+      { length: Math.ceil((route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || []).length / 3) },
+      (_, rowIndex) => (
+        <View
+          key={rowIndex}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          {(route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || [])
+            .slice(rowIndex * 3, rowIndex * 3 + 3)
+            .map((item, index) => (
+              <View key={item.id || `photo-${index}`} style={{ flex: 1, margin: 5 }}>
+                {renderPhotosList(item, index)}
+              </View>
+            ))}
+        </View>
+      ),
+    )}
+  </ScrollView> 
+
         </View>
       </View>
     </View>
@@ -714,7 +751,11 @@ export default function ShopDetails({navigation, route}) {
           marginBottom: 15,
           alignItems: 'center',
         }}
-        onPress={() => navigation.navigate('details', {item})}>
+        onPress={() =>
+          navigation.navigate('productcategories', {
+            item:route?.params?.item?.categoriesPost?.length > 0 ? route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+          })
+        }>
         <View
           style={[
             styles.rectangle,
@@ -725,7 +766,10 @@ export default function ShopDetails({navigation, route}) {
                 : 'rgba(248, 247, 247, 1)',
             },
           ]}>
-          <Image source={item.img} style={{width: '100%', height: '100%'}} />
+          <Image
+            source={{uri: item.images[0]}}
+            style={{width: '100%', height: '100%'}}
+          />
         </View>
 
         <Text
@@ -1013,7 +1057,7 @@ export default function ShopDetails({navigation, route}) {
           alignItems: 'center',
         }}>
         <View style={[styles.rectangle, {overflow: 'hidden'}]}>
-          <Image source={item.img} style={{width: '100%', height: '100%'}} />
+          <Image source={{uri: item}} style={{width: '100%', height: '100%'}} />
         </View>
       </View>
     );
@@ -1048,14 +1092,26 @@ export default function ShopDetails({navigation, route}) {
           }}>
           <Header header={'Shop Details'} />
 
-          <Image
-            source={require('../assets/shop-pic.png')}
+          {route?.params?.item?.profile?.length > 0 ? (
+            <Image
+              source={{uri: route?.params?.item?.profile[0]}}
+              style={{
+                width: Width * 0.9,
+                height: Height * 0.2,
+              }}
+              resizeMode="contain"
+            />
+          ) : (
+            <Image
+            source={{uri: singleShop?.profile[0]}}
             style={{
               width: Width * 0.9,
               height: Height * 0.2,
             }}
             resizeMode="contain"
           />
+          )}
+
           <View
             style={{
               flexDirection: 'row',
@@ -1103,7 +1159,7 @@ export default function ShopDetails({navigation, route}) {
                       ? 'rgba(255, 255, 255, 1)'
                       : 'rgba(0, 0, 0, 0.4)',
                   }}>
-                  {Data?.location}
+                  {Data?.businessAddress}
                 </Text>
               </View>
             </View>
@@ -1122,7 +1178,7 @@ export default function ShopDetails({navigation, route}) {
               }}>
               <Text
                 numberOfLines={1}
-                style={[ 
+                style={[
                   {
                     fontWeight: 'bold',
                     marginTop: 0,
@@ -1171,7 +1227,7 @@ export default function ShopDetails({navigation, route}) {
                       marginTop: 2,
                       color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     }}>
-                    9:30 am–10:30 pm
+                    {Data.openTime}-{Data.closeTime}
                   </Text>
                 </View>
 
@@ -1212,7 +1268,7 @@ export default function ShopDetails({navigation, route}) {
             }}>
             <Pressable style={styles.iconStyle}>
               <Ionicons
-                onPress={() => Linking.openURL(`tel:${Data?.contactNumber}`)}
+                onPress={() => Linking.openURL(`tel:${Data?.phone}`)}
                 name="call"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
@@ -1237,7 +1293,9 @@ export default function ShopDetails({navigation, route}) {
                 styles.iconStyle,
                 {backgroundColor: 'rgba(255, 219, 17, 1)'},
               ]}
-              onPress={() => navigation.navigate('ratedscreen', {item:route.params.item})}>
+              onPress={() =>
+                navigation.navigate('ratedscreen', {item: route.params.item})
+              }>
               <Octicons
                 name="star-fill"
                 size={26}
@@ -1336,7 +1394,7 @@ export default function ShopDetails({navigation, route}) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.smallblueBotton}
-          onPress={() => Linking.openURL(`tel:${Data?.contactNumber}`)}>
+          onPress={() => Linking.openURL(`tel:${Data?.phone}`)}>
           <Text
             style={[
               styles.smallText,

@@ -40,6 +40,9 @@ export default function SellerProfile({navigation, route}) {
   const [bussinessAddress, setbussinessAddress] = useState('');
   const [ownerName, setownerName] = useState('');
   const [shopName, setshopName] = useState('');
+  const [openAt, setopenAt] = useState('');
+  const [closeAt, setcloseAt] = useState('');
+
   const [phone, setphone] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedScale, setSelectedScale] = useState([]);
@@ -81,6 +84,8 @@ export default function SellerProfile({navigation, route}) {
     Socialmedia: '',
     ownerName: '',
     shopName: '',
+    openAt: '',
+    closeAt: '',
     selectedScale: '',
     selectedAvailabity: '',
   });
@@ -101,6 +106,8 @@ export default function SellerProfile({navigation, route}) {
       Socialmedia: '',
       ownerName: '',
       shopName: '',
+      openAt: '',
+    closeAt: '',
       selectedScale: '',
       selectedAvailabity: '',
     };
@@ -164,7 +171,7 @@ export default function SellerProfile({navigation, route}) {
     } else if (Socialmedia.length < 6) {
       newErrors.Socialmedia = 'Social media must be at least 6 characters long.';
       valid = false;
-    }
+    } 
 
     if (!shopName.trim()) {
       newErrors.shopName = 'Shop name is required.';
@@ -173,7 +180,12 @@ export default function SellerProfile({navigation, route}) {
       newErrors.ownerName = 'Owner name is required.';
     }
     
-
+    if (!openAt.trim()) {
+      newErrors.openAt = 'opening time  is required.';
+    }
+    if (!closeAt.trim()) {
+      newErrors.closeAt = 'closeing time is required.';
+    }
     setErrors(newErrors);
     return valid;
   };
@@ -189,29 +201,31 @@ export default function SellerProfile({navigation, route}) {
       bussinessAddress: '',
       Socialmedia: '',
       ownerName: '',
-      shopName: '',
+      shopName: '', openAt: '',
+      closeAt: '',
       selectedScale: '',
       selectedAvailabity: '',
     });
-    if (!validateInputs()) return;
+    // if (!validateInputs()) return;
 
     setIsLoading(true);
-    try {
-      console.log('Success', 'Login successful!');
-      navigation.navigate('uploadimage', {
+    try { 
+      navigation.navigate('AddProducts',{ 
         email: email,
         description: description,
         phone: phone,
-        selectedCategories: selectedCategories,
         location: location,
-        media: '',
-        bussinessAddress: '',
-        Socialmedia: '',
-        ownerName: '',
-        shopName: '',
-        selectedScale: '',
-        selectedAvailabity: '',
-      });
+        media: media,
+        selectedCategories:selectedCategories, 
+        bussinessAddress: bussinessAddress,
+        Socialmedia: Socialmedia,
+        ownerName: ownerName,
+        shopName: shopName,
+        openAt: openAt,
+        closeAt:closeAt,
+        selectedScale: selectedScale,
+        selectedAvailabity: selectedAvailabity,
+      })
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -268,60 +282,102 @@ export default function SellerProfile({navigation, route}) {
         </TouchableOpacity>
       </View>
 
-      <View style={{}}>
-        {media && media.length > 0 ? (
-          <>
-            <Image
-              source={{uri: media[0].uri}}
-              style={[
-                styles.mediaSelector,
-                {borderWidth: 0, backgroundColor: 'rgb(255, 255, 255)'},
-              ]}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                // Remove the first image from the media array
-                setMedia(null); // This removes the first item from the array
-              }}>
-              <Entypo name="cross" size={25} color="black" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <TouchableOpacity
-            disabled
-            // onPress={selectMedia}
-          >
-            <View
-              style={[
-                styles.mediaSelector,
-                {
-                  backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-                },
-              ]}>
-              <MaterialIcons
-                name="image"
-                size={35}
-                color="rgba(158, 158, 158, 1)"
+      <View>
+        <View>
+          {media.length > 0 && media[0].uri ? (
+            <>
+              <Image
+                source={{uri: media[0].uri}}
+                style={[styles.mediaSelector, {borderWidth: 0}]}
               />
-            </View>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image
-            source={require('../assets/edit.png')}
-            style={{
-              position: 'absolute',
-              width: 50,
-              height: 35,
-              right: -10,
-              bottom: 30,
-              alignSelf: 'flex-end',
-            }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setMedia(media.slice(1))}>
+                <Entypo name="cross" size={25} color={'black'} />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity onPress={selectMedia}>
+              <View
+                style={[
+                  styles.mediaSelector,
+                  {
+                    backgroundColor: isDark
+                      ? '#1E1E1E'
+                      : 'rgba(250, 250, 250, 1)',
+                  },
+                ]}>
+                <MaterialIcons name="image" size={45} color="grey" />
+                <Text
+                  style={{
+                    color: isDark ? '#BBB' : 'rgba(158, 158, 158, 1)',
+                    fontWeight: 'bold',
+                  }}>
+                  Select Media
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
+
+ {/* Uploaded Images */}
+      {media.length > 0 && (
+        <>
+          <Text
+            style={[
+              {
+                color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                fontSize: 18,
+                textAlign: 'left',
+                marginBottom: 10,
+                fontWeight: '600',
+                alignSelf: 'flex-start',
+                marginLeft: '7%',
+                marginTop: '5%',
+              },
+            ]}>
+            Post images
+          </Text>
+
+          <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
+            {media.slice(1, 8).map((item, index) => (
+              <View key={index} style={styles.mediaItem}>
+                {/* {item.type.startsWith('image') ? ( */}
+                <>
+                  <Image source={{uri: item.uri}} style={styles.mediaPreview} />
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => {
+                      setMedia(media.filter((_, i) => i !== index));
+                    }}>
+                    <Entypo name="cross" size={18} color={'black'} />
+                  </TouchableOpacity>
+                </>
+                {/* ) : null} */}
+              </View>
+            ))}
+
+            {media.length < 8 && (
+              <TouchableOpacity
+                onPress={selectMedia}
+                style={[
+                  styles.mediaItem,
+                  {
+                    backgroundColor: isDark ? '#1E1E1E' : 'rgb(255, 255, 255)',
+                    borderColor: isDark ? '#555' : 'rgba(176, 176, 176, 1)',
+                  },
+                ]}>
+                <Entypo
+                  name="squared-plus"
+                  size={25}
+                  color="rgba(176, 176, 176, 1)"
+                />
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
+      )}
 
       <View
         style={{
@@ -471,6 +527,121 @@ export default function SellerProfile({navigation, route}) {
       <HelperText type="error" visible={!!errors.phone} style={{alignSelf: 'flex-start', marginLeft: 10}}>
         {errors.phone}
       </HelperText>
+
+      <View
+        style={{
+          alignSelf: 'flex-start',
+          marginLeft: 25,
+          flexDirection: 'row',
+        }}>
+        <Text
+          style={[
+            {
+              color: '#000',
+              fontWeight: '600',
+              fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+              marginBottom: 5,
+              alignSelf: 'flex-start',
+              width: Width * 0.48,
+            },
+          ]}>
+         OpenAt
+        </Text>
+
+        <Text
+          style={[
+            {
+              fontWeight: '600',
+              fontSize: 15,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+              marginBottom: 5,
+              alignSelf: 'flex-start',
+            },
+          ]}>
+         CloseAt
+        </Text>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignSelf: 'center',
+          width: Width,
+          justifyContent: 'space-evenly',
+        }}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              width: '42%',
+              borderColor: isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
+          <TextInput
+            value={openAt}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
+            onChangeText={setopenAt}
+            placeholder="Opens At"
+            mode="outlined"
+            placeholderTextColor={'grey'}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              width: '42%',
+              borderColor: isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
+          <TextInput
+            value={closeAt}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
+            onChangeText={item => setcloseAt(item)}
+            placeholder="closing time"
+            mode="outlined"
+            placeholderTextColor={'grey'}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+      </View>
+      {errors.openAt?(
+      <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.openAt}>
+        {errors.openAt}
+      </HelperText>):null}
+
+     {errors.closeAt?( <HelperText
+        type="error"
+        style={{alignSelf: 'flex-start', marginLeft: 14}}
+        visible={!!errors.closeAt}>
+        {errors.closeAt}
+      </HelperText>):null}
+
 
       <View
         style={{
@@ -864,21 +1035,21 @@ export default function SellerProfile({navigation, route}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('BottomTabs')}
-        // onPress={() => handlePress()}
+        // onPress={() => navigation.navigate('AddProducts')}
+        onPress={() => handlePress()}
       >
         <Text
           style={[
             styles.smallText,
             {color: '#fff', fontSize: 22, marginBottom: 0},
           ]}>
-          Submit
+          Next
         </Text>
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent={true}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+        <View style={[styles.modalContainer,{backgroundColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)' }]}>
+          <View style={[styles.modalContent,{backgroundColor: isDark ? '#000' : '#fff'}]}>
             <View
               style={{
                 height: 5,
@@ -891,11 +1062,11 @@ export default function SellerProfile({navigation, route}) {
               }}
             />
             <TouchableOpacity
-              style={styles.closeButton2}
+              style={[styles.closeButton2,{backgroundColor: isDark ? '#fff' : 'lightgrey'}]}
               onPress={() => {
                 setModalVisible(false);
               }}>
-              <Entypo name="cross" size={22} color="black" />
+              <Entypo name="cross" size={22} color={ "black" } />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -907,13 +1078,13 @@ export default function SellerProfile({navigation, route}) {
                 alignItems: 'center',
                 borderBottomWidth: 1,
                 padding: 10,
-                borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+                borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.2)',
               }}
               onPress={() => requestCameraPermission()}>
               <Entypo
                 name={'camera'}
                 size={25}
-                color="rgb(0, 0, 0)"
+                color={ isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"}
                 style={{marginRight: 15, marginLeft: 20}}
               />
 
@@ -922,7 +1093,7 @@ export default function SellerProfile({navigation, route}) {
                   {
                     fontSize: 18,
                     fontWeight: '600',
-                    marginLeft: 6,
+                    marginLeft: 6,color: isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)",
                   },
                 ]}>
                 Take Photo
@@ -938,12 +1109,12 @@ export default function SellerProfile({navigation, route}) {
                 borderBottomWidth: 1,
                 height: 60,
                 padding: 10,
-                borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+                borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.2)',
               }}>
               <MaterialCommunityIcons
                 name={'image'}
                 size={30}
-                color="rgb(0, 0, 0)"
+                color={ isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"}
                 style={{marginRight: 10, marginLeft: 18}}
               />
 
@@ -952,7 +1123,7 @@ export default function SellerProfile({navigation, route}) {
                   {
                     fontSize: 18,
                     fontWeight: '600',
-                    marginLeft: 6,
+                    marginLeft: 6,color: isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)",
                   },
                 ]}>
                 Choose from Gallery
@@ -1036,13 +1207,31 @@ const styles = StyleSheet.create({
   mediaSelector: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 100,
-    height: 100,
-    borderRadius: 80,
+    width: Width * 0.85,
+    height: 150,
     borderWidth: 3,
-    borderColor: 'rgba(0, 0, 0, 0.28)',
     backgroundColor: 'rgba(250, 250, 250, 1)',
-    marginBottom: 30,
+    borderRadius: 30,
+    borderColor: 'rgba(6, 196, 217, 1)',
+    marginBottom: 10,
+  }, mediaItem: {
+    width: '20%', // Slight margin for spacing
+    margin: '2%',
+    aspectRatio: 1, // Keeps items square
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  mediaPreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },imageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',marginBottom: 10,
+    paddingHorizontal: 10,
   },
   phoneInput: {
     flexDirection: 'row',

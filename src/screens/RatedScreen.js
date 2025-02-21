@@ -22,78 +22,72 @@ import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
 
-export default function RatedScreen({navigation}) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function RatedScreen({navigation,route}) { 
   const [isLoading, setIsLoading] = useState(false);
   // const [media, setMedia] = useState([]);
   const [description, setdescription] = useState('');
+  const [rating, setrating] = useState(0);
+const postId = route?.params?.item?._id;
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
   const [errors, setErrors] = useState({
-    email: '',
-    password: '',
+    rating: '',
+    description: '',
+    media: '',
   });
-  const {handleRegister, handleLogin, handleResetPassword} =
+  const {handleRegister, handleLogin, PostRating} =
     useContext(AuthContext);
 
   const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
 
 
   const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
+   
 
-    if (!email && !password) {
+    if (!rating.trim()) {
       setErrors(prevState => ({
         ...prevState,
-        email: 'Email or phone number is required.',
+        rating: 'rating is required.',
+      }));
+      return false;
+    }
+ 
+    if (!description.trim()) {
+      setErrors(prevState => ({
+        ...prevState,
+        description: 'description is required.',
       }));
       return false;
     }
 
-    if (email && phoneRegex.test(email)) {
-      // phone number is valid
-    } else if (email && emailRegex.test(email)) {
-      // email is valid
-    } else {
+    if (description.length < 6) {
       setErrors(prevState => ({
         ...prevState,
-        email: 'Please enter a valid email address or phone number.',
+        description: 'description must be at least 6 characters long.',
       }));
       return false;
     }
 
-    if (!password.trim()) {
+    if (media.length === 0) {
       setErrors(prevState => ({
         ...prevState,
-        password: 'Password is required.',
+        media: 'Please select at least one image.',
       }));
       return false;
     }
-
-    if (password.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password must be at least 6 characters long.',
-      }));
-      return false;
-    }
-
-    setErrors({email: '', password: ''});
+    setErrors({rating: '', description: '',media: ''});
     return true;
   };
 
   const handlePress = async () => {
-    setErrors({email: '', password: ''});
-    if (!validateInputs()) return;
-
-    setIsLoading(true);
+    setErrors({rating: '', description: '',media: ''});
+    // if (!validateInputs()) return;
+ console.log('rate 86',postId)
     try {
-      await handleLogin(email, password);
-      console.log('Success', 'Login successful!');
-      navigation.navigate('OTPScreen', {emailPhone: email, password: password});
+      await PostRating(postId,rating,media, description);
+      // console.log('Success', 'rating successful!');
+      // navigation.navigate('OTPScreen', {emailPhone: email, password: password});
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -178,7 +172,11 @@ export default function RatedScreen({navigation}) {
         }}>
         <Rating
           size={32}
-          rating={4}
+          rating={rating}
+          onChange={(value) => {
+            // console.log('User rating:', value);
+            setrating(value); // Update state
+          }}
           starColor="#FFD700"
           baseColor={isDark ? '#48484A' : '#D1D1D6'}
         />
@@ -368,7 +366,7 @@ export default function RatedScreen({navigation}) {
                 style={[
                   styles.mediaItem,
                   {
-                    backgroundColor: 'rgb(255, 255, 255)',
+                    backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
                     borderWidth: 1,
                     borderRadius: 10,
                     borderColor: 'rgba(176, 176, 176, 1)',
@@ -387,7 +385,9 @@ export default function RatedScreen({navigation}) {
       )}
       <TouchableOpacity
         style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
-        onPress={() => navigation.navigate('shopdetails')}>
+        // onPress={() => navigation.navigate('shopdetails')}
+        onPress={() => handlePress()}
+        >
         <Text
           style={[
             styles.smallText,

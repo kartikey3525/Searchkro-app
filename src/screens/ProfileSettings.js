@@ -272,7 +272,7 @@ export default function ProfileSettings({navigation, route}) {
             Profile
           </Text>
 
-          <Pressable onPress={selectMedia}>
+          <Pressable onPress={() => navigation.navigate('editProfile')}>
             <Image
               source={
                 isDark

@@ -47,7 +47,7 @@ export default function HomeScreen({navigation}) {
   useEffect(() => {
     userRole === 'buyer' ? getCategories() : getSellerCategories();
     userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
-    // console.log('userRole data ', userRole);
+    //  console.log('posts data ', posts);
   }, [isFocused]);
 
   const flatListKey = `flat-list-${numColumns}`;
@@ -143,6 +143,7 @@ export default function HomeScreen({navigation}) {
         style={{
           justifyContent: 'center',
           marginBottom: 15,
+          marginLeft: 10,
           alignItems: 'center',
         }}
         onPress={() => navigation.navigate('shopdetails', {item: item})}>
@@ -198,10 +199,14 @@ export default function HomeScreen({navigation}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}>
-              {item?.rating?.averageRating}
+              {/* {item?.rating?.averageRating} */}
+              4
             </Text>
 
-            <RatingTest fixedRating={item?.rating?.averageRating} />
+            <RatingTest fixedRating=
+            // {item?.rating?.averageRating} 
+            '4'
+            />
           </View>
 
           <View
@@ -209,7 +214,7 @@ export default function HomeScreen({navigation}) {
               flexDirection: 'row',
               marginBottom: 5,
               alignItems: 'center',
-              marginTop: -2,
+              marginTop: 2,
             }}>
             <Image
               source={
@@ -237,6 +242,7 @@ export default function HomeScreen({navigation}) {
                 },
               ]}>
               dddddddddddddddddddddddddddddddddddddddddddddd
+              {/* {item.location} */}
             </Text>
           </View>
         </View>
@@ -292,6 +298,20 @@ export default function HomeScreen({navigation}) {
     );
   };
 
+  const [filteredLists, setFilteredLists] = useState(
+    userRole === 'buyer'
+      ? [recentPosts ?? [], nearbyPosts ?? []]
+      : [posts ?? []],
+  );
+
+  useEffect(() => {
+    if (userRole === 'buyer') {
+      setFilteredLists([recentPosts, nearbyPosts]);
+    } else {
+      setFilteredLists([posts]);
+    }
+  }, [userRole, recentPosts, nearbyPosts, posts]);
+ 
   return (
     <View
       style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
@@ -455,8 +475,12 @@ export default function HomeScreen({navigation}) {
             />
           </TouchableOpacity>
         </View>
-
-        <SearchBar placeholder={'Search here'} />
+        <SearchBar
+          placeholder={'Search here'}
+          lists={userRole === 'buyer' ? [recentPosts, nearbyPosts] : [posts]}
+          setFilteredLists={setFilteredLists}
+          searchKey="title"  
+        />
 
         {userRole === 'buyer' ? (
           <>
@@ -500,7 +524,7 @@ export default function HomeScreen({navigation}) {
                   }}
                   horizontal={true} // Enables horizontal scrolling
                   showsHorizontalScrollIndicator={false} // Hides the horizontal scrollbar
-                  data={recentPosts}
+                  data={filteredLists[0]}
                   keyExtractor={item => item._id}
                   renderItem={renderRectangleList}
                 />
@@ -527,7 +551,7 @@ export default function HomeScreen({navigation}) {
                   }}
                   horizontal={true} // Enables horizontal scrolling
                   showsHorizontalScrollIndicator={false} // Hides the horizontal scrollbar
-                  data={nearbyPosts}
+                  data={filteredLists[1]}
                   keyExtractor={item => item._id}
                   renderItem={render2RectangleList}
                 />
@@ -575,7 +599,7 @@ export default function HomeScreen({navigation}) {
                     flexWrap: 'wrap',
                     marginTop: '2%',
                   }}>
-                  {posts.map(item => (
+                  {filteredLists[0].map(item => (
                     <View key={item._id} style={{width: '48%', margin: '1%'}}>
                       {renderSellerRectangleList({item})}
                     </View>

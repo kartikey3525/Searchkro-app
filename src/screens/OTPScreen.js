@@ -224,8 +224,8 @@ export default function OTPScreen({navigation, route}) {
       <TouchableOpacity
         style={styles.blueBotton}
         // onPress={() => setModalVisible(true)}
-        onPress={() => navigation.navigate('AddressScreen')}
-        // onPress={() => handlePress()}
+        // onPress={() => navigation.navigate('AddressScreen')}
+        onPress={() => handlePress()}
       >
         <Text
           style={[

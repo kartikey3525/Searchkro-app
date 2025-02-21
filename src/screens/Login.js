@@ -92,7 +92,7 @@ export default function Login({navigation}) {
 
   const handlePress = async () => {
     setErrors({email: '', password: '', username: ''});
-    if (!validateInputs()) return;
+    // if (!validateInputs()) return;
 
     setIsLoading(true);
     try {
@@ -295,8 +295,8 @@ export default function Login({navigation}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('OTPScreen')}
-        // onPress={() => handlePress()}
+        // onPress={() => navigation.navigate('OTPScreen')}
+        onPress={() => handlePress()}
       >
         <Text
           style={[

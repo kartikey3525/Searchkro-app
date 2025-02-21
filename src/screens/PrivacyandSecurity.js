@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import { AuthContext } from '../context/authcontext';
+import { useIsFocused } from '@react-navigation/native';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -19,11 +21,16 @@ export default function PrivacyandSecurity({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
+
+  
+  const {getPostsHistory, handleLogout,deletePost} = useContext(AuthContext);
+
+  useEffect(() => { 
+    // console.log('get PostsHistory', PostsHistory[0]);
+  }, [useIsFocused()]);
+
   const handleDelete = () => {
-    const updatedList = recentPostList.filter(
-      item => item.id !== selectedItem.id,
-    );
-    setRecentPostList(updatedList);
+    handleLogout() 
     setModalVisible(false);
   };
   return (
@@ -31,7 +38,7 @@ export default function PrivacyandSecurity({navigation}) {
       <Header header={'Privacy and Security'} />
 
       <TouchableOpacity
-        onPress={() => setModalVisible(true)}
+        onPress={() => [setModalVisible(true),]}
         style={{
           width: Width * 0.9,
           alignSelf: 'center',
