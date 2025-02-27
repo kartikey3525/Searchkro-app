@@ -117,8 +117,9 @@ export default function ProfileScreen({navigation}) {
                   height: Height * 0.07,
                   marginLeft: 10,
                   marginRight: 10,
+                  borderRadius: 100,
                 }}
-                resizeMode="contain"
+                resizeMode="cover"
               />
 
               <View>
