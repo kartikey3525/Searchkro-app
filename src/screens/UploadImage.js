@@ -46,24 +46,24 @@ export default function UploadImage({navigation, route}) {
 
   const handlePress = async () => {
     setErrors({media: ''});
-    if (!validateInputs()) return;
-
+    // if (!validateInputs()) return;
+    console.log('media', media);
     try {
-      await createPost(
-        route.params.selectedCategories,
-        route.params.description,
-        route.params.phone,
-        route.params.email,
-        route.params.location,
-        media,
-      );
+      // await createPost(
+      //   route.params.selectedCategories,
+      //   route.params.description,
+      //   route.params.phone,
+      //   route.params.email,
+      //   route.params.location,
+      //   media,
+      // );
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
- 
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -84,10 +84,10 @@ export default function UploadImage({navigation, route}) {
       {/* Image Selector */}
       <View>
         <View>
-          {media.length > 0 && media[0].uri ? (
+          {media.length > 0 && media[0] ? (
             <>
               <Image
-                source={{uri: media[0].uri}}
+                source={{uri: media[0]}}
                 style={[styles.mediaSelector, {borderWidth: 0}]}
               />
               <TouchableOpacity
@@ -171,7 +171,7 @@ export default function UploadImage({navigation, route}) {
               <View key={index} style={styles.mediaItem}>
                 {/* {item.type.startsWith('image') ? ( */}
                 <>
-                  <Image source={{uri: item.uri}} style={styles.mediaPreview} />
+                  <Image source={{uri: item}} style={styles.mediaPreview} />
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => {

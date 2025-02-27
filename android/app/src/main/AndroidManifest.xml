@@ -1,16 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> 
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.CAMERA"/>
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/> 
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
@@ -31,6 +33,15 @@
         <action android:name="com.google.firebase.MESSAGING_EVENT"/>
     </intent-filter>
 </service>
+
+<receiver
+    android:exported="true"
+    android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBroadcastReceiver">
+    <intent-filter>
+        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+    </intent-filter>
+</receiver>
+
 
       <activity
         android:name=".MainActivity"

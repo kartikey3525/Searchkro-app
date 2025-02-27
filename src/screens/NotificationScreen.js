@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
   Modal,
   TouchableOpacity,
 } from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import {AuthContext} from '../context/authcontext';
+import {useIsFocused} from '@react-navigation/native';
+import moment from 'moment';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -41,28 +43,38 @@ export default function NotificationScreen({navigation}) {
       time: '9:00 am',
     },
   ]);
+  const {deleteNotification, getNotification, notificationList} =
+    useContext(AuthContext);
+
+  useEffect(() => {
+    getNotification();
+    console.log('notificationList 50', notificationList[0]);
+  }, [useIsFocused()]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleLongPress = item => {
-    const updatedList = recentPostList.map(listItem =>
-      listItem.id === item.id
-        ? {...listItem, selected: !listItem.selected}
-        : listItem,
-    );
-    setRecentPostList(updatedList);
-    setSelectedItem(item);
+    setSelectedItem(item); // Ensure selectedItem is properly set
     setModalVisible(true);
   };
 
-  const handleDelete = () => {
-    const updatedList = recentPostList.filter(
-      item => item.id !== selectedItem.id,
-    );
-    setRecentPostList(updatedList);
-    setModalVisible(false);
+  const handleDelete = async () => {
+    if (selectedItem && selectedItem._id) {
+      try {
+        await deleteNotification(selectedItem._id);
+        getNotification(); // Refresh notifications after delete
+        setModalVisible(false);
+        setSelectedItem(null);
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+      }
+    } else {
+      console.error('Error: selectedItem or selectedItem._id is undefined');
+    }
   };
+
+  // console.log(timeOnly);
 
   const render2RectangleList = (item, index) => (
     <Pressable
@@ -85,7 +97,7 @@ export default function NotificationScreen({navigation}) {
           },
         ]}>
         <Image
-          source={item.img}
+          source={recentPostList[0].img}
           style={{
             width: 66,
             height: 66,
@@ -105,7 +117,7 @@ export default function NotificationScreen({navigation}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
-            {item.title}
+            {item.message}
           </Text>
           <Text
             numberOfLines={2}
@@ -119,7 +131,7 @@ export default function NotificationScreen({navigation}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
-            {item.time}
+            {extractTime(item.date)}
           </Text>
         </View>
         {item.selected && (
@@ -134,6 +146,14 @@ export default function NotificationScreen({navigation}) {
     </Pressable>
   );
 
+  const extractTime = dateStr => {
+    return new Date(dateStr).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true, // Change to false for 24-hour format
+    });
+  };
+
   return (
     <View
       showsVerticalScrollIndicator={false}
@@ -143,21 +163,65 @@ export default function NotificationScreen({navigation}) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{height: Height * 0.8, flexGrow: 1}}>
-        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
-          Today
-        </Text>
-        {recentPostList.map((item, index) => render2RectangleList(item, index))}
+        {/* Today */}
+        {notificationList.filter(item =>
+          moment(item.date).isSame(moment(), 'day'),
+        ).length > 0 && (
+          <>
+            <Text
+              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+              Today
+            </Text>
+            {notificationList
+              .filter(item => moment(item.date).isSame(moment(), 'day'))
+              .map((item, index) => render2RectangleList(item, index))}
+          </>
+        )}
 
-        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
-          Yesterday
-        </Text>
-        {recentPostList.map((item, index) => render2RectangleList(item, index))}
+        {/* Yesterday */}
+        {notificationList.filter(item =>
+          moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
+        ).length > 0 && (
+          <>
+            <Text
+              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+              Yesterday
+            </Text>
+            {notificationList
+              .filter(item =>
+                moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
+              )
+              .map((item, index) => render2RectangleList(item, index))}
+          </>
+        )}
 
-        <Text style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
-          This week
-        </Text>
-        {recentPostList.map((item, index) => render2RectangleList(item, index))}
+        {/* This Week (Last 7 days but not today/yesterday) */}
+        {notificationList.filter(
+          item =>
+            moment(item.date).isAfter(moment().subtract(7, 'days')) &&
+            !moment(item.date).isSame(moment(), 'day') &&
+            !moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
+        ).length > 0 && (
+          <>
+            <Text
+              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+              This Week
+            </Text>
+            {notificationList
+              .filter(
+                item =>
+                  moment(item.date).isAfter(moment().subtract(7, 'days')) &&
+                  !moment(item.date).isSame(moment(), 'day') &&
+                  !moment(item.date).isSame(
+                    moment().subtract(1, 'days'),
+                    'day',
+                  ),
+              )
+              .map((item, index) => render2RectangleList(item, index))}
+          </>
+        )}
       </ScrollView>
+
       {/* Confirmation Modal */}
       <Modal transparent={true} visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>

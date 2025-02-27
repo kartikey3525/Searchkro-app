@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Rating} from '@kolking/react-native-rating';
 
 import {useState} from 'react';
-import {AuthContext} from '../context/authcontext'; 
+import {AuthContext} from '../context/authcontext';
 
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
@@ -21,13 +21,14 @@ const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
+import {useIsFocused} from '@react-navigation/native';
 
-export default function RatedScreen({navigation,route}) { 
+export default function RatedScreen({navigation, route}) {
   const [isLoading, setIsLoading] = useState(false);
   // const [media, setMedia] = useState([]);
-  const [description, setdescription] = useState('');
-  const [rating, setrating] = useState(0);
-const postId = route?.params?.item?._id;
+  const [description, setdescription] = useState(route?.params?.item.feedback);
+  const [rating, setrating] = useState(route?.params?.item.rate);
+  const postId = route?.params?.item?._id;
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
@@ -36,15 +37,15 @@ const postId = route?.params?.item?._id;
     description: '',
     media: '',
   });
-  const {handleRegister, handleLogin, PostRating} =
-    useContext(AuthContext);
+  const {handleRegister, handleLogin, PostRating} = useContext(AuthContext);
 
-  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
+  const {media, selectMedia, requestCameraPermission, setMedia} =
+    useImagePicker();
 
-
+  useEffect(() => {
+    // console.log('route?.params?.item', route?.params?.item);
+  }, [useIsFocused()]);
   const validateInputs = () => {
-   
-
     if (!rating.trim()) {
       setErrors(prevState => ({
         ...prevState,
@@ -52,7 +53,7 @@ const postId = route?.params?.item?._id;
       }));
       return false;
     }
- 
+
     if (!description.trim()) {
       setErrors(prevState => ({
         ...prevState,
@@ -76,16 +77,16 @@ const postId = route?.params?.item?._id;
       }));
       return false;
     }
-    setErrors({rating: '', description: '',media: ''});
+    setErrors({rating: '', description: '', media: ''});
     return true;
   };
 
   const handlePress = async () => {
-    setErrors({rating: '', description: '',media: ''});
+    setErrors({rating: '', description: '', media: ''});
     // if (!validateInputs()) return;
- console.log('rate 86',postId)
+    console.log('rate 86', postId);
     try {
-      await PostRating(postId,rating,media, description);
+      await PostRating(postId, rating, media, description);
       // console.log('Success', 'rating successful!');
       // navigation.navigate('OTPScreen', {emailPhone: email, password: password});
     } catch (error) {
@@ -94,7 +95,6 @@ const postId = route?.params?.item?._id;
       setIsLoading(false);
     }
   };
- 
 
   return (
     <ScrollView
@@ -116,7 +116,8 @@ const postId = route?.params?.item?._id;
           },
         ]}>
         <Image
-          source={require('../assets/shop-pic.png')}
+          // source={require('../assets/shop-pic.png')}
+          source={{uri: route?.params?.item.profile[0]}}
           style={{
             width: '30%',
             height: '80%',
@@ -142,7 +143,7 @@ const postId = route?.params?.item?._id;
                 width: Width * 0.57,
               },
             ]}>
-            title
+            {route?.params?.item.name}
           </Text>
         </View>
       </View>
@@ -173,7 +174,7 @@ const postId = route?.params?.item?._id;
         <Rating
           size={32}
           rating={rating}
-          onChange={(value) => {
+          onChange={value => {
             // console.log('User rating:', value);
             setrating(value); // Update state
           }}
@@ -231,6 +232,7 @@ const postId = route?.params?.item?._id;
         visible={!!errors.description}>
         {errors.description}
       </HelperText>
+
       <Text
         style={[
           styles.recListText,
@@ -245,12 +247,13 @@ const postId = route?.params?.item?._id;
         ]}>
         Add photo & Video
       </Text>
+
       <View>
         <View style={{}}>
-          {media.length > 0 && media[0].uri ? (
+          {media.length > 0 && media[0] ? (
             <>
               <Image
-                source={{uri: media[0].uri}}
+                source={{uri: media[0]}}
                 style={[
                   styles.mediaSelector,
                   {borderWidth: 0, backgroundColor: 'rgba(248, 247, 247, 1)'},
@@ -296,6 +299,7 @@ const postId = route?.params?.item?._id;
           )}
         </View>
       </View>
+
       <HelperText type="error" visible={!!errors.media}>
         {errors.media}
       </HelperText>
@@ -329,10 +333,7 @@ const postId = route?.params?.item?._id;
               <View key={index} style={styles.mediaItem}>
                 {item.type.startsWith('image') ? (
                   <>
-                    <Image
-                      source={{uri: item.uri}}
-                      style={styles.mediaPreview}
-                    />
+                    <Image source={{uri: item}} style={styles.mediaPreview} />
                     <TouchableOpacity
                       style={[
                         styles.closeButton,
@@ -383,11 +384,12 @@ const postId = route?.params?.item?._id;
           </View>
         </>
       )}
+
       <TouchableOpacity
+        disabled={route?.params?.item ? true : false}
         style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
         // onPress={() => navigation.navigate('shopdetails')}
-        onPress={() => handlePress()}
-        >
+        onPress={() => handlePress()}>
         <Text
           style={[
             styles.smallText,

@@ -7,12 +7,13 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+// import MapView, {Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {ThemeContext} from '../context/themeContext';
+import MapView, {UrlTile} from 'react-native-maps';
 
 export default function MapAddress({navigation}) {
   const {theme} = useContext(ThemeContext);
@@ -58,6 +59,24 @@ export default function MapAddress({navigation}) {
       <MapView style={styles.map} region={region} onRegionChange={setRegion}>
         {marker && <Marker coordinate={marker} title="Searched Location" />}
       </MapView>
+      {/* <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 37.7749, // San Francisco
+          longitude: -122.4194,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        }}
+        provider={null} // Disable Google Maps
+        // showsUserLocation={true} // Show user location
+      >
+        <UrlTile
+          // urlTemplate="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          urlTemplate="https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+          maximumZ={19} // Adjust zoom level
+          flipY={false}
+        />
+      </MapView> */}
 
       <View
         style={{

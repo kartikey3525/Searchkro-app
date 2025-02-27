@@ -36,31 +36,85 @@ export default function ShopDetails({navigation, route}) {
 
   const [Data, setData] = useState([]);
   const isFocused = useIsFocused();
-  const {getFilteredPosts, singleShop, getSingleShop, categorydata} = useContext(AuthContext);
+  const {
+    shopRating,
+    singleShop,
+    getSingleShop,
+    getShopRating,
+    PostReviewLikes,
+    RatingLiked,
+  } = useContext(AuthContext);
 
   useEffect(() => {
-    const  userId=route?.params?.item?.userId
-    // console.log('route id', userId);
-    route?.params?.item?.categoriesPost?.length > 0 ?null:
-    getSingleShop(userId); 
+    const userId = route?.params?.item?.userId;
 
-    // getFilteredPosts(userId);
-    route?.params?.item?.categoriesPost?.length > 0 ?
-    setData(route?.params?.item):setData(singleShop)
+    if (userId) {
+      // Call getSingleShop only if categoriesPost is missing or empty
+      if (
+        !route?.params?.item?.categoriesPost ||
+        route?.params?.item?.categoriesPost.length === 0
+      ) {
+        getSingleShop(userId);
+      }
 
+      // Always fetch shop ratings
+      getShopRating(userId);
+    }
 
-    //  console.log('route data', filteredPosts.length);
+    // Set data: If categoriesPost exists, use it; otherwise, use singleShop
+    setData(
+      route?.params?.item?.categoriesPost?.length > 0
+        ? route.params.item
+        : singleShop,
+    );
 
-    // }
+    // console.log('route?.params?.item', route.params.item[0]);
   }, [isFocused]);
 
-  const data = [
-    {value: 100, label: '5'},
-    {value: 80, label: '4'},
-    {value: 50, label: '3'},
-    {value: 40, label: '2'},
-    {value: 20, label: '1'},
-  ];
+  const handleLike = postId => {
+    PostReviewLikes(postId, route?.params?.item?.userId, 'liketrue');
+  };
+
+  const handleDislike = postId => {
+    PostReviewLikes(postId, route?.params?.item?.userId, 'disliketrue');
+  };
+
+  const sortedRatings = shopRating?.rating?.length
+    ? [...shopRating.rating] // Clone array properly
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by latest date
+        .map(review => ({
+          likeCount: review.likeCount,
+          dislikeCount: review.disLikeCount,
+
+          id: review._id,
+          name: review.name,
+          rate: review.rate,
+          date: review.date,
+          feedback: review.feedback,
+          profile: review.profile,
+          timeAgo: review.timeAgo,
+        }))
+    : [];
+
+  // console.log("Sorted Ratings:", sortedRatings);
+
+  const data = shopRating?.result?.map(item => ({
+    value: item.count, // Use count as bar height
+    label: `${item.rate}`, // Label with star rating
+  }));
+
+  const maxValue = Math.max(
+    ...(shopRating?.result?.map(item => item.count) || [1]),
+  );
+
+  const highestRatedNumber =
+    shopRating?.result?.length > 0
+      ? shopRating.result.find(
+          item =>
+            item.count === Math.max(...shopRating.result.map(i => i.count), 0),
+        )?.rate || 0 // Ensure default to 0
+      : 0;
+
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
     {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
@@ -70,13 +124,17 @@ export default function ShopDetails({navigation, route}) {
     {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
   ]);
 
-  const dynamicRatings = [
-    {label: '3.5', value: '3.5'},
-    {label: '4.0', value: '4.0'},
-    {label: '4.5', value: '4.5'},
-    {label: '5.0', value: '5.0'},
-    {label: '4.0', value: '4.0'},
-  ];
+  // const dynamicRatings = [
+  //   {label: '3.5', value: '3.5'},
+  //   {label: '4.0', value: '4.0'},
+  //   {label: '4.5', value: '4.5'},
+  //   {label: '5.0', value: '5.0'},
+  //   {label: '4.0', value: '4.0'},
+  // ];
+  const dynamicRatings = sortedRatings?.map(item => ({
+    value: item.rate, // Use rate for bar height
+    label: `${item.rate}`, // Label with star rating
+  }));
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
@@ -86,15 +144,15 @@ export default function ShopDetails({navigation, route}) {
     {key: 'photos', title: 'Photos'},
   ]);
 
-  const [selectedItemId, setSelectedItemId] = useState(null);
+  // const [selectedItemId, setSelectedItemId] = useState(null);
 
-  const toggleModal = id => {
-    if (selectedItemId === id) {
-      setSelectedItemId(null); // Close modal if the same item is clicked again
-    } else {
-      setSelectedItemId(id); // Open modal for the clicked item
-    }
-  };
+  // const toggleModal = id => {
+  //   if (selectedItemId === id) {
+  //     setSelectedItemId(null); // Close modal if the same item is clicked again
+  //   } else {
+  //     setSelectedItemId(id); // Open modal for the clicked item
+  //   }
+  // };
 
   const Overview = () => (
     <View>
@@ -204,12 +262,15 @@ export default function ShopDetails({navigation, route}) {
                   {renderRectangleList(item, index)}
                 </View>
               ))
-            ) : (
+            ) : Array.isArray(singleShop?.categoriesPost) &&
+              singleShop.categoriesPost.length > 0 ? (
               singleShop.categoriesPost.map((item, index) => (
                 <View key={item.id ?? `category-${index}`}>
                   {renderRectangleList(item, index)}
                 </View>
               ))
+            ) : (
+              <Text>No categories available</Text> // Handle empty case gracefully
             )}
           </ScrollView>
         </View>
@@ -219,7 +280,10 @@ export default function ShopDetails({navigation, route}) {
           // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('productcategories', {
-              item: route?.params?.item?.categoriesPost?.length > 0 ? route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+              item:
+                route?.params?.item?.categoriesPost?.length > 0
+                  ? route?.params?.item?.categoriesPost
+                  : singleShop?.categoriesPost,
             })
           }>
           <Text
@@ -246,55 +310,63 @@ export default function ShopDetails({navigation, route}) {
           Rating review
         </Text>
         <View style={{flexDirection: 'row', marginLeft: 25}}>
-          <View
-            style={{
-              flexDirection: 'row',
-              height: 200,
-              alignSelf: 'flex-start',
-              width: Width * 0.7,
-            }}>
-            {/* Y-Axis */}
-            <YAxis
-              data={data}
-              yAccessor={({index}) => index}
-              scale={scale.scaleBand}
-              contentInset={{top: 10, bottom: 10}}
-              formatLabel={(_, index) => data[index].label}
-              propsForLabels={{
-                fontSize: 20, // Set the font size here
-                fontWeight: 'bold', // Optional: Make the label text bold
-              }}
-            />
+          {shopRating?.result?.length > 0 ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                height: 200,
+                alignSelf: 'flex-start',
+                width: Width * 0.7,
+              }}>
+              <YAxis
+                key={isDark ? 'dark' : 'light'} // Forces re-render when theme changes
+                data={data}
+                yAccessor={({index}) => index}
+                scale={scale.scaleBand}
+                contentInset={{top: 10, bottom: 13}}
+                formatLabel={(_, index) => data[index].label}
+                svg={{
+                  fill: isDark ? 'white' : 'black',
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                }}
+              />
 
-            {/* BarChart */}
-            <BarChart
-              style={{flex: 1, marginLeft: 8}}
-              data={data}
-              horizontal={true}
-              svg={{fill: 'rgba(255, 180, 0, 1)'}}
-              spacing={0}
-              gridMin={0}
-              contentInset={{top: 5, bottom: 10}}>
-              {/* Render the grid for vertical lines */}
-              <Grid direction={Grid.Direction.VERTICAL} />
+              <BarChart
+                style={{flex: 1, marginLeft: 8}}
+                data={data}
+                horizontal={true}
+                svg={{fill: 'rgba(255, 180, 0, 1)'}}
+                spacing={0}
+                gridMin={0}
+                contentInset={{top: 5, bottom: 10}}>
+                <Grid direction={Grid.Direction.VERTICAL} />
 
-              {/* Render custom rectangles (bars) */}
-              <G>
-                {data.map((item, index) => (
-                  <Rect
-                    key={index}
-                    x={0}
-                    y={index * 36 + 20}
-                    width={item.value * 2.5} // Adjust width as needed
-                    height={10} // Height of each bar
-                    rx={4} // Rounded corners (radius)
-                    ry={4} // Rounded corners (radius)
-                    fill="rgba(255, 180, 0, 1)" // Custom fill
-                  />
-                ))}
-              </G>
-            </BarChart>
-          </View>
+                <G>
+                  {data?.map((item, index) => (
+                    <Rect
+                      key={index}
+                      x={0}
+                      y={index * 36 + 20}
+                      width={(item.value / maxValue) * 100} // Normalize width
+                      height={10} // Height of each bar
+                      rx={4} // Rounded corners (radius)
+                      ry={4} // Rounded corners (radius)
+                      fill="rgba(255, 180, 0, 1)" // Custom fill
+                    />
+                  ))}
+                </G>
+              </BarChart>
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.smallText,
+                {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+              ]}>
+              No enough data to show Ratings Graph
+            </Text>
+          )}
 
           <View style={{marginTop: '10%'}}>
             <View style={{flexDirection: 'row'}}>
@@ -309,7 +381,7 @@ export default function ShopDetails({navigation, route}) {
                     marginBottom: 0,
                   },
                 ]}>
-                {Data?.rating?.averageRating}
+                {highestRatedNumber}
               </Text>
               <Octicons
                 name="star-fill"
@@ -386,7 +458,14 @@ export default function ShopDetails({navigation, route}) {
         <TouchableOpacity
           style={styles.blueBotton}
           // onPress={() => setModalVisible(true)}
-          onPress={() => navigation.navigate('ratedscreen', {})}>
+          onPress={() =>
+            navigation.navigate('ratedscreen', {
+              item:
+                route?.params?.item?.profile?.length > 0
+                  ? route?.params?.item
+                  : singleShop,
+            })
+          }>
           <Text
             style={[
               styles.smallText,
@@ -400,9 +479,21 @@ export default function ShopDetails({navigation, route}) {
           <ScrollView
             showsVerticalScrollIndicator={false}
             style={{marginTop: '2%'}}>
-            {recentPostList.map((item, index) => (
-              <View key={item.id}>{render2RectangleList(item, index)}</View>
-            ))}
+            {sortedRatings?.length > 0 ? (
+              sortedRatings.map((item, index) => (
+                <View key={item?.id || index}>
+                  {render2RectangleList(item, index)}
+                </View>
+              ))
+            ) : (
+              <Text
+                style={[
+                  styles.smallText,
+                  {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+                ]}>
+                No Ratings Available
+              </Text>
+            )}
           </ScrollView>
         </View>
 
@@ -422,28 +513,41 @@ export default function ShopDetails({navigation, route}) {
         </Text>
         <View style={{width: '95%', marginLeft: 10}}>
           <View style={{marginTop: '2%', padding: 5}}>
-          <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false}>
-    {Array.from(
-      { length: Math.ceil((route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || []).length / 3) },
-      (_, rowIndex) => (
-        <View
-          key={rowIndex}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          {(route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || [])
-            .slice(rowIndex * 3, rowIndex * 3 + 3)
-            .map((item, index) => (
-              <View key={item.id || `photo-${index}`} style={{ flex: 1, margin: 5 }}>
-                {renderPhotosList(item, index)}
-              </View>
-            ))}
-        </View>
-      ),
-    )}
-  </ScrollView> 
-
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}>
+              {Array.from(
+                {
+                  length: Math.ceil(
+                    (route?.params?.item?.profile?.length > 0
+                      ? route?.params?.item?.profile
+                      : singleShop?.profile || []
+                    ).length / 3,
+                  ),
+                },
+                (_, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    {(route?.params?.item?.profile?.length > 0
+                      ? route?.params?.item?.profile
+                      : singleShop?.profile || []
+                    )
+                      .slice(rowIndex * 3, rowIndex * 3 + 3)
+                      .map((item, index) => (
+                        <View
+                          key={item.id || `photo-${index}`}
+                          style={{flex: 1, margin: 5}}>
+                          {renderPhotosList(item, index)}
+                        </View>
+                      ))}
+                  </View>
+                ),
+              )}
+            </ScrollView>
           </View>
         </View>
       </View>
@@ -472,23 +576,16 @@ export default function ShopDetails({navigation, route}) {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={{marginTop: '2%', padding: 5}}>
-            {route?.params?.item?.categoriesPost?.length > 0 ? (
-              route.params.item.categoriesPost.map((item, index) => (
-                <View
-                  key={item.id ?? `category-${index}`}
-                  style={{marginRight: 10}}>
-                  {renderRectangleList(item, index)}
-                </View>
-              ))
-            ) : (
-              singleShop.categoriesPost.map((item, index) => (
-                <View
-                  key={item.id ?? `category-${index}`}
-                  style={{marginRight: 10}}>
-                  {renderRectangleList(item, index)}
-                </View>
-              ))
-            )}
+            {(route?.params?.item?.categoriesPost?.length > 0
+              ? route.params.item.categoriesPost
+              : singleShop?.categoriesPost ?? []
+            ).map((item, index) => (
+              <View
+                key={item?.id ?? `category-${index}`}
+                style={{marginRight: 10}}>
+                {renderRectangleList(item, index)}
+              </View>
+            ))}
           </ScrollView>
         </View>
 
@@ -497,7 +594,10 @@ export default function ShopDetails({navigation, route}) {
           // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('productcategories', {
-              item: route?.params?.item?.categoriesPost?.length > 0 ?route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+              item:
+                route?.params?.item?.categoriesPost?.length > 0
+                  ? route?.params?.item?.categoriesPost
+                  : singleShop?.categoriesPost,
             })
           }>
           <Text
@@ -529,55 +629,63 @@ export default function ShopDetails({navigation, route}) {
           Rating review
         </Text>
         <View style={{flexDirection: 'row', marginLeft: 25}}>
-          <View
-            style={{
-              flexDirection: 'row',
-              height: 200,
-              alignSelf: 'flex-start',
-              width: Width * 0.7,
-            }}>
-            {/* Y-Axis */}
-            <YAxis
-              data={data}
-              yAccessor={({index}) => index}
-              scale={scale.scaleBand}
-              contentInset={{top: 10, bottom: 10}}
-              formatLabel={(_, index) => data[index].label}
-              propsForLabels={{
-                fontSize: 20, // Set the font size here
-                fontWeight: 'bold', // Optional: Make the label text bold
-              }}
-            />
+          {shopRating?.result?.length > 0 ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                height: 200,
+                alignSelf: 'flex-start',
+                width: Width * 0.7,
+              }}>
+              <YAxis
+                key={isDark ? 'dark' : 'light'} // Forces re-render when theme changes
+                data={data}
+                yAccessor={({index}) => index}
+                scale={scale.scaleBand}
+                contentInset={{top: 10, bottom: 13}}
+                formatLabel={(_, index) => data[index].label}
+                svg={{
+                  fill: isDark ? 'white' : 'black',
+                  fontSize: 14,
+                  fontWeight: 'bold',
+                }}
+              />
 
-            {/* BarChart */}
-            <BarChart
-              style={{flex: 1, marginLeft: 8}}
-              data={data}
-              horizontal={true}
-              svg={{fill: 'rgba(255, 180, 0, 1)'}}
-              spacing={0}
-              gridMin={0}
-              contentInset={{top: 5, bottom: 10}}>
-              {/* Render the grid for vertical lines */}
-              <Grid direction={Grid.Direction.VERTICAL} />
+              <BarChart
+                style={{flex: 1, marginLeft: 8}}
+                data={data}
+                horizontal={true}
+                svg={{fill: 'rgba(255, 180, 0, 1)'}}
+                spacing={0}
+                gridMin={0}
+                contentInset={{top: 5, bottom: 10}}>
+                <Grid direction={Grid.Direction.VERTICAL} />
 
-              {/* Render custom rectangles (bars) */}
-              <G>
-                {data.map((item, index) => (
-                  <Rect
-                    key={index}
-                    x={0}
-                    y={index * 36 + 20}
-                    width={item.value * 2.5} // Adjust width as needed
-                    height={10} // Height of each bar
-                    rx={4} // Rounded corners (radius)
-                    ry={4} // Rounded corners (radius)
-                    fill="rgba(255, 180, 0, 1)" // Custom fill
-                  />
-                ))}
-              </G>
-            </BarChart>
-          </View>
+                <G>
+                  {data?.map((item, index) => (
+                    <Rect
+                      key={index}
+                      x={0}
+                      y={index * 36 + 20}
+                      width={(item.value / maxValue) * 100} // Normalize width
+                      height={10} // Height of each bar
+                      rx={4} // Rounded corners (radius)
+                      ry={4} // Rounded corners (radius)
+                      fill="rgba(255, 180, 0, 1)" // Custom fill
+                    />
+                  ))}
+                </G>
+              </BarChart>
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.smallText,
+                {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+              ]}>
+              No enough data to show Ratings Graph
+            </Text>
+          )}
 
           <View style={{marginTop: '10%'}}>
             <View style={{flexDirection: 'row'}}>
@@ -680,11 +788,21 @@ export default function ShopDetails({navigation, route}) {
 
         <View style={{height: 440, marginTop: '2%'}}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            {recentPostList.map((item, index) => (
-              <View key={item.id} style={{marginBottom: 10}}>
-                {render2RectangleList(item, index)}
-              </View>
-            ))}
+            {sortedRatings?.length > 0 ? (
+              sortedRatings.map((item, index) => (
+                <View key={item?.id || index}>
+                  {render2RectangleList(item, index)}
+                </View>
+              ))
+            ) : (
+              <Text
+                style={[
+                  styles.smallText,
+                  {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+                ]}>
+                No Ratings Available
+              </Text>
+            )}
           </ScrollView>
         </View>
       </View>
@@ -708,29 +826,42 @@ export default function ShopDetails({navigation, route}) {
         Photos
       </Text>
       <View style={{width: '100%', marginLeft: 14}}>
-        <View style={{marginTop: '2%', padding: 5}}> 
-  <ScrollView showsVerticalScrollIndicator={false} scrollEnabled={false}>
-    {Array.from(
-      { length: Math.ceil((route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || []).length / 3) },
-      (_, rowIndex) => (
-        <View
-          key={rowIndex}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}>
-          {(route?.params?.item?.profile?.length > 0 ?route?.params?.item?.profile:singleShop?.profile || [])
-            .slice(rowIndex * 3, rowIndex * 3 + 3)
-            .map((item, index) => (
-              <View key={item.id || `photo-${index}`} style={{ flex: 1, margin: 5 }}>
-                {renderPhotosList(item, index)}
-              </View>
-            ))}
-        </View>
-      ),
-    )}
-  </ScrollView> 
-
+        <View style={{marginTop: '2%', padding: 5}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}>
+            {Array.from(
+              {
+                length: Math.ceil(
+                  (route?.params?.item?.profile?.length > 0
+                    ? route?.params?.item?.profile
+                    : singleShop?.profile || []
+                  ).length / 3,
+                ),
+              },
+              (_, rowIndex) => (
+                <View
+                  key={rowIndex}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  {(route?.params?.item?.profile?.length > 0
+                    ? route?.params?.item?.profile
+                    : singleShop?.profile || []
+                  )
+                    .slice(rowIndex * 3, rowIndex * 3 + 3)
+                    .map((item, index) => (
+                      <View
+                        key={item.id || `photo-${index}`}
+                        style={{flex: 1, margin: 5}}>
+                        {renderPhotosList(item, index)}
+                      </View>
+                    ))}
+                </View>
+              ),
+            )}
+          </ScrollView>
         </View>
       </View>
     </View>
@@ -753,7 +884,10 @@ export default function ShopDetails({navigation, route}) {
         }}
         onPress={() =>
           navigation.navigate('productcategories', {
-            item:route?.params?.item?.categoriesPost?.length > 0 ? route?.params?.item?.categoriesPost:singleShop?.categoriesPost,
+            item:
+              route?.params?.item?.categoriesPost?.length > 0
+                ? route?.params?.item?.categoriesPost
+                : singleShop?.categoriesPost,
           })
         }>
         <View
@@ -789,7 +923,7 @@ export default function ShopDetails({navigation, route}) {
           borderBottomWidth: 1,
           borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.1)',
         }}
-        onPress={() => navigation.navigate('details', {item: item})}>
+        onPress={() => navigation.navigate('ratedscreen', {item: item})}>
         <View
           style={[
             styles.rectangle2,
@@ -809,16 +943,21 @@ export default function ShopDetails({navigation, route}) {
               margin: 8,
               marginBottom: 0,
             }}>
-            <Image source={item.img} style={{width: '100%', height: '100%'}} />
+            <Image
+              // source={item.img}
+
+              source={{uri: item.profile[0]}}
+              style={{width: '100%', height: '100%'}}
+            />
           </View>
-          <Entypo
+          {/* <Entypo
             name={'dots-three-vertical'}
             size={16}
             color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
             style={{position: 'absolute', right: 10, top: 20}}
-            onPress={() => toggleModal(item.id)}
+            onPress={() => toggleModal(item._id)}
           />
-          {selectedItemId === item.id && (
+          {selectedItemId === item._id && (
             <Pressable
               style={{
                 position: 'absolute',
@@ -888,7 +1027,7 @@ export default function ShopDetails({navigation, route}) {
                 </TouchableOpacity>
               </View>
             </Pressable>
-          )}
+          )} */}
           <View></View>
           <View>
             <Text
@@ -901,7 +1040,7 @@ export default function ShopDetails({navigation, route}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}>
-              {item.title}
+              {item.name}
             </Text>
 
             <View
@@ -920,9 +1059,11 @@ export default function ShopDetails({navigation, route}) {
                     fontWeight: '500',
                     fontSize: 12,
                     left: 2,
+                    width: '80%',
                   },
                 ]}>
-                12 reviews
+                {/* 12 reviews */}
+                {item.feedback}
               </Text>
             </View>
 
@@ -930,7 +1071,7 @@ export default function ShopDetails({navigation, route}) {
               style={{
                 flexDirection: 'row',
               }}>
-              <RatingTest fixedRating={Data?.rating?.averageRating} />
+              <RatingTest fixedRating={item.rate} />
             </View>
           </View>
         </View>
@@ -954,10 +1095,10 @@ export default function ShopDetails({navigation, route}) {
                 marginRight: 20,
               },
             ]}>
-            8 month ago
+            {item.timeAgo}
           </Text>
 
-          <View
+          <Pressable
             style={{
               marginRight: 15,
               borderRadius: 5,
@@ -967,7 +1108,8 @@ export default function ShopDetails({navigation, route}) {
               borderColor: 'rgba(228, 228, 228, 1)',
               alignItems: 'center',
               justifyContent: 'center',
-            }}>
+            }}
+            onPress={() => handleLike(item.id)}>
             <AntDesign
               name={'like1'}
               size={16}
@@ -982,11 +1124,41 @@ export default function ShopDetails({navigation, route}) {
                   fontSize: 12,
                 },
               ]}>
-              Helpfull
+              {item.likeCount}
             </Text>
-          </View>
+          </Pressable>
 
           <Pressable
+            style={{
+              marginRight: 15,
+              borderRadius: 5,
+              borderWidth: 1,
+              padding: 5,
+              flexDirection: 'row',
+              borderColor: 'rgba(228, 228, 228, 1)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onPress={() => handleDislike(item.id)}>
+            <AntDesign
+              name={'dislike1'}
+              size={16}
+              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+            />
+            <Text
+              style={[
+                {
+                  marginLeft: 5,
+                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
+                  fontWeight: '500',
+                  fontSize: 12,
+                },
+              ]}>
+              {item.dislikeCount}
+            </Text>
+          </Pressable>
+
+          {/* <Pressable
             style={{
               marginRight: 15,
               borderRadius: 5,
@@ -1014,7 +1186,7 @@ export default function ShopDetails({navigation, route}) {
               ]}>
               comment
             </Text>
-          </Pressable>
+          </Pressable> */}
 
           <View
             style={{
@@ -1103,13 +1275,17 @@ export default function ShopDetails({navigation, route}) {
             />
           ) : (
             <Image
-            source={{uri: singleShop?.profile[0]}}
-            style={{
-              width: Width * 0.9,
-              height: Height * 0.2,
-            }}
-            resizeMode="contain"
-          />
+              source={
+                singleShop?.profile?.[0]
+                  ? {uri: singleShop.profile[0]}
+                  : require('../assets/shop-pic.png') // Replace with your local placeholder image
+              }
+              style={{
+                width: Width * 0.9,
+                height: Height * 0.2,
+              }}
+              resizeMode="contain"
+            />
           )}
 
           <View
@@ -1187,9 +1363,9 @@ export default function ShopDetails({navigation, route}) {
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
                 ]}>
-                {Data?.rating?.averageRating}
+                {Data.averageRating}
               </Text>
-              <RatingTest fixedRating={Data?.rating?.averageRating} />
+              <RatingTest fixedRating={Data.averageRating} />
             </View>
 
             <View

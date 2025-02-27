@@ -30,7 +30,6 @@ export default function ProfileSettings({navigation, route}) {
   const isDark = theme === 'dark';
   const [date, setDate] = useState(new Date());
 
-  const [categories, setcategories] = useState('');
   const [name, setname] = useState('');
   const [phone, setphone] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -40,31 +39,17 @@ export default function ProfileSettings({navigation, route}) {
   const [isLoading, setIsLoading] = useState(false);
   const phoneInput = useRef(null);
   const isFocused = useIsFocused();
-  const [modalVisible, setModalVisible] = useState(false);
 
   const {media, selectMedia, requestCameraPermission, setMedia} =
     useImagePicker();
 
-  const formatDate = date => {
-    return `${date.getDate().toString().padStart(2, '0')}/${(
-      date.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, '0')}/${date.getFullYear()}`;
-  };
-
-  const handlegenderChange = value => {
-    setgender(value); // Update selected categories
-  };
-
-  const handleCategoryChange = value => {
-    setSelectedCategories(value); // Update selected categories
-  };
-
-  const {getCategories, fullCategorydata, createPost} = useContext(AuthContext);
+  const {getCategories, userdata, getUserData, Userfulldata} =
+    useContext(AuthContext);
 
   useEffect(() => {
     getCategories();
+    getUserData();
+    // console.log('userdata50', Userfulldata);
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
@@ -155,60 +140,25 @@ export default function ProfileSettings({navigation, route}) {
             marginBottom: 10,
           },
         ]}>
-        {media && media.length > 0 ? (
-          <>
-            <Image
-              source={{uri: media[0].uri}}
-              style={{
-                width: 120,
-                height: 120,
-                alignSelf: 'center',
-                overflow: 'hidden',
-                borderRadius: 100,
-                top: 10,
-                borderWidth: 5,
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 1)'
-                  : 'rgba(231, 231, 231, 1)',
-              }}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setMedia([])} // Properly reset media array
-            >
-              <Entypo name="cross" size={25} color="black" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Image
-            source={require('../assets/User-image.png')}
-            style={{
-              width: 120,
-              height: 120,
-              alignSelf: 'center',
-              overflow: 'hidden',
-              borderRadius: 100,
-              top: 10,
-              borderWidth: 5,
-              borderColor: 'rgba(0, 0, 0, 0.14)',
-            }}
-          />
-        )}
+        <Image
+          source={
+            Userfulldata
+              ? {uri: Userfulldata?.profile[0]}
+              : require('../assets/User-image.png')
+          }
+          style={{
+            width: 120,
+            height: 120,
+            alignSelf: 'center',
+            overflow: 'hidden',
+            borderRadius: 100,
+            marginTop: 20,
+            borderWidth: 5,
+            borderColor: 'rgba(0, 0, 0, 0.14)',
+          }}
+        />
 
-        <Pressable onPress={selectMedia}>
-          <Image
-            source={require('../assets/edit.png')}
-            style={{
-              width: 50,
-              height: 35,
-              right: 35,
-              bottom: 20,
-              alignSelf: 'flex-end',
-            }}
-            resizeMode="contain"
-          />
-        </Pressable>
-        <View style={{alignSelf: 'center'}}>
+        <View style={{alignSelf: 'center', marginTop: 30}}>
           <Text
             style={[
               styles.recListText,
@@ -221,7 +171,7 @@ export default function ProfileSettings({navigation, route}) {
                 textAlign: 'center',
               },
             ]}>
-            Itunuoluwa Abidoye
+            {Userfulldata?.name}
           </Text>
 
           <Text
@@ -233,7 +183,7 @@ export default function ProfileSettings({navigation, route}) {
                 textAlign: 'center',
               },
             ]}>
-            @Itunuoluwa
+            {Userfulldata?.email}
           </Text>
         </View>
       </View>
@@ -328,7 +278,7 @@ export default function ProfileSettings({navigation, route}) {
               marginBottom: 20,
             },
           ]}>
-          Albert Flores
+          {Userfulldata?.name}
         </Text>
 
         <Text
@@ -421,38 +371,7 @@ export default function ProfileSettings({navigation, route}) {
               marginBottom: 20,
             },
           ]}>
-          Albert Flores
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: 'grey',
-              fontWeight: '400',
-              fontSize: 15,
-              marginLeft: 20,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-            },
-          ]}>
-          Categories
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-              marginBottom: 20,
-            },
-          ]}>
-          Albert Flores
+          {Userfulldata?.email}
         </Text>
       </View>
 
@@ -615,9 +534,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#00AEEF',
     width: '90%',
     height: 50,
-    marginTop: 20,
+    marginTop: 50,
     borderRadius: 10,
-    marginBottom: 60,
+    marginBottom: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },

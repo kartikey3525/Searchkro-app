@@ -132,8 +132,7 @@ export default function PostHistory({navigation}) {
                   },
                 ]}>
                 post : at 21th Nov 2024, 12:23pm
-               {/* {item.openTime} */}
-
+                {/* {item.openTime} */}
               </Text>
             </View>
           </View>
@@ -195,33 +194,6 @@ export default function PostHistory({navigation}) {
                   borderRadius: 10,
                 }}
               />
-
-              <TouchableOpacity
-                style={{
-                  padding: 4,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 20,
-                }}
-                onPress={() => deleteItem(item._id)}>
-                <Ionicons
-                  name={'trash-outline'}
-                  size={16}
-                  color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-                />
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 16,
-                      marginLeft: 5,
-                      fontWeight: '500',
-                      color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-                    },
-                  ]}>
-                  Delete all
-                </Text>
-              </TouchableOpacity>
             </View>
           </Pressable>
         )}

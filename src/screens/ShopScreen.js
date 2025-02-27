@@ -4,7 +4,6 @@ import {
   TextInput,
   StyleSheet,
   Text,
-  FlatList,
   TouchableOpacity,
   Image,
   Pressable,
@@ -13,7 +12,7 @@ import {
 } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo'; 
+import Entypo from 'react-native-vector-icons/Entypo';
 import {ThemeContext} from '../context/themeContext';
 
 import {Dimensions} from 'react-native';
@@ -36,18 +35,18 @@ export default function ShopScreen({navigation, route}) {
   const [value, setValue] = useState([0, 2]);
   const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
   const [selectedRating, setSelectedRating] = useState(null);
-  
+
   useEffect(() => {
-    // console.log('getFilteredPosts called')
-    getFilteredPosts(route?.params?.selectedcategory,selectedRating);
+    // console.log('selectedRating=', filteredPosts[2]?.averageRating);
+    getFilteredPosts(route?.params?.selectedcategory, selectedRating);
 
     // const filteredData = filteredPosts
     // ? data.filter(item => item.rating >= parseFloat(selectedRating))
     // : data;
   }, [isFocused]);
 
-    const [filteredLists, setFilteredLists] = useState( filteredPosts ?? [],)
-  
+  const [filteredLists, setFilteredLists] = useState([]);
+
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
     {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
@@ -127,18 +126,15 @@ export default function ShopScreen({navigation, route}) {
                   styles.recListText,
                   {
                     fontWeight: 'bold',
-                    marginTop: 0,paddingRight:5,
+                    marginTop: 0,
+                    paddingRight: 5,
                     fontSize: 13,
                     color: isDark ? '#fff' : '#000',
                   },
                 ]}>
-                {/* {item.rating.averageRating} */}
-                5
+                {item.averageRating}
               </Text>
-              <RatingTest fixedRating=
-              // {item?.rating?.averageRating}
-              {5}
-               />
+              <RatingTest fixedRating={item.averageRating} />
             </View>
 
             <View
@@ -327,27 +323,35 @@ export default function ShopScreen({navigation, route}) {
     );
   };
   const [searchText, setSearchText] = useState('');
- 
-  const searchFilterFunction = (text) => {
+
+  useEffect(() => {
+    if (Array.isArray(filteredPosts)) {
+      setFilteredLists(filteredPosts);
+    } else {
+      console.error('filteredPosts is not an array:', filteredPosts);
+    }
+  }, [filteredPosts]); // Runs whenever filteredPosts updates
+
+  const searchFilterFunction = text => {
     setSearchText(text);
-  
+
     if (text.trim() === '') {
       setFilteredLists(filteredPosts); // Reset to full list when search is empty
       return;
     }
-  
+
     const lowerCaseText = text.toLowerCase();
-  
+
     // Ensure filteredPosts is an array before filtering
     if (!Array.isArray(filteredPosts)) {
       console.error('filteredPosts is not an array:', filteredPosts);
       return;
     }
-  
+
     const filteredResults = filteredPosts.filter(item =>
-      item?.name?.toLowerCase().includes(lowerCaseText)
+      item?.name?.toLowerCase().includes(lowerCaseText),
     );
-  
+
     setFilteredLists(filteredResults);
   };
 
@@ -451,8 +455,8 @@ export default function ShopScreen({navigation, route}) {
               }
               placeholder="Search here"
               onChangeText={searchFilterFunction}
-          autoCorrect={false}
-          value={searchText}
+              autoCorrect={false}
+              value={searchText}
               autoCapitalize="none"
               // onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
             />
@@ -490,7 +494,9 @@ export default function ShopScreen({navigation, route}) {
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
           {filteredLists.map((item, index) => (
-            <View key={item.id ?? `post-${index}`}>{render2RectangleList({item, index})}</View>
+            <View key={item.id ?? `post-${index}`}>
+              {render2RectangleList({item, index})}
+            </View>
           ))}
         </ScrollView>
       </View>
@@ -656,7 +662,7 @@ export default function ShopScreen({navigation, route}) {
               ]}>
               Rating
             </Text>
-            <RatingButtons onSelectRating={setSelectedRating}/>
+            <RatingButtons onSelectRating={setSelectedRating} />
 
             <View
               style={{
@@ -696,12 +702,19 @@ export default function ShopScreen({navigation, route}) {
                 minimumValue={0}
                 maximumValue={5}
                 step={1}
-                thumbTintColor="#00AEEF" 
+                thumbTintColor="#00AEEF"
               />
             </SliderContainer>
             <TouchableOpacity
               style={styles.blueBotton}
-              onPress={() => [setModalVisible(false),  ]}>
+              onPress={() => [
+                setModalVisible(false),
+                getFilteredPosts(
+                  route?.params?.selectedcategory,
+                  selectedRating,
+                  value,
+                ),
+              ]}>
               <Text
                 style={[
                   styles.smallText,

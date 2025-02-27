@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {HelperText} from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {AuthContext} from '../context/authcontext';
 import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
@@ -23,6 +23,7 @@ import DatePicker from 'react-native-date-picker';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
+import {useIsFocused} from '@react-navigation/native';
 
 export default function EditProfile({navigation}) {
   const [email, setEmail] = useState('');
@@ -38,22 +39,34 @@ export default function EditProfile({navigation}) {
   const [value, setValue] = useState('');
 
   const [errors, setErrors] = useState({
-    email: '',
     value: '',
     name: '',
     phone: '',
     gender: '',
   });
-  const {handleRegister, handleLogin, handleResetPassword} =
-    useContext(AuthContext);
 
   const {media, selectMedia, requestCameraPermission, setMedia} =
     useImagePicker();
 
+  const {
+    getCategories,
+    uploadImage,
+    getUserData,
+    Userfulldata,
+    updatebuyerProfile,
+    imageUrl,
+  } = useContext(AuthContext);
+
+  useEffect(() => {
+    getCategories();
+    getUserData();
+    // console.log('userdata50', Userfulldata);
+  }, [useIsFocused()]);
+
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
-    let newErrors = {email: '', phone: '', name: '', gender: ''};
+    let newErrors = {phone: '', name: '', gender: ''};
     let isValid = true;
 
     if (!name.trim()) {
@@ -64,13 +77,13 @@ export default function EditProfile({navigation}) {
       isValid = false;
     }
 
-    if (!email.trim()) {
-      newErrors.email = 'Email or phone number is required.';
-      isValid = false;
-    } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-      newErrors.email = 'Please enter a valid email address or phone number.';
-      isValid = false;
-    }
+    // if (!email.trim()) {
+    //   newErrors.email = 'Email or phone number is required.';
+    //   isValid = false;
+    // } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+    //   newErrors.email = 'Please enter a valid email address or phone number.';
+    //   isValid = false;
+    // }
 
     if (!value.trim()) {
       newErrors.phone = 'Phone number is required.';
@@ -90,18 +103,48 @@ export default function EditProfile({navigation}) {
   };
 
   const handlePress = async () => {
-    setErrors({email: '', phone: '', name: '', gender: ''});
-    if (!validateInputs()) return;
-
-    setIsLoading(true);
+    setErrors({phone: '', name: '', gender: ''});
+    // if (!validateInputs()) return;
     try {
-      // await handleLogin(email, password);
-      console.log('Success', 'profile update successful!');
-      navigation.navigate('Profilescreen' );
+      console.log('imageUrl121', media[0]);
+
+      // await uploadImage(media); // Wait for the URL
+
+      // setTimeout(async () => {
+      //   if (!imageUrl == []) {
+      //     // console.log('imageUrl121', name, date, value, gender, media[0].uri);
+      await updatebuyerProfile(name, date, value, gender, media[0]);
+      //     // Pass valid image URL
+      //   }
+      // }, 2000); // 2-second delay
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async (imageUrl, updatebuyerProfile) => {
+    try {
+      console.log('Uploading image...');
+
+      await uploadImage(media); // Wait for the URL
+
+      setTimeout(async () => {
+        // if (!imageUrl) {
+        //   console.log('❌ Image upload failed. Profile update aborted.');
+        //   return;
+        // }
+
+        console.log('Image uploaded. Updating profile...');
+        if (!imageUrl) {
+          await updatebuyerProfile(name, gender, imageUrl);
+          // console.log('✅ Profile updated successfully!');
+          // Pass valid image URL
+        }
+      }, 2000); // 2-second delay
+    } catch (error) {
+      console.log('❌ Error updating profile:', error);
     }
   };
 
@@ -137,7 +180,7 @@ export default function EditProfile({navigation}) {
         {media && media.length > 0 ? (
           <>
             <Image
-              source={{uri: media[0].uri}}
+              source={{uri: media[0]}}
               style={{
                 width: 120,
                 height: 120,
@@ -160,7 +203,11 @@ export default function EditProfile({navigation}) {
           </>
         ) : (
           <Image
-            source={require('../assets/User-image.png')}
+            source={
+              Userfulldata
+                ? {uri: Userfulldata?.profile[0]}
+                : require('../assets/User-image.png')
+            }
             style={{
               width: 120,
               height: 120,
@@ -180,41 +227,13 @@ export default function EditProfile({navigation}) {
             style={{
               width: 50,
               height: 35,
-              right: 35,
+              right: 5,
               bottom: 20,
               alignSelf: 'flex-end',
             }}
             resizeMode="contain"
           />
         </Pressable>
-        <View style={{alignSelf: 'center'}}>
-          <Text
-            style={[
-              styles.recListText,
-              {
-                fontSize: 15,
-                width: 200,
-                fontWeight: 'bold',
-                color: isDark ? 'white' : 'black',
-                alignSelf: 'center',
-                textAlign: 'center',
-              },
-            ]}>
-            Itunuoluwa Abidoye
-          </Text>
-
-          <Text
-            style={[
-              styles.recListText,
-              {
-                color: isDark ? 'white' : 'rgba(23, 23, 23, 0.59)',
-                alignSelf: 'center',
-                textAlign: 'center',
-              },
-            ]}>
-            @Itunuoluwa
-          </Text>
-        </View>
       </View>
 
       <View
@@ -305,7 +324,7 @@ export default function EditProfile({navigation}) {
         {errors.date}
       </HelperText>
 
-      <View
+      {/* <View
         style={[
           styles.inputContainer,
           {
@@ -345,7 +364,7 @@ export default function EditProfile({navigation}) {
         style={{alignSelf: 'flex-start', marginLeft: 14}}
         visible={!!errors.email}>
         {errors.email}
-      </HelperText>
+      </HelperText> */}
 
       <PhoneInput
         ref={phoneInput}
@@ -390,7 +409,7 @@ export default function EditProfile({navigation}) {
           setValue(text);
         }}
       />
- <HelperText
+      <HelperText
         type="error"
         style={{alignSelf: 'flex-start', marginLeft: 14}}
         visible={!!errors.phone}>
@@ -405,7 +424,7 @@ export default function EditProfile({navigation}) {
           },
           {
             label: 'Others',
-            value: 'othetrs',
+            value: 'others',
           },
         ]}
         selectedValues={gender}
@@ -431,7 +450,7 @@ export default function EditProfile({navigation}) {
         style={[styles.blueBotton, {margin: '10%'}]}
         // onPress={() => navigation.navigate('Profilescreen')}
 
-        onPress={ handlePress}>
+        onPress={handlePress}>
         <Text
           style={[
             styles.smallText,
@@ -481,7 +500,7 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     top: 14,
-    right: 50,
+    right: 10,
     backgroundColor: 'rgb(255, 255, 255)',
     borderRadius: 15,
     padding: 1,

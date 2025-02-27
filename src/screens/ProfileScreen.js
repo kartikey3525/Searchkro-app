@@ -27,16 +27,24 @@ export default function ProfileScreen({navigation}) {
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const {getCategories, userdata, getUserData, Userfulldata} =
+    useContext(AuthContext);
+
+  useEffect(() => {
+    getUserData();
+    // console.log('userdata50', Userfulldata);
+  }, [isFocused]);
 
   useEffect(() => {}, [isFocused]);
 
   const handleDelete = () => {
-    handleLogout() 
+    handleLogout();
     setModalVisible2(false);
   };
 
   return (
-    <View style={[styles.container,{backgroundColor: isDark ? '#000' : '#fff'}]}>
+    <View
+      style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       {/* <Image
         source={
           isDark
@@ -60,30 +68,30 @@ export default function ProfileScreen({navigation}) {
           // onPress={() => navigation.navigate('Home')}
         >
           <View style={styles.modalContent}>
-
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-
-             <Entypo
-                      onPress={() => navigation.goBack()}
-                      name="chevron-thin-left"
-                      size={20}
-                      color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-                      style={{padding: 5}}
-                    />
-            <Text
-              style={[
-                styles.recListText,
-                {
-                  color: isDark ? 'white' : 'black',
-                  fontSize: 24,
-                  alignSelf: 'flex-start',
-                  width: '100%',
-                  margin: 10,
-                  marginLeft: 20, 
-                },
-              ]}>
-              Profile
-            </Text>
+              <Entypo
+                onPress={() => navigation.goBack()}
+                name="chevron-thin-left"
+                size={20}
+                color={
+                  isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                }
+                style={{padding: 5}}
+              />
+              <Text
+                style={[
+                  styles.recListText,
+                  {
+                    color: isDark ? 'white' : 'black',
+                    fontSize: 24,
+                    alignSelf: 'flex-start',
+                    width: '100%',
+                    margin: 10,
+                    marginLeft: 20,
+                  },
+                ]}>
+                Profile
+              </Text>
             </View>
 
             <View
@@ -93,12 +101,17 @@ export default function ProfileScreen({navigation}) {
                 height: Height * 0.12,
                 backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                 alignSelf: 'center',
-                alignItems: 'center',shadowColor:isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
+                alignItems: 'center',
+                shadowColor: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                 elevation: 10,
                 borderRadius: 5,
               }}>
               <Image
-                source={require('../assets/User-image.png')}
+                source={
+                  Userfulldata?.profile?.length > 0 && Userfulldata?.profile[0]
+                    ? {uri: Userfulldata.profile[0]}
+                    : require('../assets/User-image.png')
+                }
                 style={{
                   width: Width * 0.15,
                   height: Height * 0.07,
@@ -119,7 +132,7 @@ export default function ProfileScreen({navigation}) {
                       marginLeft: 2,
                     },
                   ]}>
-                  Itunuoluwa Abidoye
+                  {Userfulldata?.name}
                 </Text>
 
                 <Text
@@ -132,7 +145,7 @@ export default function ProfileScreen({navigation}) {
                       marginLeft: 2,
                     },
                   ]}>
-                  @Itunuoluwa
+                  {Userfulldata?.email}
                 </Text>
               </View>
               <Feather
@@ -153,7 +166,7 @@ export default function ProfileScreen({navigation}) {
                 width: Width * 0.9,
                 height: Height * userRole === 'buyer' ? 0.63 : 0.63,
                 marginTop: 14,
-                elevation: 15, 
+                elevation: 15,
                 borderRadius: 5,
               }}>
               {userRole === 'buyer' ? (
@@ -204,7 +217,7 @@ export default function ProfileScreen({navigation}) {
                       Profile Settings
                     </Text>
 
-                    <AntDesign 
+                    <AntDesign
                       name="right"
                       size={16}
                       color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -258,7 +271,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -310,7 +322,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -363,7 +374,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -417,7 +427,6 @@ export default function ProfileScreen({navigation}) {
                       </Text>
 
                       <AntDesign
-                        
                         name="right"
                         size={16}
                         color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -470,7 +479,6 @@ export default function ProfileScreen({navigation}) {
                       </Text>
 
                       <AntDesign
-                        
                         name="right"
                         size={16}
                         color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -525,7 +533,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -579,7 +586,6 @@ export default function ProfileScreen({navigation}) {
                     </Text>
 
                     <AntDesign
-                      
                       name="right"
                       size={16}
                       color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -633,7 +639,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -688,7 +693,6 @@ export default function ProfileScreen({navigation}) {
                   </Text>
 
                   <AntDesign
-                    
                     name="right"
                     size={16}
                     color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
@@ -997,7 +1001,7 @@ export default function ProfileScreen({navigation}) {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-               onPress={handleDelete}
+                onPress={handleDelete}
                 style={styles.deleteButton}>
                 <Text style={styles.buttonText}>Logout</Text>
               </TouchableOpacity>

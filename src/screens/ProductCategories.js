@@ -165,148 +165,10 @@ export default function ProductCategories({navigation,route}) {
     {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
-
-  // const [index, setIndex] = useState(0);
-  // const [routes] = useState([
-  //   {key: 'jacket', title: 'jacket'},
-  //   {key: 'jeans', title: 'jeans'},
-  //   {key: 'hoddies', title: 'hoddies'},
-  //   {key: 'tshirts', title: 't-shirts'},
-  // ]);
-
-  const jacket = () => (
-    <View>
-      <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 8}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            scrollEnabled={false}
-            numColumns={3}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={route?.params?.item}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
-        </View>
-      </View>
-    </View>
-  );
-
-  const jeans = () => (
-    <View>
-      <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 8}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            scrollEnabled={false}
-            numColumns={3}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={route?.params?.item}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
-        </View>
-      </View>
-    </View>
-  );
-  const hoddies = () => (
-    <View>
-      <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 8}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            scrollEnabled={false}
-            numColumns={3}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={route?.params?.item}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
-        </View>
-      </View>
-    </View>
-  );
-
-  const tshirts = () => (
-    <View>
-      <View style={{height: '100%', flexGrow: 1}}>
-        <View style={{width: '100%', marginLeft: 8}}>
-          <FlatList
-            style={{
-              marginTop: '2%',
-              padding: 5,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            scrollEnabled={false}
-            numColumns={3}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={route?.params?.item}
-            keyExtractor={item => item.id}
-            renderItem={renderRectangleList}
-          />
-        </View>
-      </View>
-    </View>
-  );
-
-  // const renderScene = SceneMap({
-  //   jacket: jacket,
-  //   jeans: jeans,
-  //   hoddies: hoddies,
-  //   tshirts: tshirts,
-  // });
+ 
 
   const flatListKey = `flat-list-${numColumns}`;
-
-  // const renderRectangleList = ({item, index}) => {
-  //   return (
-  //     <TouchableOpacity
-  //       style={{
-  //         justifyContent: 'center',
-  //         marginBottom: 15,
-  //         alignItems: 'center',
-  //       }}
-  //       onPress={() => navigation.navigate('details', {item: item})}>
-  //       <View
-  //         style={[
-  //           styles.rectangle,
-  //           {
-  //             overflow: 'hidden',
-  //             backgroundColor: isDark ? '#121212' : 'rgba(248, 247, 247, 1)',
-  //           },
-  //         ]}>
-  //         <Image source={{uri: item.images[0]}} style={{width: '100%', height: '100%'}} />
-  //       </View>
-
-  //       <Text
-  //         numberOfLines={1}
-  //         style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
-  //         {item.title}
-  //       </Text>
-  //     </TouchableOpacity>
-  //   );
-  // };
-
+ 
   const getTabHeight = () => {
     switch (index) {
       case 0:
@@ -362,7 +224,7 @@ export default function ProductCategories({navigation,route}) {
               ]}>
               Categories
             </Text>
-            <Image
+            {/* <Image
               source={
                 isDark
                   ? require('../assets/search-icon-dark.png')
@@ -375,67 +237,41 @@ export default function ProductCategories({navigation,route}) {
                 left: 10,
               }}
               resizeMode="contain"
-            />
+            /> */}
           </View>
 
           <View style={[styles.tabContainer, {height: getTabHeight()}]}>
-            {/* <TabView
-              swipeEnabled={false}
-              navigationState={{index, routes}}
-              renderScene={renderScene}
-              onIndexChange={setIndex}
-              initialLayout={{width: Width}}
-              renderTabBar={props => (
-                <TabBar
-                  {...props}
-                  indicatorStyle={{backgroundColor: isDark ? 'white' : 'black'}} // Active tab indicator
-                  style={{
-                    backgroundColor: isDark ? 'black' : 'white', // Tab bar background color
-                    borderTopWidth: 1, // Top border
-                    borderBottomWidth: 1, // Bottom border
-                    borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)', // Border color
-                  }}
-                  labelStyle={{
-                    fontWeight: 'bold', // Ensure bold label
-                    color: isDark ? 'white' : 'black', // Force black color for labels
-                    textTransform: 'none', // Disable any text transformation (like uppercase)
-                  }}
-                  activeColor={isDark ? 'white' : 'black'}
-                  inactiveColor="grey"
-                  pressColor="rgba(0, 0, 0, 0.1)"
-                />
-              )}
-            /> */}
-
-{routes.length > 0 && (
-          <TabView
-            swipeEnabled={false}
-            navigationState={{ index, routes }}
-            renderScene={SceneMap(renderScene)}
-            onIndexChange={setIndex}
-            initialLayout={{ width: Width }}
-            renderTabBar={props => (
-              <TabBar
-                {...props}
-                indicatorStyle={{ backgroundColor: isDark ? 'white' : 'black' }}
-                style={{
-                  backgroundColor: isDark ? 'black' : 'white',
-                  borderBottomWidth: 1,
-                  borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)',
-                }}
-                labelStyle={{
-                  fontWeight: 'bold',
-                  // fontSize: 16,
-                  color: isDark ? 'white' : 'black',
-                }}
-                activeColor={isDark ? 'white' : 'black'}
-                inactiveColor="grey"
-                scrollEnabled={true} // Enables horizontal scrolling for tabs
-                tabStyle={{ width: 'auto' }} // Prevents tabs from breaking ont
+            {routes.length > 0 && (
+              <TabView
+                swipeEnabled={false}
+                navigationState={{index, routes}}
+                renderScene={SceneMap(renderScene)}
+                onIndexChange={setIndex}
+                initialLayout={{width: Width}}
+                renderTabBar={props => (
+                  <TabBar
+                    {...props}
+                    indicatorStyle={{
+                      backgroundColor: isDark ? 'white' : 'black',
+                    }}
+                    style={{
+                      backgroundColor: isDark ? 'black' : 'white',
+                      borderBottomWidth: 1,
+                      borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)',
+                    }}
+                    labelStyle={{
+                      fontWeight: 'bold',
+                      // fontSize: 16,
+                      color: isDark ? 'white' : 'black',
+                    }}
+                    activeColor={isDark ? 'white' : 'black'}
+                    inactiveColor="grey"
+                    scrollEnabled={true} // Enables horizontal scrolling for tabs
+                    tabStyle={{width: 'auto'}} // Prevents tabs from breaking ont
+                  />
+                )}
               />
             )}
-          />
-        )}
           </View>
         </View>
       </ScrollView>

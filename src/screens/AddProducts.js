@@ -94,7 +94,7 @@ export default function AddProducts({navigation, route}) {
 
     const newProduct = {
       name,
-      images: media.map(item => item.uri),
+      images: media.map(item => item),
       categories: selectedCategories,
     };
 
@@ -145,10 +145,10 @@ export default function AddProducts({navigation, route}) {
       {/* Image Selector */}
       <View>
         <View>
-          {media.length > 0 && media[0].uri ? (
+          {media.length > 0 && media[0] ? (
             <>
               <Image
-                source={{uri: media[0].uri}}
+                source={{uri: media[0]}}
                 style={[styles.mediaSelector, {borderWidth: 0}]}
               />
               <TouchableOpacity
@@ -209,7 +209,7 @@ export default function AddProducts({navigation, route}) {
               <View key={index} style={styles.mediaItem}>
                 {/* {item.type.startsWith('image') ? ( */}
                 <>
-                  <Image source={{uri: item.uri}} style={styles.mediaPreview} />
+                  <Image source={{uri: item}} style={styles.mediaPreview} />
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => {
@@ -346,57 +346,78 @@ export default function AddProducts({navigation, route}) {
         <Text style={[styles.buttonText, {color: '#fff'}]}>Add</Text>
       </TouchableOpacity>
 
-
-{/* Display Products Grouped by Categories */}
-{Object.keys(groupedProducts).map(category => (
-        <View key={category} style={{ marginLeft:'5%',marginBottom: 5, alignSelf:"flex-start" }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2,color: isDark ? '#fff' : 'rgb(0, 0, 0)', }}>
+      {/* Display Products Grouped by Categories */}
+      {Object.keys(groupedProducts).map(category => (
+        <View
+          key={category}
+          style={{marginLeft: '5%', marginBottom: 5, alignSelf: 'flex-start'}}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              marginBottom: 2,
+              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+            }}>
             {category}
           </Text>
-<View style={{ flexDirection:'row'}}>
-
-
-          {groupedProducts[category].map((product, index) => (
-            <View
-              key={index}
-              style={{
-                padding: 10,   
-                borderRadius: 5,
-                marginBottom: 10,
-              }}>
-
-              {/* Show Images */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 5 }}>
-                {product.images.map((uri, imgIndex) => (
-                  <View key={imgIndex} style={{ position: 'relative', marginRight: 2 }}>
-                    <Image
-                      source={{ uri }}
-                      style={{ width: 60, height: 60, borderRadius: 5 }}
-                    />
-                    {/* Remove Button */}
-                    <TouchableOpacity
-                      style={{
-                        position: 'absolute',
-                        top: -5,
-                        right: -5,
-                        backgroundColor:isDark?'black': 'white',
-                        borderRadius: 10,
-                        padding: 2,
-                      }}
-                      onPress={() => handleRemoveProduct(category, index)}>
-                      <Entypo name="cross" size={18} color={isDark?'white':"black"} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
+          <View style={{flexDirection: 'row'}}>
+            {groupedProducts[category].map((product, index) => (
+              <View
+                key={index}
+                style={{
+                  padding: 10,
+                  borderRadius: 5,
+                  marginBottom: 10,
+                }}>
+                {/* Show Images */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    marginTop: 5,
+                  }}>
+                  {product.images.map((uri, imgIndex) => (
+                    <View
+                      key={imgIndex}
+                      style={{position: 'relative', marginRight: 2}}>
+                      <Image
+                        source={{uri}}
+                        style={{width: 60, height: 60, borderRadius: 5}}
+                      />
+                      {/* Remove Button */}
+                      <TouchableOpacity
+                        style={{
+                          position: 'absolute',
+                          top: -5,
+                          right: -5,
+                          backgroundColor: isDark ? 'black' : 'white',
+                          borderRadius: 10,
+                          padding: 2,
+                        }}
+                        onPress={() => handleRemoveProduct(category, index)}>
+                        <Entypo
+                          name="cross"
+                          size={18}
+                          color={isDark ? 'white' : 'black'}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                  }}>
+                  {product.name}
+                </Text>
               </View>
-              <Text style={{ fontSize: 16, fontWeight: 'bold',color: isDark ? '#fff' : 'rgb(0, 0, 0)', }}>{product.name}</Text>
-
-            </View>
-          ))}
+            ))}
           </View>
         </View>
       ))}
-      
+
       {/* Post Button */}
       <TouchableOpacity
         style={[styles.blueButton, {margin: '20%'}]}

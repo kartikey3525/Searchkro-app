@@ -1,11 +1,49 @@
-import { useState } from 'react';
-import { Platform, PermissionsAndroid } from 'react-native';
+import {useContext, useState} from 'react';
+import {Platform, PermissionsAndroid} from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
+import axios from 'axios';
+import {AuthContext} from '../context/authcontext';
 
 const useImagePicker = () => {
+  const {getCategories, userdata, getUserData, apiURL} =
+    useContext(AuthContext);
+
   const [media, setMedia] = useState([]);
 
-  // Request permission for camera (Android only)
+  // Function to upload image and get URL
+  const uploadImage = async uri => {
+    try {
+      const formData = new FormData();
+      formData.append('image', {
+        uri: uri,
+        name: `photo_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      });
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+        'Content-Type': 'multipart/form-data',
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/user/uploadImage`,
+        formData,
+        {headers},
+      );
+
+      if (response.status === 200 && response.data?.data) {
+        return response.data.data[0]; // Assuming API returns an array of URLs
+      } else {
+        console.log('Failed to upload image:', response.data);
+        return null;
+      }
+    } catch (error) {
+      console.log('Error uploading image:', error);
+      return null;
+    }
+  };
+
+  // Request camera permission (Android only)
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -35,38 +73,50 @@ const useImagePicker = () => {
   };
 
   // Launch the camera to take a photo
-  const launchCamera = () => {
+  const launchCamera = async () => {
     let options = {
-      includeBase64: false,
       mediaType: 'photo',
       maxWidth: 400,
       maxHeight: 400,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
     };
 
-    ImagePicker.launchCamera(options, response => {
+    ImagePicker.launchCamera(options, async response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorMessage) {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else {
         if (response.assets && response.assets.length > 0) {
-          setMedia(prevMedia => [...prevMedia, { uri: response.assets[0].uri }]);
+          const localUri = response.assets[0].uri;
+          const uploadedUrl = await uploadImage(localUri);
+          if (uploadedUrl) {
+            setMedia(prevMedia => [...prevMedia, uploadedUrl]); // Add new URL to the array
+          }
         }
       }
     });
   };
 
   // Launch image picker to select media
-  const selectMedia = () => {
-    ImagePicker.launchImageLibrary({ mediaType: 'mixed', selectionLimit: 0 }, response => {
-      if (response.assets) {
-        setMedia(prevMedia => [...prevMedia, ...response.assets]);
-      }
-    });
+  const selectMedia = async () => {
+    ImagePicker.launchImageLibrary(
+      {mediaType: 'photo', selectionLimit: 10}, // Allow multiple selection
+      async response => {
+        if (response.assets && response.assets.length > 0) {
+          const uploadedUrls = await Promise.all(
+            response.assets.map(async asset => {
+              const uploadedUrl = await uploadImage(asset.uri);
+              return uploadedUrl;
+            }),
+          );
+
+          const validUrls = uploadedUrls.filter(url => url !== null);
+          if (validUrls.length > 0) {
+            setMedia(prevMedia => [...prevMedia, ...validUrls]); // Append multiple URLs
+          }
+        }
+      },
+    );
   };
 
   return {

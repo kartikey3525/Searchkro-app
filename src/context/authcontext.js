@@ -1,11 +1,12 @@
 import {createContext, useState, useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Alert, AppState} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 let apiURL = 'http://192.168.1.31:8080';
 // let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
@@ -23,47 +24,415 @@ const AuthProvider = ({children}) => {
   const [nearbyPosts, setnearbyPosts] = useState([]);
   const [filteredPosts, setfilteredPosts] = useState([]);
   const [singleShop, setSingleShop] = useState([]);
+  const [shopRating, setShopRating] = useState([]);
+  const [imageUrl, setimageUrl] = useState([]);
 
-  const [PostsHistory, setPostsHistory] = useState([]); 
+  const [PostsHistory, setPostsHistory] = useState([]);
+  const [notificationList, setnotificationList] = useState([]);
+
+  const [RatingLiked, setRatingLiked] = useState([]);
+
   const [FAQs, setFAQs] = useState([]);
 
   const [userdata, setUserdata] = useState([]);
+  const [Userfulldata, setUserfulldata] = useState([]);
+
   const [fcmToken, setFcmToken] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isposting, setisposting] = useState(false);
 
-  useEffect(() => {
-    getDeviceToken();
+  const isFocused = useIsFocused(); // ✅ Correct way to use `useIsFocused()`
 
+  // not crashing
+  useEffect(() => {
+    console.log('🔄 useEffect triggered');
+
+    // ✅ Configure Google Sign-In
     GoogleSignin.configure({
       webClientId: 'searchkro-d6ff3.firebaseapp.com',
-      offlineAccess: true, // Enable offline access
+      offlineAccess: true,
     });
 
-    // Foreground Notifications
-    messaging().onMessage(async remoteMessage => {
-      console.log('New foreground message:', remoteMessage);
-    
+    // ✅ Ensure Notification Permissions
+    requestNotificationPermission();
+
+    // ✅ Get Device Token
+    getDeviceToken();
+    checkLoginStatus();
+
+    // ✅ Handle initial notification (App was killed & opened from notification)
+    const handleInitialNotification = async () => {
       try {
-        if (AppState.currentState === 'active') {
-          Alert.alert(
-            remoteMessage.notification?.title || 'Notification',
-            remoteMessage.notification?.body || 'You have a new message',
-          );
+        const remoteMessage = await messaging().getInitialNotification();
+        console.log(
+          '📩 Initial Notification:',
+          JSON.stringify(remoteMessage, null, 2),
+        );
+
+        if (remoteMessage) {
+          handleNotification(remoteMessage, 'Initial');
         } else {
-          console.log('App is not active, skipping Alert');
+          console.log('⚠️ No initial notification found.');
         }
       } catch (error) {
-        console.log('Error displaying alert:', error);
+        console.error('❌ Error fetching initial notification:', error);
+      }
+    };
+
+    handleInitialNotification();
+
+    // ✅ Handle background notification click
+    const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        console.log(
+          '📬 Notification opened from background:',
+          JSON.stringify(remoteMessage, null, 2),
+        );
+        if (remoteMessage) {
+          handleNotification(remoteMessage, 'Background');
+        }
+      },
+    );
+
+    // ✅ Handle foreground notifications
+    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      console.log(
+        '📨 Foreground message received:',
+        JSON.stringify(remoteMessage, null, 2),
+      );
+      if (remoteMessage) {
+        handleNotification(remoteMessage, 'Foreground');
       }
     });
 
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('New background message:', remoteMessage);
-    });
-
+    // ✅ Cleanup
+    return () => {
+      unsubscribeOnOpen();
+      unsubscribeOnMessage();
+    };
   }, []);
+
+  // ✅ Function to request notification permissions
+  const requestNotificationPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('✅ Notification permission granted.');
+    } else {
+      console.log('❌ Notification permission denied.');
+    }
+  };
+
+  // ✅ Function to handle notifications safely
+  const handleNotification = (remoteMessage, source) => {
+    console.log(
+      `🔔 ${source} Notification Data:`,
+      JSON.stringify(remoteMessage.data, null, 2),
+    );
+
+    if (remoteMessage.notification) {
+      const {title, body} = remoteMessage.notification;
+      const data = remoteMessage.data || {};
+
+      console.log(
+        `📜 Notification Details: Title: ${title}, Body: ${body}, Data:`,
+        data,
+      );
+
+      if (AppState.currentState === 'active') {
+        Alert.alert(
+          `${title || 'Notification'} (${source})`,
+          `${body || 'You have a new message'}\n\nData: ${JSON.stringify(
+            data,
+          )}`,
+        );
+      }
+    } else {
+      console.log(`⚠️ No "notification" object found in ${source} message.`);
+    }
+  };
+
+  // getting data throught firestore but crashing
+  // useEffect(() => {
+  //   console.log('🔄 useEffect triggered');
+
+  //   // ✅ Configure Google Sign-In
+  //   GoogleSignin.configure({
+  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
+  //     offlineAccess: true,
+  //   });
+
+  //   // ✅ Ensure Notification Permissions
+  //   requestNotificationPermission();
+
+  //   // ✅ Get Device Token
+  //   getDeviceToken();
+  //   checkLoginStatus();
+
+  //   // ✅ Handle initial notification (App was killed & opened from notification)
+  //   const handleInitialNotification = async () => {
+  //     try {
+  //       const remoteMessage = await messaging().getInitialNotification();
+  //       console.log(
+  //         '📩 Initial Notification:',
+  //         JSON.stringify(remoteMessage, null, 2),
+  //       );
+
+  //       if (!remoteMessage) {
+  //         console.log('⚠️ No initial notification found.');
+  //         return;
+  //       }
+
+  //       const {notification, data} = remoteMessage;
+  //       const title = notification?.title || 'Notification';
+  //       const body = notification?.body || 'You have a new message';
+
+  //       console.log(
+  //         `📜 Initial Notification Details: Title: ${title}, Body: ${body}, Data:`,
+  //         data,
+  //       );
+
+  //       Alert.alert(title, body);
+  //     } catch (error) {
+  //       console.error('❌ Error fetching initial notification:', error);
+  //     }
+  //   };
+
+  //   handleInitialNotification();
+
+  //   // ✅ Handle background notification click
+  //   const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
+  //     remoteMessage => {
+  //       console.log(
+  //         '📬 Notification opened from background:',
+  //         JSON.stringify(remoteMessage, null, 2),
+  //       );
+  //       if (remoteMessage) {
+  //         handleNotification(remoteMessage, 'Background');
+  //       }
+  //     },
+  //   );
+
+  //   // ✅ Handle foreground notifications
+  //   messaging().onMessage(async remoteMessage => {
+  //     try {
+  //       console.log(
+  //         '📨 Foreground message received:',
+  //         JSON.stringify(remoteMessage, null, 2),
+  //       );
+
+  //       if (!remoteMessage) {
+  //         console.log('⚠️ No remoteMessage found in onMessage.');
+  //         return;
+  //       }
+
+  //       // 🛡 Ensure `notification` and `data` exist before accessing
+  //       const notification = remoteMessage?.notification || {};
+  //       const data = remoteMessage?.data || {};
+
+  //       console.log(`📜 Safe Notification Details:`, {
+  //         title: notification?.title || 'No Title',
+  //         body: notification?.body || 'No Body',
+  //         data: Object.keys(data).length ? data : 'No Data',
+  //       });
+
+  //       // ✅ Show an alert ONLY if App is in foreground (to prevent crashes)
+  //       if (AppState.currentState === 'active') {
+  //         try {
+  //           Alert.alert(
+  //             notification?.title || 'Notification',
+  //             notification?.body || 'You have a new message',
+  //           );
+  //         } catch (alertError) {
+  //           console.error('🚨 Alert crashed the app:', alertError);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error(
+  //         '❌ CRASH PREVENTED: Error handling foreground notification:',
+  //         error,
+  //       );
+  //     }
+  //   });
+
+  //   // ✅ Cleanup
+  //   return () => {
+  //     unsubscribeOnOpen();
+  //     unsubscribeOnMessage();
+  //   };
+  // }, []);
+
+  // // ✅ Function to request notification permissions
+  // const requestNotificationPermission = async () => {
+  //   try {
+  //     const authStatus = await messaging().requestPermission();
+  //     const enabled =
+  //       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+  //       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  //     if (enabled) {
+  //       console.log('✅ Notification permission granted.');
+  //     } else {
+  //       console.log('❌ Notification permission denied.');
+  //     }
+  //   } catch (error) {
+  //     console.error('❌ Error requesting notification permission:', error);
+  //   }
+  // };
+
+  // // ✅ Function to handle notifications safely
+  // const handleNotification = (remoteMessage, source) => {
+  //   try {
+  //     console.log(
+  //       `🔔 ${source} Notification Data:`,
+  //       JSON.stringify(
+  //         remoteMessage?.data || {message: 'No data received'},
+  //         null,
+  //         2,
+  //       ),
+  //     );
+
+  //     if (!remoteMessage || !remoteMessage.notification) {
+  //       console.log(`⚠️ No "notification" object found in ${source} message.`);
+  //       return;
+  //     }
+
+  //     const {title, body} = remoteMessage.notification || {};
+  //     const safeData =
+  //       remoteMessage.data && Object.keys(remoteMessage.data).length
+  //         ? remoteMessage.data
+  //         : {message: 'No data received'};
+
+  //     console.log(
+  //       `📜 Safe Notification Details: Title: ${title || 'No Title'}, Body: ${
+  //         body || 'No Body'
+  //       }, Data:`,
+  //       safeData,
+  //     );
+
+  //     if (AppState.currentState === 'active') {
+  //       try {
+  //         Alert.alert(
+  //           `${title || 'Notification'} (${source})`,
+  //           `${body || 'You have a new message'}\n\nData: ${JSON.stringify(
+  //             safeData,
+  //           )}`,
+  //         );
+  //       } catch (alertError) {
+  //         console.error('🚨 Alert crashed the app:', alertError);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       `❌ CRASH PREVENTED: Error handling ${source} notification:`,
+  //       error,
+  //     );
+  //   }
+  // };
+
+  // crashing but have data througt api useEffect(() => {
+  //   console.log('🔄 useEffect triggered');
+
+  //   // ✅ Configure Google Sign-In
+  //   GoogleSignin.configure({
+  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
+  //     offlineAccess: true,
+  //   });
+
+  //   // ✅ Fetch Device Token
+  //   getDeviceToken();
+  //   checkLoginStatus();
+
+  //   // ✅ Handle initial notification (when app is killed & opened from notification)
+  //   const handleInitialNotification = async () => {
+  //     try {
+  //       const remoteMessage = await messaging().getInitialNotification();
+  //       console.log('📩 Initial Notification:', remoteMessage);
+
+  //       if (remoteMessage?.notification) {
+  //         const {title, body} = remoteMessage.notification;
+  //         if (AppState.currentState === 'active') {
+  //           Alert.alert(
+  //             title || 'Notification',
+  //             body || 'You have a new message',
+  //           );
+  //         }
+  //       } else {
+  //         console.log('⚠️ No initial notification found.');
+  //       }
+  //     } catch (error) {
+  //       console.error('❌ Error fetching initial notification:', error);
+  //     }
+  //   };
+
+  //   handleInitialNotification();
+
+  //   // ✅ Handle background notification click
+  //   const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
+  //     remoteMessage => {
+  //       console.log('📬 Notification opened from background:', remoteMessage);
+  //       if (!remoteMessage) {
+  //         console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
+  //         return;
+  //       }
+  //     },
+  //   );
+
+  //   // ✅ Handle foreground notifications
+  //   const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+  //     try {
+  //       console.log('📨 Foreground message received:', remoteMessage);
+
+  //       if (!remoteMessage) {
+  //         console.log('⚠️ No remoteMessage found in onMessage.');
+  //         return;
+  //       }
+
+  //       const {notification} = remoteMessage;
+  //       if (notification) {
+  //         Alert.alert(
+  //           notification.title || 'Notification',
+  //           notification.body || 'You have a new message',
+  //         );
+  //       } else {
+  //         console.log('⚠️ No notification data found in foreground message.');
+  //       }
+  //     } catch (error) {
+  //       console.error('❌ Error handling foreground notification:', error);
+  //     }
+  //   });
+
+  //   // ✅ Cleanup
+  //   return () => {
+  //     unsubscribeOnOpen();
+  //     unsubscribeOnMessage();
+  //   };
+  // }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+
+      if (token && userData) {
+        setUserdata(JSON.parse(userData));
+        if (navigation.isReady()) {
+          navigation.navigate('BottomTabs');
+        }
+      }
+      // else {
+      //   if (navigation.isReady()) {
+      //     navigation.navigate('Login');
+      //   }
+      // }
+    } catch (error) {
+      console.error('❌ Error checking login status:', error);
+    }
+  };
 
   const getDeviceToken = async () => {
     try {
@@ -132,19 +501,16 @@ const AuthProvider = ({children}) => {
 
   const getFAQs = async () => {
     try {
-      const response = await axios.get(
-        `${apiURL}/api/faq/getFaqs`,
-        {
-          headers: {
-            Authorization: `Bearer ${userdata.token}`,
-            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
-          },
+      const response = await axios.get(`${apiURL}/api/faq/getFaqs`, {
+        headers: {
+          Authorization: `Bearer ${userdata.token}`,
+          // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
         },
-      );
+      });
 
-      const FAQs = response.data; 
-     
-    //  console.log('FAQs', FAQs);
+      const FAQs = response.data;
+
+      //  console.log('FAQs', FAQs);
       setFAQs(FAQs);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -191,12 +557,15 @@ const AuthProvider = ({children}) => {
 
   const getPosts = async () => {
     try {
-      const response = await axios.get(`${apiURL}/api/requirementPost/getRequirement`, {
-        headers: {
-          Authorization: `Bearer ${userdata.token}`,
-          // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
+      const response = await axios.get(
+        `${apiURL}/api/requirementPost/getRequirement`,
+        {
+          headers: {
+            Authorization: `Bearer ${userdata.token}`,
+            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
+          },
         },
-      });
+      );
 
       const Posts = response.data;
 
@@ -235,8 +604,8 @@ const AuthProvider = ({children}) => {
   const getNearbyPosts = async () => {
     try {
       const payload = {
-          startDistance: '',
-         endDistance: '33',
+        startDistance: '',
+        endDistance: '33',
         latitude: '40.758896',
         longitude: '-73.985130',
         rating: 2,
@@ -251,7 +620,7 @@ const AuthProvider = ({children}) => {
 
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
-        
+
         // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
       };
 
@@ -276,17 +645,17 @@ const AuthProvider = ({children}) => {
   };
 
   const getFilteredPosts = async (
-    userId,
-    categories=  [],
-    distanceFilter = null,
+    // userId,
+    categories = [],
     ratingFilter = null,
+    distanceFilter = null,
   ) => {
-      // console.log('categories:', categories);
+    // console.log('categories:', categories);
 
     try {
       const payload = {
-        // distance: 5,
-        // rating: '',
+        // distance: distanceFilter,
+        // rating: ratingFilter,
         // topRated: '',
         // key: '',
         // categories: categories,
@@ -340,17 +709,19 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const getSingleShop = async (userId) => {
+  const getSingleShop = async userId => {
     try {
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
       };
-  
-      const response = await axios.get(`${apiURL}/api/user/getAllProfile`, { headers });
-  
+
+      const response = await axios.get(`${apiURL}/api/user/getAllProfile`, {
+        headers,
+      });
+
       // Find the user with the matching ID
-      const singleShop = response.data.data.find((shop) => shop._id === userId);
-  
+      const singleShop = response.data.data.find(shop => shop._id === userId);
+
       if (singleShop) {
         setSingleShop(singleShop);
         // console.log('Single Shop:', singleShop._id);
@@ -359,21 +730,68 @@ const AuthProvider = ({children}) => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Error fetching shop:', error.response?.data || 'No error response');
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
       } else {
         console.error('Failed to load shop data');
       }
     }
   };
-  
-  const getPostsHistory = async (categories=[]) => {
+
+  const getShopRating = async shopId => {
+    // console.log('shopId', shopId);
     try {
-      const response = await axios.get(`${apiURL}/api/requirementPost/getRequirement`, {
-        headers: {
-          Authorization: `Bearer ${userdata.token}`,
-          // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.get(
+        `${apiURL}/api/rate/getRating?postId=${shopId}`,
+        {headers},
+      );
+
+      // Log response to check structure
+      // console.log('Rating API Response:', response.data);
+      setShopRating(response.data);
+      //     console.log('Shop Rating:', ShopRating);
+      // If response contains 'data', set shop rating
+      // if (response.data && response.data.data) {
+      //   const ShopRating = response.data.data.find(shop => shop._id === shopId);
+
+      //   if (ShopRating) {
+      //     setShopRating(ShopRating);
+      //     console.log('Shop Rating:', ShopRating);
+      //   } else {
+      //     console.log('No shop found with the given shopId');
+      //   }
+      // } else {
+      //   console.log('Invalid API response structure');
+      // }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.error('Failed to load shop data');
+      }
+    }
+  };
+
+  const getPostsHistory = async (categories = []) => {
+    try {
+      const response = await axios.get(
+        `${apiURL}/api/requirementPost/getRequirement`,
+        {
+          headers: {
+            Authorization: `Bearer ${userdata.token}`,
+            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
+          },
         },
-      });
+      );
       const PostsHistory = response.data.data;
       setPostsHistory(PostsHistory);
       // console.log('PostsHistory:', response.data.data);
@@ -386,11 +804,64 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const getNotification = async () => {
+    try {
+      const response = await axios.get(
+        `${apiURL}/api/notifications/myNotifications`,
+        {
+          headers: {
+            Authorization: `Bearer ${userdata.token}`,
+            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
+          },
+        },
+      );
+      const notificationList = response.data.data;
+      setnotificationList(notificationList);
+      // console.log('notificationList:', response.data.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // console.log('Error 107', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109', 'Failed to load categories');
+      }
+    }
+  };
+
+  const PostReviewLikes = async (userId, postId, like) => {
+    console.log('userId, postId', userId, postId, like);
+
+    try {
+      const payload = {
+        status: 'like', // Ensure `like` is defined before calling
+      };
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/rate/likeRating?postId=${userId}&userId=${postId}&status=${like}`,
+        payload, // Pass payload correctly
+        {headers}, // Move headers inside config
+      );
+
+      const RatingLiked = response.data;
+      setRatingLiked(RatingLiked); // Ensure `setRatingLiked` is defined
+      // console.log('Success:', 'Rating Liked!', response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log('Error 107', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109', 'Failed to load likes');
+      }
+    }
+  };
+
   const PostReportissue = async (media, description) => {
     // console.log('Success343', media, description);
     const formattedMedia = Array.isArray(media)
-    ? media.map(item => item.uri || item)
-    : [];
+      ? media.map(item => item.uri || item)
+      : [];
 
     try {
       const payload = {
@@ -442,8 +913,8 @@ const AuthProvider = ({children}) => {
         // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
       };
 
-      const response = await axios.put(
-        `${apiURL}/api/rate/updateRating?postId=${postId}`, // Dynamic Post ID
+      const response = await axios.post(
+        `${apiURL}/api/rate/rating?postId=${postId}`, // Dynamic Post ID
         payload,
         {headers},
       );
@@ -521,33 +992,63 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const deletePost = async (id) => {
+  const deletePost = async id => {
     try {
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
       };
-  
+
       const response = await axios.delete(
         `${apiURL}/api/requirementPost/deleteRequirement?id=${id}`, // Passing id as a query param
-        { headers }
+        {headers},
       );
-  
+
       console.log('Deleted Post Response:', response.data);
-  
+
       // Update local state by filtering out the deleted post
-      setPostsHistory((prevPosts) => prevPosts.filter((post) => post._id !== id));
-  
+      setPostsHistory(prevPosts => prevPosts.filter(post => post._id !== id));
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('Error deleting post:', error.response?.data || 'No error response');
+        console.log(
+          'Error deleting post:',
+          error.response?.data || 'No error response',
+        );
       } else {
         console.log('Error:', error);
       }
     }
   };
-  
+
+  const deleteNotification = async id => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.delete(
+        `${apiURL}/api/notifications/deleteNotifications?id=${id}`, // Passing id as a query param
+        {headers},
+      );
+
+      console.log('Deleted Post Response:', response.data);
+
+      // Update local state by filtering out the deleted post
+      // setPostsHistory(prevPosts => prevPosts.filter(post => post._id !== id));
+      console.log('notification deleted');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(
+          'Error deleting post:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.log('Error:', error);
+      }
+    }
+  };
+
   const createSellerProfile = async (
-     email,
+    email,
     description,
     phone,
     location,
@@ -559,13 +1060,14 @@ const AuthProvider = ({children}) => {
     shopName,
     selectedScale,
     selectedAvailabity,
-    products ) => {
+    products,
+  ) => {
     try {
       const payload = {
         name: shopName,
         email: email,
-        description:'description',
-        phone: '9999999999', 
+        description: 'description',
+        phone: '9999999999',
         googleData: {},
         profile:
           'https://images.pexels.com/photos/674010/pexels-photo-674010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -614,15 +1116,109 @@ const AuthProvider = ({children}) => {
         console.log('Error 109:', error.message || 'Failed to load categories');
       }
     }
-    
   };
-  const updateUserData = async () => {
+
+  const updatebuyerProfile = async (name, date, value, gender, imageUrl) => {
+    // const formattedMedia = Array.isArray(media)
+    //   ? media.map(item => item.uri || item)
+    //   : [];
+
+    // console.log('gender', gender);
     try {
-      const response = await api.get(`api/users/${user.email}`);
-      const userData = response.data;
-      setUserdata(userData);
+      const payload = {
+        name: name,
+        dob: date,
+        phone: value,
+        gender: gender[0],
+        profile: imageUrl,
+        fcmToken: fcmToken,
+      };
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+
+        // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.put(
+        `${apiURL}/api/user/updateProfile`,
+        payload,
+        {headers},
+      );
+
+      console.log('Response 171:', response.data);
+      // Alert.alert('Success', 'Post created successfully!');
+      navigation.navigate('BottomTabs');
+      // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
-      console.error('Error updating user data:', error);
+      if (axios.isAxiosError(error)) {
+        console.log('Error 107:', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109:', error.message || 'Failed to load categories');
+      }
+    }
+  };
+
+  const uploadImage = async image => {
+    console.log('image:', image);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', {
+        uri: image[0].uri,
+        name: image[0].fileName || `photo_${Date.now()}.jpg`,
+        type: image[0].type || 'image/jpeg',
+      });
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+        'Content-Type': 'multipart/form-data',
+      };
+
+      const response = await axios.post(
+        `${apiURL}/api/user/uploadImage`,
+        formData,
+        {headers},
+      );
+
+      if (response.status === 200) {
+        const fileUrl = response.data?.data[0]; // Extracting the first URL from the array
+        console.log('✅ Image uploaded successfully. File URL:', fileUrl);
+        setimageUrl(fileUrl);
+        return fileUrl; // Return only the URL
+      } else {
+        console.log(
+          '❌ Failed to upload image:',
+          response.status,
+          response.data,
+        );
+      }
+    } catch (error) {
+      console.log('❌ Error uploading image:', error.response?.data || error);
+    }
+  };
+
+  const getUserData = async () => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.get(`${apiURL}/api/user/getProfile`, {
+        headers,
+      });
+      // console.log('userdata731', response.data);
+
+      setUserfulldata(response.data.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.error('Failed to load shop data');
+      }
     }
   };
 
@@ -641,28 +1237,22 @@ const AuthProvider = ({children}) => {
   };
 
   const handleLogin = async (email, password, username) => {
-    console.log('fcmToken', fcmToken);
     try {
       const response = await axios.post(`${apiURL}/api/user/sendOTP`, {
         emailPhone: email,
         password,
         username,
         isAcceptTermConditions: true,
-        roleId: userRole==='buyer'?0:1,
+        roleId: userRole === 'buyer' ? 0 : 1,
         fcmToken: fcmToken,
         gender: 'male',
       });
+
       const user = response.data;
 
-      // navigation.navigate('Home');
+      // navigation.navigate('BottomTabs'); // Redirect to home
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // console.error('Error response:', error.response.data);
-        Alert.alert('Error', error.response.data.body);
-      } else {
-        // console.error('Error logging in:=========', error);
-        Alert.alert('Error', 'Invalid email or password.');
-      }
+      console.error('Login error:', error);
     }
   };
 
@@ -675,11 +1265,18 @@ const AuthProvider = ({children}) => {
       });
       const user = response.data;
       setUserdata(response.data);
-      console.log('userdata', response.data.token);
+      // console.log('userdata', response.data);
+      // ✅ Ensure AsyncStorage saves the token correctly
+      await AsyncStorage.setItem('userToken', user.token);
+      await AsyncStorage.setItem('userData', JSON.stringify(user));
+
+      // Debugging: Check if token is saved correctly
+      const storedToken = await AsyncStorage.getItem('userToken');
+      //  console.log('Stored Token:', storedToken); // 🔍 Should not be null
 
       if (response.data.msg) {
         console.log('Success', 'Verification successful!');
-        navigation.navigate('BottomTabs');
+        navigation.navigate('AddressScreen');
       } else {
         Alert.alert('Error', response.data.message);
       }
@@ -692,26 +1289,27 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
+
       // Clear user session
       setUserdata(null);
       setIsLoggedIn(false);
-  
+
       console.log('User logged out successfully!');
-  
+
       // Reset navigation and go to Login screen
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Login' }],
+        routes: [{name: 'Login'}],
       });
-  
     } catch (error) {
       console.error('Error during logout:', error);
       Alert.alert('Error', 'Something went wrong while logging out.');
     }
   };
-  
 
   const handleResetPassword = async email => {
     try {
@@ -742,7 +1340,10 @@ const AuthProvider = ({children}) => {
 
       const googleCredential = auth.GoogleAuthProvider.credential(fcmToken);
 
-      return await auth().signInWithCredential(googleCredential),navigation.navigate('BottomTabs');
+      return (
+        await auth().signInWithCredential(googleCredential),
+        navigation.navigate('BottomTabs')
+      );
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       throw error;
@@ -769,7 +1370,6 @@ const AuthProvider = ({children}) => {
         handleRegister,
         handleLogin,
         handleLogout,
-        updateUserData,
         handleResetPassword,
         VerifyOTP,
         getCategories,
@@ -802,6 +1402,19 @@ const AuthProvider = ({children}) => {
         deletePost,
         getSingleShop,
         singleShop,
+        getShopRating,
+        shopRating,
+        PostReviewLikes,
+        RatingLiked,
+        getUserData,
+        Userfulldata,
+        updatebuyerProfile,
+        uploadImage,
+        imageUrl,
+        apiURL,
+        getNotification,
+        notificationList,
+        deleteNotification,
       }}>
       {children}
     </AuthContext.Provider>

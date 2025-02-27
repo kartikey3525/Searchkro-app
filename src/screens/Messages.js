@@ -7,12 +7,7 @@ import {
   Pressable,
   Image,
   Dimensions,
-  Modal,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Feather from 'react-native-vector-icons/Feather';
+} from 'react-native'; 
 import {ThemeContext} from '../context/themeContext';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
@@ -199,11 +194,11 @@ export default function Messages({navigation}) {
               backgroundColor: 'rgba(6, 196, 217, 1)',
             }}></View>
         </View>
-        <Feather
+        {/* <Feather
           name="camera"
           size={24}
           color={isDark ? '#fff' : 'rgba(75, 77, 77, 0.44)'}
-        />
+        /> */}
       </View>
     </Pressable>
   );
@@ -213,55 +208,14 @@ export default function Messages({navigation}) {
       <Header header={'New message'} />
 
       <SearchBar
-          placeholder={'Search '}
-          lists={recentPostList}  
-          setFilteredLists={setFilteredLists} 
-          searchKey="title"
-        />
+        placeholder={'Search '}
+        lists={recentPostList}
+        setFilteredLists={setFilteredLists}
+        searchKey="title"
+      />
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredLists.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>
-      {/* Confirmation Modal */}
-      {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View
-            style={[
-              styles.modalContent,
-              {backgroundColor: isDark ? '#121212' : '#fff'},
-            ]}>
-            <Text
-              style={[
-                styles.modalText,
-                {
-                  fontWeight: 'bold',
-                  marginBottom: 10,
-                  color: isDark ? '#fff' : '#000',
-                },
-              ]}>
-              Delete ?
-            </Text>
-            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
-              Are you sure want Delete?
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false), handleLongPress();
-                }}
-                style={styles.cancelButton}>
-                <Text style={[styles.buttonText, {color: 'black'}]}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal> */}
     </View>
   );
 }
