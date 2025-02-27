@@ -14,7 +14,6 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
 
@@ -45,11 +44,10 @@ export default function ShopDetails({navigation, route}) {
     RatingLiked,
   } = useContext(AuthContext);
 
+  const userId = route?.params?.item?.userId;
   useEffect(() => {
-    const userId = route?.params?.item?.userId;
-
     if (userId) {
-      // Call getSingleShop only if categoriesPost is missing or empty
+      // If categoriesPost is missing or empty, fetch the single shop
       if (
         !route?.params?.item?.categoriesPost ||
         route?.params?.item?.categoriesPost.length === 0
@@ -60,23 +58,54 @@ export default function ShopDetails({navigation, route}) {
       // Always fetch shop ratings
       getShopRating(userId);
     }
+  }, [isFocused]); // Run only when screen is focused
 
-    // Set data: If categoriesPost exists, use it; otherwise, use singleShop
-    setData(
-      route?.params?.item?.categoriesPost?.length > 0
-        ? route.params.item
-        : singleShop,
-    );
+  // Separate useEffect to update data when singleShop is fetched
+  useEffect(() => {
+    if (route?.params?.item?.categoriesPost?.length > 0) {
+      setData(route.params.item);
+    } else if (singleShop && Object.keys(singleShop).length > 0) {
+      setData(singleShop);
+    }
 
-    // console.log('route?.params?.item', route.params.item[0]);
-  }, [isFocused]);
+    // console.log(
+    //   'route?.params?.item',
+    //   route.params.item,
+    //   'singleShop:',
+    //   singleShop,
+    // );
+  }, [singleShop]); // Runs again when `singleShop` is updated
 
   const handleLike = postId => {
     PostReviewLikes(postId, route?.params?.item?.userId, 'liketrue');
+    if (userId) {
+      // If categoriesPost is missing or empty, fetch the single shop
+      if (
+        !route?.params?.item?.categoriesPost ||
+        route?.params?.item?.categoriesPost.length === 0
+      ) {
+        getSingleShop(userId);
+      }
+
+      // Always fetch shop ratings
+      getShopRating(userId);
+    }
   };
 
   const handleDislike = postId => {
     PostReviewLikes(postId, route?.params?.item?.userId, 'disliketrue');
+    if (userId) {
+      // If categoriesPost is missing or empty, fetch the single shop
+      if (
+        !route?.params?.item?.categoriesPost ||
+        route?.params?.item?.categoriesPost.length === 0
+      ) {
+        getSingleShop(userId);
+      }
+
+      // Always fetch shop ratings
+      getShopRating(userId);
+    }
   };
 
   const sortedRatings = shopRating?.rating?.length
@@ -403,7 +432,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-              9876549812
+              {Data.phone}
             </Text>
 
             <Text
@@ -475,28 +504,37 @@ export default function ShopDetails({navigation, route}) {
           </Text>
         </TouchableOpacity>
 
-        <View style={{height: 440}}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={{marginTop: '2%'}}>
-            {sortedRatings?.length > 0 ? (
-              sortedRatings.map((item, index) => (
-                <View key={item?.id || index}>
-                  {render2RectangleList(item, index)}
-                </View>
-              ))
-            ) : (
-              <Text
-                style={[
-                  styles.smallText,
-                  {color: isDark ? 'white' : 'black', alignSelf: 'center'},
-                ]}>
-                No Ratings Available
-              </Text>
-            )}
-          </ScrollView>
-        </View>
-
+        {sortedRatings?.length > 0 ? (
+          <View style={{height: 440}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              style={{marginTop: '2%'}}>
+              {sortedRatings?.length > 0 ? (
+                sortedRatings.map((item, index) => (
+                  <View key={item?.id || index}>
+                    {render2RectangleList(item, index)}
+                  </View>
+                ))
+              ) : (
+                <Text
+                  style={[
+                    styles.smallText,
+                    {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+                  ]}>
+                  No Ratings Available
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+        ) : (
+          <Text
+            style={[
+              styles.smallText,
+              {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+            ]}>
+            No Ratings Available
+          </Text>
+        )}
         <Text
           style={[
             styles.bigText,
@@ -776,7 +814,14 @@ export default function ShopDetails({navigation, route}) {
         <TouchableOpacity
           style={styles.blueBotton}
           // onPress={() => setModalVisible(true)}
-          onPress={() => navigation.navigate('ratedscreen', {})}>
+          onPress={() =>
+            navigation.navigate('ratedscreen', {
+              item:
+                route?.params?.item?.profile?.length > 0
+                  ? route?.params?.item
+                  : singleShop,
+            })
+          }>
           <Text
             style={[
               styles.smallText,
@@ -1401,6 +1446,7 @@ export default function ShopDetails({navigation, route}) {
                       color: 'grey',
                       fontWeight: '500',
                       marginTop: 2,
+                      left: 2,
                       color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                     }}>
                     {Data.openTime}-{Data.closeTime}
@@ -1420,11 +1466,11 @@ export default function ShopDetails({navigation, route}) {
                   <Text
                     numberOfLines={1}
                     style={{
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: '500',
-                      marginTop: 0,
+                      marginTop: 3,
+                      left: 2,
                       alignSelf: 'center',
-                      left: 0,
                       color: isDark
                         ? 'rgba(255, 255, 255, 1)'
                         : 'rgba(0, 0, 0, 0.86)',
@@ -1470,7 +1516,12 @@ export default function ShopDetails({navigation, route}) {
                 {backgroundColor: 'rgba(255, 219, 17, 1)'},
               ]}
               onPress={() =>
-                navigation.navigate('ratedscreen', {item: route.params.item})
+                navigation.navigate('ratedscreen', {
+                  item:
+                    route?.params?.item?.profile?.length > 0
+                      ? route?.params?.item
+                      : singleShop,
+                })
               }>
               <Octicons
                 name="star-fill"

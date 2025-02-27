@@ -35,6 +35,7 @@ const useImagePicker = () => {
         return response.data.data[0]; // Assuming API returns an array of URLs
       } else {
         console.log('Failed to upload image:', response.data);
+        Alert.alert('Upload Failed', 'Please try again later.');
         return null;
       }
     } catch (error) {

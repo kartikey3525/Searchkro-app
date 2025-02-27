@@ -240,7 +240,6 @@ export default function SellerProfile({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-
       <LocationPermission setLocation={setLocation} />
 
       <View
@@ -284,10 +283,10 @@ export default function SellerProfile({navigation, route}) {
 
       <View>
         <View>
-          {media.length > 0 && media[0].uri ? (
+          {media.length > 0 && media[0] ? (
             <>
               <Image
-                source={{uri: media[0].uri}}
+                source={{uri: media[0]}}
                 style={[styles.mediaSelector, {borderWidth: 0}]}
               />
               <TouchableOpacity
@@ -321,7 +320,7 @@ export default function SellerProfile({navigation, route}) {
         </View>
       </View>
 
- {/* Uploaded Images */}
+      {/* Uploaded Images */}
       {media.length > 0 && (
         <>
           <Text
@@ -524,7 +523,10 @@ export default function SellerProfile({navigation, route}) {
         layout="second"
         onChangeText={text => setphone(text)}
       />
-      <HelperText type="error" visible={!!errors.phone} style={{alignSelf: 'flex-start', marginLeft: 10}}>
+      <HelperText
+        type="error"
+        visible={!!errors.phone}
+        style={{alignSelf: 'flex-start', marginLeft: 10}}>
         {errors.phone}
       </HelperText>
 
@@ -546,7 +548,7 @@ export default function SellerProfile({navigation, route}) {
               width: Width * 0.48,
             },
           ]}>
-         OpenAt
+          OpenAt
         </Text>
 
         <Text
@@ -559,7 +561,7 @@ export default function SellerProfile({navigation, route}) {
               alignSelf: 'flex-start',
             },
           ]}>
-         CloseAt
+          CloseAt
         </Text>
       </View>
 
@@ -627,21 +629,23 @@ export default function SellerProfile({navigation, route}) {
           />
         </View>
       </View>
-      {errors.openAt?(
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.openAt}>
-        {errors.openAt}
-      </HelperText>):null}
+      {errors.openAt ? (
+        <HelperText
+          type="error"
+          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          visible={!!errors.openAt}>
+          {errors.openAt}
+        </HelperText>
+      ) : null}
 
-     {errors.closeAt?( <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.closeAt}>
-        {errors.closeAt}
-      </HelperText>):null}
-
+      {errors.closeAt ? (
+        <HelperText
+          type="error"
+          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          visible={!!errors.closeAt}>
+          {errors.closeAt}
+        </HelperText>
+      ) : null}
 
       <View
         style={{
@@ -684,7 +688,10 @@ export default function SellerProfile({navigation, route}) {
         onChangeValue={handleScaleChange}
       />
 
-      <HelperText type="error" visible={!!errors.selectedScale}  style={{alignSelf: 'flex-start', marginLeft: 10}}>
+      <HelperText
+        type="error"
+        visible={!!errors.selectedScale}
+        style={{alignSelf: 'flex-start', marginLeft: 10}}>
         {errors.selectedScale}
       </HelperText>
 
@@ -787,20 +794,23 @@ export default function SellerProfile({navigation, route}) {
           />
         </View>
       </View>
-      {errors.shopName?(
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.shopName}>
-        {errors.shopName}
-      </HelperText>):null}
+      {errors.shopName ? (
+        <HelperText
+          type="error"
+          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          visible={!!errors.shopName}>
+          {errors.shopName}
+        </HelperText>
+      ) : null}
 
-     {errors.ownerName?( <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.ownerName}>
-        {errors.ownerName}
-      </HelperText>):null}
+      {errors.ownerName ? (
+        <HelperText
+          type="error"
+          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          visible={!!errors.ownerName}>
+          {errors.ownerName}
+        </HelperText>
+      ) : null}
       <View
         style={{
           alignSelf: 'flex-start',
@@ -1025,19 +1035,21 @@ export default function SellerProfile({navigation, route}) {
           })) || []
         }
         placeholder={'Select Categories'}
-        selectedValues={selectedCategories}  
-        onChangeValue={handleCategoryChange}  
+        selectedValues={selectedCategories}
+        onChangeValue={handleCategoryChange}
       />
 
-      <HelperText type="error" visible={!!errors.selectedCategories} style={{alignSelf: 'flex-start', marginLeft: 10}}>
+      <HelperText
+        type="error"
+        visible={!!errors.selectedCategories}
+        style={{alignSelf: 'flex-start', marginLeft: 10}}>
         {errors.selectedCategories}
       </HelperText>
 
       <TouchableOpacity
         style={styles.blueBotton}
         // onPress={() => navigation.navigate('AddProducts')}
-        onPress={() => handlePress()}
-      >
+        onPress={() => handlePress()}>
         <Text
           style={[
             styles.smallText,
@@ -1048,8 +1060,20 @@ export default function SellerProfile({navigation, route}) {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent={true}>
-        <View style={[styles.modalContainer,{backgroundColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)' }]}>
-          <View style={[styles.modalContent,{backgroundColor: isDark ? '#000' : '#fff'}]}>
+        <View
+          style={[
+            styles.modalContainer,
+            {
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.3)'
+                : 'rgba(0, 0, 0, 0.3)',
+            },
+          ]}>
+          <View
+            style={[
+              styles.modalContent,
+              {backgroundColor: isDark ? '#000' : '#fff'},
+            ]}>
             <View
               style={{
                 height: 5,
@@ -1062,11 +1086,14 @@ export default function SellerProfile({navigation, route}) {
               }}
             />
             <TouchableOpacity
-              style={[styles.closeButton2,{backgroundColor: isDark ? '#fff' : 'lightgrey'}]}
+              style={[
+                styles.closeButton2,
+                {backgroundColor: isDark ? '#fff' : 'lightgrey'},
+              ]}
               onPress={() => {
                 setModalVisible(false);
               }}>
-              <Entypo name="cross" size={22} color={ "black" } />
+              <Entypo name="cross" size={22} color={'black'} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1084,7 +1111,7 @@ export default function SellerProfile({navigation, route}) {
               <Entypo
                 name={'camera'}
                 size={25}
-                color={ isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"}
+                color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 15, marginLeft: 20}}
               />
 
@@ -1093,7 +1120,8 @@ export default function SellerProfile({navigation, route}) {
                   {
                     fontSize: 18,
                     fontWeight: '600',
-                    marginLeft: 6,color: isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)",
+                    marginLeft: 6,
+                    color: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                   },
                 ]}>
                 Take Photo
@@ -1114,7 +1142,7 @@ export default function SellerProfile({navigation, route}) {
               <MaterialCommunityIcons
                 name={'image'}
                 size={30}
-                color={ isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)"}
+                color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
                 style={{marginRight: 10, marginLeft: 18}}
               />
 
@@ -1123,7 +1151,8 @@ export default function SellerProfile({navigation, route}) {
                   {
                     fontSize: 18,
                     fontWeight: '600',
-                    marginLeft: 6,color: isDark ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)",
+                    marginLeft: 6,
+                    color: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
                   },
                 ]}>
                 Choose from Gallery

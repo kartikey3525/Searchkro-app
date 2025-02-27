@@ -19,7 +19,11 @@ export default function PreferenceDetails({navigation, route}) {
 
   useEffect(() => {
     getFilteredPosts(route?.params?.selectedcategory);
-    // console.log('get fil post', filteredPosts[0]);
+    // console.log(
+    //   'get fil post',
+    //   filteredPosts[0],
+    //   route?.params?.selectedcategory,
+    // );
   }, [useIsFocused()]);
 
   const [recentPostList, setrecentPostList] = useState([
@@ -55,7 +59,7 @@ export default function PreferenceDetails({navigation, route}) {
             },
           ]}>
           <Image
-            source={{uri: item.images[0]}}
+            source={{uri: item.profile[0]}}
             style={{
               width: '94%',
               height: '50%',
@@ -84,7 +88,7 @@ export default function PreferenceDetails({navigation, route}) {
                     width: Width * 0.56,
                   },
                 ]}>
-                {item.title}
+                {item.name}
               </Text>
 
               <View
@@ -103,12 +107,12 @@ export default function PreferenceDetails({navigation, route}) {
                         ? 'rgba(255, 255, 255, 1)'
                         : 'rgba(29, 30, 32, 1)',
                       fontSize: 13,
-                     paddingRight: 5
+                      paddingRight: 5,
                     },
                   ]}>
-                  {item.rating.averageRating}
+                  {item?.averageRating}
                 </Text>
-                <RatingTest fixedRating={item?.rating?.averageRating} />
+                <RatingTest fixedRating={item?.averageRating} />
               </View>
             </View>
 
@@ -143,7 +147,7 @@ export default function PreferenceDetails({navigation, route}) {
                       : 'rgba(29, 30, 32, 1)',
                   },
                 ]}>
-                {item.location}
+                {item.businessAddress}
               </Text>
             </View>
 

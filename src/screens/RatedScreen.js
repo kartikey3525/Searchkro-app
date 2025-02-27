@@ -26,8 +26,8 @@ import {useIsFocused} from '@react-navigation/native';
 export default function RatedScreen({navigation, route}) {
   const [isLoading, setIsLoading] = useState(false);
   // const [media, setMedia] = useState([]);
-  const [description, setdescription] = useState(route?.params?.item.feedback);
-  const [rating, setrating] = useState(route?.params?.item.rate);
+  const [description, setdescription] = useState(route?.params?.item?.feedback);
+  const [rating, setrating] = useState(route?.params?.item?.rate);
   const postId = route?.params?.item?._id;
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -43,52 +43,44 @@ export default function RatedScreen({navigation, route}) {
     useImagePicker();
 
   useEffect(() => {
-    // console.log('route?.params?.item', route?.params?.item);
+    // console.log('route?.params?.item', route?.params?.item?._id);
   }, [useIsFocused()]);
+
   const validateInputs = () => {
-    if (!rating.trim()) {
-      setErrors(prevState => ({
-        ...prevState,
-        rating: 'rating is required.',
-      }));
-      return false;
+    let valid = true;
+    let newErrors = {rating: '', description: '', media: ''};
+
+    if (!rating) {
+      newErrors.rating = 'Rating is required.';
+      valid = false;
     }
 
     if (!description.trim()) {
-      setErrors(prevState => ({
-        ...prevState,
-        description: 'description is required.',
-      }));
-      return false;
-    }
-
-    if (description.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        description: 'description must be at least 6 characters long.',
-      }));
-      return false;
+      newErrors.description = 'Description is required.';
+      valid = false;
+    } else if (description.length < 6) {
+      newErrors.description = 'Description must be at least 6 characters long.';
+      valid = false;
     }
 
     if (media.length === 0) {
-      setErrors(prevState => ({
-        ...prevState,
-        media: 'Please select at least one image.',
-      }));
-      return false;
+      newErrors.media = 'Please select at least one image.';
+      valid = false;
     }
-    setErrors({rating: '', description: '', media: ''});
-    return true;
+
+    setErrors(newErrors); // Set all errors in one go
+
+    return valid;
   };
 
   const handlePress = async () => {
     setErrors({rating: '', description: '', media: ''});
-    // if (!validateInputs()) return;
-    console.log('rate 86', postId);
+    console.log('rating, media, description', rating, media, description);
+    if (!validateInputs()) return;
+
     try {
+      setIsLoading(true);
       await PostRating(postId, rating, media, description);
-      // console.log('Success', 'rating successful!');
-      // navigation.navigate('OTPScreen', {emailPhone: email, password: password});
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -117,7 +109,11 @@ export default function RatedScreen({navigation, route}) {
         ]}>
         <Image
           // source={require('../assets/shop-pic.png')}
-          source={{uri: route?.params?.item.profile[0]}}
+          source={
+            route?.params?.item?.profile?.[0]
+              ? {uri: route.params.item.profile[0]}
+              : require('../assets/shop-pic.png')
+          }
           style={{
             width: '30%',
             height: '80%',
@@ -143,7 +139,7 @@ export default function RatedScreen({navigation, route}) {
                 width: Width * 0.57,
               },
             ]}>
-            {route?.params?.item.name}
+            {route?.params?.item?.name}
           </Text>
         </View>
       </View>
@@ -182,6 +178,10 @@ export default function RatedScreen({navigation, route}) {
           baseColor={isDark ? '#48484A' : '#D1D1D6'}
         />
       </View>
+      <HelperText type="error" visible={errors.rating !== ''}>
+        {errors.rating}
+      </HelperText>
+
       <Text
         style={[
           styles.recListText,
@@ -226,10 +226,7 @@ export default function RatedScreen({navigation, route}) {
           autoCapitalize="none"
         />
       </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.description}>
+      <HelperText type="error" visible={errors.description !== ''}>
         {errors.description}
       </HelperText>
 
@@ -300,7 +297,7 @@ export default function RatedScreen({navigation, route}) {
         </View>
       </View>
 
-      <HelperText type="error" visible={!!errors.media}>
+      <HelperText type="error" visible={errors.media !== ''}>
         {errors.media}
       </HelperText>
       {media.length > 0 && (
@@ -386,7 +383,7 @@ export default function RatedScreen({navigation, route}) {
       )}
 
       <TouchableOpacity
-        disabled={route?.params?.item ? true : false}
+        disabled={route.params.item.feedback ? true : false}
         style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
         // onPress={() => navigation.navigate('shopdetails')}
         onPress={() => handlePress()}>

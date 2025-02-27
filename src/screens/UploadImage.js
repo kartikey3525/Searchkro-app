@@ -46,17 +46,17 @@ export default function UploadImage({navigation, route}) {
 
   const handlePress = async () => {
     setErrors({media: ''});
-    // if (!validateInputs()) return;
-    console.log('media', media);
+    if (!validateInputs()) return;
+    // console.log('media', media);
     try {
-      // await createPost(
-      //   route.params.selectedCategories,
-      //   route.params.description,
-      //   route.params.phone,
-      //   route.params.email,
-      //   route.params.location,
-      //   media,
-      // );
+      await createPost(
+        route.params.selectedCategories,
+        route.params.description,
+        route.params.phone,
+        route.params.email,
+        route.params.location,
+        media,
+      );
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {

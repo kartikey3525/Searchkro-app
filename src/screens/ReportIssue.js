@@ -150,14 +150,14 @@ export default function ReportIssue({navigation}) {
       </Text>
       <View>
         <View style={{}}>
-          {media.length > 0 && media[0].uri ? (
+          {media.length > 0 && media[0] ? (
             <TouchableOpacity
               onPress={
                 // selectMedia
                 () => setModalVisible(!modalVisible)
               }>
               <Image
-                source={{uri: media[0].uri}}
+                source={{uri: media[0]}}
                 style={[styles.mediaSelector, {borderWidth: 0}]}
               />
             </TouchableOpacity>

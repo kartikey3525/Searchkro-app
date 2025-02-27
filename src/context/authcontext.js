@@ -634,7 +634,7 @@ const AuthProvider = ({children}) => {
 
       const NearbyPosts = response.data.data;
       setnearbyPosts(NearbyPosts);
-      // console.log('NearbyPosts:', NearbyPosts);
+      //  console.log('NearbyPosts:', NearbyPosts[0].userData);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // console.log('Error 107', error.response?.data || 'No error response');
@@ -828,7 +828,7 @@ const AuthProvider = ({children}) => {
   };
 
   const PostReviewLikes = async (userId, postId, like) => {
-    console.log('userId, postId', userId, postId, like);
+    // console.log('userId, postId', userId, postId, like);
 
     try {
       const payload = {
@@ -840,7 +840,7 @@ const AuthProvider = ({children}) => {
       };
 
       const response = await axios.post(
-        `${apiURL}/api/rate/likeRating?postId=${userId}&userId=${postId}&status=${like}`,
+        `${apiURL}/api/rate/likeRating?postId=${postId}&userId=${userId}&status=${like}`,
         payload, // Pass payload correctly
         {headers}, // Move headers inside config
       );
@@ -896,15 +896,15 @@ const AuthProvider = ({children}) => {
   };
 
   const PostRating = async (postId, rating, media, description) => {
-    const formattedMedia = Array.isArray(media)
-      ? media.map(item => item.uri || item)
-      : [];
+    // const formattedMedia = Array.isArray(media)
+    //   ? media.map(item => item.uri || item)
+    //   : [];
     // console.log('formattedMedia',formattedMedia)
     try {
       const payload = {
         rate: rating, // User-selected rating
         feedback: description, // User feedback (optional)
-        images: formattedMedia, // Array of image URLs (optional)
+        images: media[0], // Array of image URLs (optional)
       };
 
       const headers = {
@@ -919,7 +919,7 @@ const AuthProvider = ({children}) => {
         {headers},
       );
 
-      //  navigation.navigate(navigation.goBack())
+      navigation.navigate(navigation.goBack());
       console.log('Success', 'Rating Posted Successfully!', response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -938,17 +938,23 @@ const AuthProvider = ({children}) => {
     location,
     media,
   ) => {
+    console.log(
+      'first',
+      selectedCategories,
+      description,
+      phone,
+      email,
+      location,
+      media,
+    );
     try {
       const payload = {
         categories: selectedCategories,
-        images: [
-          'https://example.com/image1.jpg',
-          'https://example.com/image2.jpg',
-        ],
+        images: media,
         description: description,
         contactNumber: phone,
         contactEmail: email,
-        location: '',
+        location: location,
         latitude: location.latitude,
         longitude: location.longitude,
         locationUrl: 'https://maps.google.com/?q=New+York',
@@ -979,7 +985,7 @@ const AuthProvider = ({children}) => {
         {headers},
       );
 
-      // console.log('Response 171:', response.data);
+      console.log('Response 171:', response.data);
       // Alert.alert('Success', 'Post created successfully!');
       navigation.navigate('BottomTabs');
       // console.log('NearbyPosts:', NearbyPosts);
@@ -987,7 +993,7 @@ const AuthProvider = ({children}) => {
       if (axios.isAxiosError(error)) {
         // console.log('Error 107', error.response?.data || 'No error response');
       } else {
-        console.log('Error 109', 'Failed to load categories');
+        console.log('Error 109', 'Failed to create post');
       }
     }
   };

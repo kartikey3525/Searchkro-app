@@ -48,7 +48,7 @@ export default function NotificationScreen({navigation}) {
 
   useEffect(() => {
     getNotification();
-    console.log('notificationList 50', notificationList[0]);
+    // console.log('notificationList 50', notificationList[0]);
   }, [useIsFocused()]);
 
   const [modalVisible, setModalVisible] = useState(false);

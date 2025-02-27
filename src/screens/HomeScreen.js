@@ -183,7 +183,8 @@ export default function HomeScreen({navigation}) {
             ]}>
             {item.title}
           </Text>
-          <View
+
+          {/* <View
             style={{
               flexDirection: 'row',
             }}>
@@ -199,15 +200,13 @@ export default function HomeScreen({navigation}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}>
-              {/* {item?.rating?.averageRating} */}
+             {item?.rating?.averageRating}   
               4
             </Text>
 
-            <RatingTest fixedRating=
-            // {item?.rating?.averageRating} 
-            '4'
-            />
-          </View>
+            <RatingTest fixedRating="4" />
+          </View> */}
+          {/* {item?.rating?.averageRating} */}
 
           <View
             style={{
@@ -241,8 +240,8 @@ export default function HomeScreen({navigation}) {
                   left: 5,
                 },
               ]}>
-              dddddddddddddddddddddddddddddddddddddddddddddd
-              {/* {item.location} */}
+              {/* dddddddddddddddddddddddddddddddddddddddddddddd */}
+              {item.userData.businessAddress}
             </Text>
           </View>
         </View>
