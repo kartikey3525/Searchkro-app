@@ -2,27 +2,27 @@ import {AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import {initializeApp, getApps} from '@react-native-firebase/app';
-// import messaging from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging';
 
 // Function to request notification permission
-// const requestUserPermission = async () => {
-//   const authStatus = await messaging().requestPermission();
-//   if (
-//     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-//     authStatus === messaging.AuthorizationStatus.PROVISIONAL
-//   ) {
-//     console.log('🚀 Notification permission granted.');
-//   } else {
-//     console.log('⚠️ Notification permission denied.');
-//   }
-// };
+const requestUserPermission = async () => {
+  const authStatus = await messaging().requestPermission();
+  if (
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+  ) {
+    console.log('🚀 Notification permission granted.');
+  } else {
+    console.log('⚠️ Notification permission denied.');
+  }
+};
 
-// // Call this function at the start of your app
-// requestUserPermission();
+// Call this function at the start of your app
+requestUserPermission();
 
-// messaging().setBackgroundMessageHandler(async remoteMessage => {
-//   console.log('Message handled in the background!', remoteMessage);
-// });
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Message handled in the background!', remoteMessage);
+});
 
 // Firebase configuration
 const firebaseConfig = {

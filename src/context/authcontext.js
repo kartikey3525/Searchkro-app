@@ -44,18 +44,45 @@ const AuthProvider = ({children}) => {
 
   const isFocused = useIsFocused(); // ✅ Correct way to use `useIsFocused()`
 
-  // not crashing
-  useEffect(() => {
-    console.log('🔄 useEffect triggered');
+ 
 
+  const sendFCMNotification = async deviceToken => {
+    try {
+      const response = await fetch(
+        'https://fcm.googleapis.com/v1/projects/searchkro-d6ff3/messages:send',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userdata.token}`, // Replace with your FCM server key
+          },
+          body: JSON.stringify({
+            to: deviceToken,
+            notification: {
+              title: 'FCM Message',
+              body: 'This is an FCM notification message!',
+            },
+            data: {
+              extraData: 'Some extra data',
+            },
+          }),
+        },
+      );
+
+      const result = await response.json();
+      console.log('✅ FCM Notification Sent:', result);
+    } catch (error) {
+      console.error('❌ Error sending FCM notification:', error);
+    }
+  };
+
+  // getting data throught firestore but crashing
+  useEffect(() => {
     // ✅ Configure Google Sign-In
     GoogleSignin.configure({
       webClientId: 'searchkro-d6ff3.firebaseapp.com',
       offlineAccess: true,
     });
-
-    // ✅ Ensure Notification Permissions
-    requestNotificationPermission();
 
     // ✅ Get Device Token
     getDeviceToken();
@@ -66,12 +93,18 @@ const AuthProvider = ({children}) => {
       try {
         const remoteMessage = await messaging().getInitialNotification();
         console.log(
-          '📩 Initial Notification:',
+          '📩 Full Remote Message:',
           JSON.stringify(remoteMessage, null, 2),
         );
 
-        if (remoteMessage) {
-          handleNotification(remoteMessage, 'Initial');
+        console.log('📩 Initial Notification:', remoteMessage);
+
+        if (remoteMessage?.notification) {
+          const {title, body} = remoteMessage.notification;
+          Alert.alert(
+            title || 'Notification',
+            body || 'You have a new message',
+          );
         } else {
           console.log('⚠️ No initial notification found.');
         }
@@ -82,336 +115,65 @@ const AuthProvider = ({children}) => {
 
     handleInitialNotification();
 
-    // ✅ Handle background notification click
+    // ✅ Handle notification click when app is in background or quit state
     const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
       remoteMessage => {
-        console.log(
-          '📬 Notification opened from background:',
-          JSON.stringify(remoteMessage, null, 2),
-        );
-        if (remoteMessage) {
-          handleNotification(remoteMessage, 'Background');
+        if (!remoteMessage) {
+          console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
+          return;
         }
+        console.log('📬 Notification opened from background:', remoteMessage);
       },
     );
 
     // ✅ Handle foreground notifications
     const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log(
-        '📨 Foreground message received:',
-        JSON.stringify(remoteMessage, null, 2),
-      );
-      if (remoteMessage) {
-        handleNotification(remoteMessage, 'Foreground');
+      try {
+        if (!remoteMessage) {
+          console.log('⚠️ No remoteMessage found in onMessage.');
+          return;
+        }
+
+        const {notification} = remoteMessage;
+        if (notification) {
+          Alert.alert(
+            notification.title || 'Notification',
+            notification.body || 'You have a new message',
+          );
+        } else {
+          console.log('⚠️ No notification data found in foreground message.');
+        }
+      } catch (error) {
+        console.error('❌ Error handling foreground notification:', error);
       }
     });
 
-    // ✅ Cleanup
+    // ✅ Handle notification click when the app is in foreground
+    const handleAppStateChange = async nextAppState => {
+      if (nextAppState === 'active') {
+        const remoteMessage = await messaging().getInitialNotification();
+        if (remoteMessage?.notification) {
+          Alert.alert(
+            remoteMessage.notification.title || 'Notification',
+            remoteMessage.notification.body || 'You have a new message',
+          );
+        }
+      }
+    };
+
+    // ✅ Listen for app state changes
+    const appStateListener = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    // ✅ Cleanup function
     return () => {
       unsubscribeOnOpen();
       unsubscribeOnMessage();
+      appStateListener.remove();
     };
   }, []);
-
-  // ✅ Function to request notification permissions
-  const requestNotificationPermission = async () => {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (enabled) {
-      console.log('✅ Notification permission granted.');
-    } else {
-      console.log('❌ Notification permission denied.');
-    }
-  };
-
-  // ✅ Function to handle notifications safely
-  const handleNotification = (remoteMessage, source) => {
-    console.log(
-      `🔔 ${source} Notification Data:`,
-      JSON.stringify(remoteMessage.data, null, 2),
-    );
-
-    if (remoteMessage.notification) {
-      const {title, body} = remoteMessage.notification;
-      const data = remoteMessage.data || {};
-
-      console.log(
-        `📜 Notification Details: Title: ${title}, Body: ${body}, Data:`,
-        data,
-      );
-
-      if (AppState.currentState === 'active') {
-        Alert.alert(
-          `${title || 'Notification'} (${source})`,
-          `${body || 'You have a new message'}\n\nData: ${JSON.stringify(
-            data,
-          )}`,
-        );
-      }
-    } else {
-      console.log(`⚠️ No "notification" object found in ${source} message.`);
-    }
-  };
-
-  // getting data throught firestore but crashing
-  // useEffect(() => {
-  //   console.log('🔄 useEffect triggered');
-
-  //   // ✅ Configure Google Sign-In
-  //   GoogleSignin.configure({
-  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
-  //     offlineAccess: true,
-  //   });
-
-  //   // ✅ Ensure Notification Permissions
-  //   requestNotificationPermission();
-
-  //   // ✅ Get Device Token
-  //   getDeviceToken();
-  //   checkLoginStatus();
-
-  //   // ✅ Handle initial notification (App was killed & opened from notification)
-  //   const handleInitialNotification = async () => {
-  //     try {
-  //       const remoteMessage = await messaging().getInitialNotification();
-  //       console.log(
-  //         '📩 Initial Notification:',
-  //         JSON.stringify(remoteMessage, null, 2),
-  //       );
-
-  //       if (!remoteMessage) {
-  //         console.log('⚠️ No initial notification found.');
-  //         return;
-  //       }
-
-  //       const {notification, data} = remoteMessage;
-  //       const title = notification?.title || 'Notification';
-  //       const body = notification?.body || 'You have a new message';
-
-  //       console.log(
-  //         `📜 Initial Notification Details: Title: ${title}, Body: ${body}, Data:`,
-  //         data,
-  //       );
-
-  //       Alert.alert(title, body);
-  //     } catch (error) {
-  //       console.error('❌ Error fetching initial notification:', error);
-  //     }
-  //   };
-
-  //   handleInitialNotification();
-
-  //   // ✅ Handle background notification click
-  //   const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
-  //     remoteMessage => {
-  //       console.log(
-  //         '📬 Notification opened from background:',
-  //         JSON.stringify(remoteMessage, null, 2),
-  //       );
-  //       if (remoteMessage) {
-  //         handleNotification(remoteMessage, 'Background');
-  //       }
-  //     },
-  //   );
-
-  //   // ✅ Handle foreground notifications
-  //   messaging().onMessage(async remoteMessage => {
-  //     try {
-  //       console.log(
-  //         '📨 Foreground message received:',
-  //         JSON.stringify(remoteMessage, null, 2),
-  //       );
-
-  //       if (!remoteMessage) {
-  //         console.log('⚠️ No remoteMessage found in onMessage.');
-  //         return;
-  //       }
-
-  //       // 🛡 Ensure `notification` and `data` exist before accessing
-  //       const notification = remoteMessage?.notification || {};
-  //       const data = remoteMessage?.data || {};
-
-  //       console.log(`📜 Safe Notification Details:`, {
-  //         title: notification?.title || 'No Title',
-  //         body: notification?.body || 'No Body',
-  //         data: Object.keys(data).length ? data : 'No Data',
-  //       });
-
-  //       // ✅ Show an alert ONLY if App is in foreground (to prevent crashes)
-  //       if (AppState.currentState === 'active') {
-  //         try {
-  //           Alert.alert(
-  //             notification?.title || 'Notification',
-  //             notification?.body || 'You have a new message',
-  //           );
-  //         } catch (alertError) {
-  //           console.error('🚨 Alert crashed the app:', alertError);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error(
-  //         '❌ CRASH PREVENTED: Error handling foreground notification:',
-  //         error,
-  //       );
-  //     }
-  //   });
-
-  //   // ✅ Cleanup
-  //   return () => {
-  //     unsubscribeOnOpen();
-  //     unsubscribeOnMessage();
-  //   };
-  // }, []);
-
-  // // ✅ Function to request notification permissions
-  // const requestNotificationPermission = async () => {
-  //   try {
-  //     const authStatus = await messaging().requestPermission();
-  //     const enabled =
-  //       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-  //       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-  //     if (enabled) {
-  //       console.log('✅ Notification permission granted.');
-  //     } else {
-  //       console.log('❌ Notification permission denied.');
-  //     }
-  //   } catch (error) {
-  //     console.error('❌ Error requesting notification permission:', error);
-  //   }
-  // };
-
-  // // ✅ Function to handle notifications safely
-  // const handleNotification = (remoteMessage, source) => {
-  //   try {
-  //     console.log(
-  //       `🔔 ${source} Notification Data:`,
-  //       JSON.stringify(
-  //         remoteMessage?.data || {message: 'No data received'},
-  //         null,
-  //         2,
-  //       ),
-  //     );
-
-  //     if (!remoteMessage || !remoteMessage.notification) {
-  //       console.log(`⚠️ No "notification" object found in ${source} message.`);
-  //       return;
-  //     }
-
-  //     const {title, body} = remoteMessage.notification || {};
-  //     const safeData =
-  //       remoteMessage.data && Object.keys(remoteMessage.data).length
-  //         ? remoteMessage.data
-  //         : {message: 'No data received'};
-
-  //     console.log(
-  //       `📜 Safe Notification Details: Title: ${title || 'No Title'}, Body: ${
-  //         body || 'No Body'
-  //       }, Data:`,
-  //       safeData,
-  //     );
-
-  //     if (AppState.currentState === 'active') {
-  //       try {
-  //         Alert.alert(
-  //           `${title || 'Notification'} (${source})`,
-  //           `${body || 'You have a new message'}\n\nData: ${JSON.stringify(
-  //             safeData,
-  //           )}`,
-  //         );
-  //       } catch (alertError) {
-  //         console.error('🚨 Alert crashed the app:', alertError);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error(
-  //       `❌ CRASH PREVENTED: Error handling ${source} notification:`,
-  //       error,
-  //     );
-  //   }
-  // };
-
-  // crashing but have data througt api useEffect(() => {
-  //   console.log('🔄 useEffect triggered');
-
-  //   // ✅ Configure Google Sign-In
-  //   GoogleSignin.configure({
-  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
-  //     offlineAccess: true,
-  //   });
-
-  //   // ✅ Fetch Device Token
-  //   getDeviceToken();
-  //   checkLoginStatus();
-
-  //   // ✅ Handle initial notification (when app is killed & opened from notification)
-  //   const handleInitialNotification = async () => {
-  //     try {
-  //       const remoteMessage = await messaging().getInitialNotification();
-  //       console.log('📩 Initial Notification:', remoteMessage);
-
-  //       if (remoteMessage?.notification) {
-  //         const {title, body} = remoteMessage.notification;
-  //         if (AppState.currentState === 'active') {
-  //           Alert.alert(
-  //             title || 'Notification',
-  //             body || 'You have a new message',
-  //           );
-  //         }
-  //       } else {
-  //         console.log('⚠️ No initial notification found.');
-  //       }
-  //     } catch (error) {
-  //       console.error('❌ Error fetching initial notification:', error);
-  //     }
-  //   };
-
-  //   handleInitialNotification();
-
-  //   // ✅ Handle background notification click
-  //   const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
-  //     remoteMessage => {
-  //       console.log('📬 Notification opened from background:', remoteMessage);
-  //       if (!remoteMessage) {
-  //         console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
-  //         return;
-  //       }
-  //     },
-  //   );
-
-  //   // ✅ Handle foreground notifications
-  //   const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-  //     try {
-  //       console.log('📨 Foreground message received:', remoteMessage);
-
-  //       if (!remoteMessage) {
-  //         console.log('⚠️ No remoteMessage found in onMessage.');
-  //         return;
-  //       }
-
-  //       const {notification} = remoteMessage;
-  //       if (notification) {
-  //         Alert.alert(
-  //           notification.title || 'Notification',
-  //           notification.body || 'You have a new message',
-  //         );
-  //       } else {
-  //         console.log('⚠️ No notification data found in foreground message.');
-  //       }
-  //     } catch (error) {
-  //       console.error('❌ Error handling foreground notification:', error);
-  //     }
-  //   });
-
-  //   // ✅ Cleanup
-  //   return () => {
-  //     unsubscribeOnOpen();
-  //     unsubscribeOnMessage();
-  //   };
-  // }, []);
 
   const checkLoginStatus = async () => {
     try {

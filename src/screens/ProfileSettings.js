@@ -49,7 +49,7 @@ export default function ProfileSettings({navigation, route}) {
   useEffect(() => {
     getCategories();
     getUserData();
-    // console.log('userdata50', Userfulldata);
+    // console.log('userdata50', Userfulldata?.dob);
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
@@ -60,6 +60,14 @@ export default function ProfileSettings({navigation, route}) {
     name: '',
   });
 
+  const formatDOB_DDMMYYYY = dateStr => {
+    const date = new Date(dateStr);
+    return `${date.getDate().toString().padStart(2, '0')}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')}/${date.getFullYear()}`;
+  };
   const validateInputs = () => {
     let valid = true;
     let newErrors = {
@@ -309,7 +317,7 @@ export default function ProfileSettings({navigation, route}) {
               marginBottom: 20,
             },
           ]}>
-          Albert Flores
+          {Userfulldata?.phone}
         </Text>
 
         <Text
@@ -340,7 +348,7 @@ export default function ProfileSettings({navigation, route}) {
               marginBottom: 20,
             },
           ]}>
-          Albert Flores
+          {formatDOB_DDMMYYYY(Userfulldata?.dob)}
         </Text>
 
         <Text
@@ -377,7 +385,7 @@ export default function ProfileSettings({navigation, route}) {
 
       <TouchableOpacity
         style={styles.blueBotton}
-        onPress={() => navigation.navigate('BottomTabs')}
+        onPress={() => navigation.navigate('editProfile')}
         // onPress={() => handlePress()}
       >
         <Text

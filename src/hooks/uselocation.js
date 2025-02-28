@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { PermissionsAndroid, Alert } from 'react-native';
+import {PermissionsAndroid, Alert, Platform} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 
 const LocationPermission = ({ setLocation }) => {
@@ -9,18 +9,23 @@ const LocationPermission = ({ setLocation }) => {
 
   const requestLocationPermission = async () => {
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Access Required',
-          message: 'This app needs to access your location.',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission granted');
-        getLocation();
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This app needs to access your location.',
+          },
+        );
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Location permission granted');
+          getLocation();
+        } else {
+          Alert.alert('Permission Denied', 'Location access is required.');
+        }
       } else {
-        Alert.alert('Permission Denied', 'Location access is required.');
+        getLocation(); // iOS handles permissions automatically
       }
     } catch (err) {
       console.warn(err);
@@ -29,33 +34,16 @@ const LocationPermission = ({ setLocation }) => {
 
   const getLocation = async () => {
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message: 'This app requires location access to function properly.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert('Permission Denied', 'Location access is required.');
-        return;
-      }
-
-      // Get location with a longer timeout and fallback options
       Geolocation.getCurrentPosition(
         position => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
+          const {latitude, longitude} = position.coords;
+          setLocation({latitude, longitude});
           console.log('User location:', latitude, longitude);
         },
         error => {
           console.error('Location error:', error);
 
-          // Specific error handling
+          // Handle specific error codes
           switch (error.code) {
             case 1:
               Alert.alert('Permission Denied', 'Enable location permission.');
@@ -64,17 +52,20 @@ const LocationPermission = ({ setLocation }) => {
               Alert.alert('Location Unavailable', 'Turn on GPS or try again.');
               break;
             case 3:
-              Alert.alert('Timeout', 'Try increasing timeout or check GPS.');
+              Alert.alert(
+                'Timeout',
+                'Location request timed out. Ensure GPS is enabled and try again.',
+              );
               break;
             default:
               Alert.alert('Error', error.message);
           }
         },
         {
-          enableHighAccuracy: false, // Try setting false if high accuracy fails
-          timeout: 60000, // Increase timeout from 35s to 60s
-          maximumAge: 10000,
-          distanceFilter: 10, // Get location updates every 10 meters
+          enableHighAccuracy: true, // Enable high accuracy for better results
+          timeout: 100000, // Increase timeout (100s)
+          maximumAge: 0, // Get fresh location, no caching
+          distanceFilter: 10, // Update every 10 meters
         },
       );
     } catch (error) {
@@ -82,7 +73,7 @@ const LocationPermission = ({ setLocation }) => {
     }
   };
 
-  return null; // No UI needs to be rendered by this component
+  return null; // No UI needed for this component
 };
 
 export default LocationPermission;
