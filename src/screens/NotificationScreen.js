@@ -48,14 +48,13 @@ export default function NotificationScreen({navigation}) {
 
   useEffect(() => {
     getNotification();
-    // console.log('notificationList 50', notificationList[0]);
   }, [useIsFocused()]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleLongPress = item => {
-    setSelectedItem(item); // Ensure selectedItem is properly set
+    setSelectedItem(item);
     setModalVisible(true);
   };
 
@@ -74,8 +73,6 @@ export default function NotificationScreen({navigation}) {
     }
   };
 
-  // console.log(timeOnly);
-
   const render2RectangleList = (item, index) => (
     <Pressable
       key={index}
@@ -92,7 +89,6 @@ export default function NotificationScreen({navigation}) {
           styles.rectangle2,
           {
             flexDirection: 'row',
-
             backgroundColor: isDark ? '#000' : '#fff',
           },
         ]}>
@@ -150,7 +146,7 @@ export default function NotificationScreen({navigation}) {
     return new Date(dateStr).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true, // Change to false for 24-hour format
+      hour12: true,
     });
   };
 
@@ -163,6 +159,19 @@ export default function NotificationScreen({navigation}) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{height: Height * 0.8, flexGrow: 1}}>
+        {/* No Notifications Message */}
+        {notificationList.length === 0 && (
+          <View style={styles.noNotificationsContainer}>
+            <Text
+              style={[
+                styles.noNotificationsText,
+                {color: isDark ? '#fff' : '#000'},
+              ]}>
+              No notifications to show.
+            </Text>
+          </View>
+        )}
+
         {/* Today */}
         {notificationList.filter(item =>
           moment(item.date).isSame(moment(), 'day'),
@@ -195,12 +204,12 @@ export default function NotificationScreen({navigation}) {
           </>
         )}
 
-        {/* This Week (Last 7 days but not today/yesterday) */}
+        {/* This Week */}
         {notificationList.filter(
           item =>
-            moment(item.date).isAfter(moment().subtract(7, 'days')) &&
-            !moment(item.date).isSame(moment(), 'day') &&
-            !moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
+            moment(item.date).isAfter(moment().subtract(7, 'days')) && // Within the last 7 days
+            !moment(item.date).isSame(moment(), 'day') && // Not today
+            !moment(item.date).isSame(moment().subtract(1, 'days'), 'day'), // Not yesterday
         ).length > 0 && (
           <>
             <Text
@@ -210,12 +219,12 @@ export default function NotificationScreen({navigation}) {
             {notificationList
               .filter(
                 item =>
-                  moment(item.date).isAfter(moment().subtract(7, 'days')) &&
-                  !moment(item.date).isSame(moment(), 'day') &&
+                  moment(item.date).isAfter(moment().subtract(7, 'days')) && // Within the last 7 days
+                  !moment(item.date).isSame(moment(), 'day') && // Not today
                   !moment(item.date).isSame(
                     moment().subtract(1, 'days'),
                     'day',
-                  ),
+                  ), // Not yesterday
               )
               .map((item, index) => render2RectangleList(item, index))}
           </>
@@ -360,5 +369,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '500',
     fontSize: 18,
+  },
+  noNotificationsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Height * 0.3,
+  },
+  noNotificationsText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
   },
 });

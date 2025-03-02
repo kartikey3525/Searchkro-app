@@ -16,16 +16,19 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 
-export default function Preferences({navigation}) {
+export default function Preferences({navigation, route}) {
   const [numColumns, setNumColumns] = useState(4);
   const isFocused = useIsFocused();
-  const {userRole, getCategories, fullCategorydata, posts, isposting} =
+  const {userRole, getPosts, fullCategorydata, posts, isposting} =
     useContext(AuthContext);
 
   useEffect(() => {
-    getCategories();
-    // console.log('posts', posts);
-  }, [isFocused]);
+    if (isFocused) {
+      // console.log('Filtered screen is focused');
+      getPosts(route.params?.category);
+    }
+  }, [isFocused, route.params?.category]);
+
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
@@ -38,7 +41,11 @@ export default function Preferences({navigation}) {
     {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
     {id: 8, title: 'Food', img: require('../assets/food.png')},
     {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {id: 9, title: 'Home service', img: require('../assets/home-service.png')},
+    {
+      id: 9,
+      title: 'Home service',
+      img: require('../assets/home-service.png'),
+    },
     {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
     {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
@@ -92,7 +99,9 @@ export default function Preferences({navigation}) {
           alignItems: 'center',
           width: Width * 0.5,
         }}
-        onPress={() => navigation.navigate('preferencedetails', {item: item})}>
+        onPress={() =>
+          navigation.navigate('Sellerproductdetails', {item: item})
+        }>
         <View
           style={[
             styles.rectangle1,
@@ -113,13 +122,13 @@ export default function Preferences({navigation}) {
             styles.recListText2,
             {fontSize: 15, color: isDark ? '#fff' : '#000'},
           ]}>
-          {item.title}
+          {item.description}
         </Text>
-        <Text
+        {/* <Text
           numberOfLines={2}
           style={[styles.recListText2, {color: isDark ? '#fff' : '#000'}]}>
           {item.description}
-        </Text>
+        </Text> */}
       </TouchableOpacity>
     );
   };

@@ -153,7 +153,7 @@ export default function ProfileScreen({navigation}) {
                 onPress={() =>
                   userRole === 'buyer'
                     ? navigation.navigate('editProfile')
-                    : null
+                    : navigation.navigate('Sellerprofile')
                 }
                 name="edit"
                 size={24}

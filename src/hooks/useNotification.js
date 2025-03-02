@@ -10,7 +10,7 @@ export default function useNotification(setInitialRoute) {
   React.useEffect(() => {
     messaging().onNotificationOpenedApp(remoteMessage => {
       setNotificationMessage(remoteMessage);
-      navigation.navigate('NotificationScreen');
+      navigation.navigate('Notification');
     });
 
     // Check whether an initial notification is available
@@ -21,7 +21,7 @@ export default function useNotification(setInitialRoute) {
           setNotificationMessage(remoteMessage);
 
           setInitialRoute(remoteMessage.data?.type);
-          navigation.navigate('NotificationScreen');
+          navigation.navigate('Notification');
         }
         setLoading(false);
       });

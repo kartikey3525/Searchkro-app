@@ -112,8 +112,10 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android") 
-    implementation platform('com.google.firebase:firebase-bom:32.2.3')
-implementation 'com.google.firebase:firebase-messaging' 
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+// implementation 'com.google.firebase:firebase-messaging' 
+implementation 'com.google.firebase:firebase-messaging:23.1.2'
+implementation 'com.onesignal:OneSignal:[5.0.0, 5.1.99]'
 implementation 'com.google.firebase:firebase-firestore'
 implementation 'com.google.android.gms:play-services-auth:20.7.0'
 //     implementation(project(':react-native-onesignal')){

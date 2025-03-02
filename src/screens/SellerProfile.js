@@ -206,7 +206,7 @@ export default function SellerProfile({navigation, route}) {
       selectedScale: '',
       selectedAvailabity: '',
     });
-    // if (!validateInputs()) return;
+    if (!validateInputs()) return;
 
     setIsLoading(true);
     try { 

@@ -3,10 +3,11 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {Alert, AppState} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
-let apiURL = 'http://192.168.1.31:8080';
-// let apiURL = 'https://8b0zr4h5-8080.inc1.devtunnels.ms';
+// let apiURL = 'http://192.168.1.31:8080';
+let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {LogLevel, OneSignal} from 'react-native-onesignal';
 
 const AuthContext = createContext();
 
@@ -44,50 +45,215 @@ const AuthProvider = ({children}) => {
 
   const isFocused = useIsFocused(); // ✅ Correct way to use `useIsFocused()`
 
- 
+  // useEffect(() => {
+  //   // Check if OneSignal is initialized
+  //   if (!OneSignal) {
+  //     console.error('OneSignal is not initialized', OneSignal);
+  //     return;
+  //   }
+  //   // console.error('OneSignal is not initialized', OneSignal);
 
-  const sendFCMNotification = async deviceToken => {
-    try {
-      const response = await fetch(
-        'https://fcm.googleapis.com/v1/projects/searchkro-d6ff3/messages:send',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userdata.token}`, // Replace with your FCM server key
-          },
-          body: JSON.stringify({
-            to: deviceToken,
-            notification: {
-              title: 'FCM Message',
-              body: 'This is an FCM notification message!',
-            },
-            data: {
-              extraData: 'Some extra data',
-            },
-          }),
-        },
-      );
+  //   // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 
-      const result = await response.json();
-      console.log('✅ FCM Notification Sent:', result);
-    } catch (error) {
-      console.error('❌ Error sending FCM notification:', error);
-    }
-  };
+  //   // Initialize OneSignal with your App ID
+  //   OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6'); // Replace with your OneSignal App ID
 
-  // getting data throught firestore but crashing
+  //   // Request notification permission
+  //   OneSignal.Notifications.requestPermission(true);
+  //   OneSignal.Notifications.getPermissionAsync();
+  //   const requestNotificationPermission = async () => {
+  //     const permission = await OneSignal.Notifications.requestPermission(true);
+  //     if (permission) {
+  //       console.log('Notification permission granted.');
+  //     } else {
+  //       console.log('Notification permission denied.');
+  //     }
+  //   };
+
+  //   requestNotificationPermission();
+  //   // Add event listener for notification clicks
+  //   OneSignal.Notifications.addEventListener('click', event => {
+  //     console.log('OneSignal: notification clicked:', event);
+  //   });
+
+  //   // Method for listening for notification clicks
+  //   OneSignal.Notifications.addEventListener('click', event => {
+  //     console.log('OneSignal: notification clicked:', event);
+
+  //     // Access notification details
+  //     const notification = event.notification;
+  //     const title = notification.title;
+  //     const body = notification.body;
+  //     const additionalData = notification.additionalData;
+
+  //     console.log('Notification Title:', title);
+  //     console.log('Notification Body:', body);
+  //     console.log('Additional Data:', additionalData);
+
+  //     // Use the data in your app
+  //     // Example: Navigate to a specific screen based on additionalData
+  //     if (additionalData && additionalData.screen) {
+  //       switch (additionalData.screen) {
+  //         case 'profile':
+  //           // Navigate to the profile screen
+  //           console.log('Navigating to profile screen');
+  //           break;
+  //         case 'settings':
+  //           // Navigate to the settings screen
+  //           console.log('Navigating to settings screen');
+  //           break;
+  //         default:
+  //           console.log('No specific screen to navigate to');
+  //       }
+  //     }
+  //   });
+
+  //   // Listen for permission changes
+  //   OneSignal.Notifications.addEventListener(
+  //     'permissionChange',
+  //     async event => {
+  //       console.log('Notification permission changed:', event.hasPermission);
+  //       if (event.hasPermission) {
+  //         const deviceState = await OneSignal.User.getDeviceState();
+  //         console.log('Device State after permission change:', deviceState);
+  //       }
+  //     },
+  //   );
+
+  //   // Set external user ID
+  //   const externalUserId = ' kartikey'; // Replace with your name or dynamic value
+  //   OneSignal.User.getExternalId(externalUserId)
+  //     .then(() => {
+  //       OneSignal.login('kartikey');
+  //       console.log('External User ID set:', externalUserId);
+  //     })
+  //     .catch(error => {
+  //       console.error('Error setting external user ID:', error);
+  //     });
+
+  //   // Check subscription status
+
+  //   const addsubscription = async userdata => {
+  //     try {
+  //       const userId = 'kartikey1'; // Replace with the actual user ID from your response
+  //       const UserRole = 'buyer'; // Use the stored role or fetch it from the response
+
+  //       // Initialize OneSignal
+  //       OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6'); // Replace with your OneSignal App ID
+
+  //       // Set external user ID
+  //       await OneSignal.login(userId);
+  //       console.log('External User ID set:', userId);
+
+  //       // Add user role as a tag
+  //       await OneSignal.User.addTag('role', UserRole);
+  //       console.log('User role tag added:', UserRole);
+
+  //       // Ensure the user is subscribed
+  //       const isSubscribed = await OneSignal.User.pushSubscription.optIn();
+  //       if (isSubscribed) {
+  //         console.log('User is subscribed.');
+  //       } else {
+  //         console.log('User is not subscribed.');
+  //       }
+
+  //       // Log device state for debugging
+  //     } catch (error) {
+  //       console.error('Error adding subscription:', error);
+  //     }
+  //   };
+  //   // Replace with actual user data
+  //   addsubscription(userdata);
+
+  //   GoogleSignin.configure({
+  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
+  //     offlineAccess: true,
+  //   });
+  //   getDeviceToken();
+  //   checkLoginStatus();
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log('OneSignal:', OneSignal); // Log the OneSignal object
+  //   console.log('OneSignal.User:', OneSignal.User); // Log the User module
+
+  //   // Initialize OneSignal
+  //   OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6');
+  //   OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+
+  //   // Request notification permission
+  //   OneSignal.Notifications.requestPermission(true);
+
+  //   // Set external_user_id (replace with actual userId from your database)
+  //   const userId = '67b719101fdcd9e4482a9d71'; // Example userId
+  //   if (OneSignal.User && OneSignal.User.setExternalUserId) {
+  //     OneSignal.User.setExternalUserId(userId); // Use OneSignal.User.setExternalUserId
+  //   } else {
+  //     console.error('OneSignal.User.setExternalUserId is not available');
+  //   }
+
+  //   // Listen for notification clicks
+  //   OneSignal.Notifications.addEventListener('click', event => {
+  //     console.log('OneSignal: notification clicked:', event);
+  //   });
+
+  //   // Get device token (FCM token) and verify it
+  //   const getDeviceToken = async () => {
+  //     try {
+  //       const deviceState = await OneSignal.getDeviceState();
+  //       if (deviceState && deviceState.userId) {
+  //         console.log('Device Token (OneSignal User ID):', deviceState.userId);
+
+  //         // Send the token to your backend for verification (if needed)
+  //         await sendTokenToBackend(deviceState.userId);
+  //       } else {
+  //         console.error('Device token (userId) not available');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching device token:', error);
+  //     }
+  //   };
+
+  //   // Function to send the token to your backend for verification
+  //   const sendTokenToBackend = async token => {
+  //     try {
+  //       const response = await fetch(
+  //         'https://your-backend-api.com/verify-token',
+  //         {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify({token}),
+  //         },
+  //       );
+
+  //       if (response.ok) {
+  //         console.log('Token successfully sent to backend for verification');
+  //       } else {
+  //         console.error('Failed to send token to backend');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error sending token to backend:', error);
+  //     }
+  //   };
+
+  //   // Call the function to get and verify the token
+  //   getDeviceToken();
+
+  //   // Check login status (if applicable)
+  //   checkLoginStatus();
+  // }, []);
+
   useEffect(() => {
     // ✅ Configure Google Sign-In
     GoogleSignin.configure({
       webClientId: 'searchkro-d6ff3.firebaseapp.com',
       offlineAccess: true,
     });
-
     // ✅ Get Device Token
     getDeviceToken();
     checkLoginStatus();
-
     // ✅ Handle initial notification (App was killed & opened from notification)
     const handleInitialNotification = async () => {
       try {
@@ -179,11 +345,23 @@ const AuthProvider = ({children}) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       const userData = await AsyncStorage.getItem('userData');
+      const userRole = await AsyncStorage.getItem('selectedUserRole'); // Retrieve stored role
 
       if (token && userData) {
-        setUserdata(JSON.parse(userData));
+        const parsedUserData = JSON.parse(userData);
+        setUserdata(parsedUserData);
+
         if (navigation.isReady()) {
-          navigation.navigate('BottomTabs');
+          // Navigate based on the stored user role
+          if (userRole === 'buyer') {
+            setUserRole(userRole);
+            navigation.navigate('BottomTabs'); // Adjust to the correct buyer screen
+          } else if (userRole === 'seller') {
+            setUserRole(userRole);
+            navigation.navigate('BottomTabs'); // Adjust to the correct seller screen
+          } else {
+            navigation.navigate('BottomTabs'); // Default navigation if no role is found
+          }
         }
       }
       // else {
@@ -317,22 +495,30 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const getPosts = async () => {
+  const getPosts = async (category = null) => {
     try {
-      const response = await axios.get(
-        `${apiURL}/api/requirementPost/getRequirement`,
-        {
-          headers: {
-            Authorization: `Bearer ${userdata.token}`,
-            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
-          },
+      let url = `${apiURL}/api/requirementPost/getRequirement`;
+
+      // Add the category query parameter only if it is valid
+      if (
+        category !== null &&
+        category !== undefined &&
+        category.trim() !== ''
+      ) {
+        url += `?category=${encodeURIComponent(category.trim())}`;
+      }
+
+      console.log('Fetching data from URL:', url); // Log the URL
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${userdata.token}`,
         },
-      );
+      });
 
       const Posts = response.data;
-
-      //  console.log('Posts', Posts);
-      setposts(Posts.data);
+      // console.log('API Response:', Posts.data[0]); // Log the API response
+      setposts(Posts.data); // Update the state with filtered posts
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log('Error 205', error.response.data.body);
@@ -821,11 +1007,12 @@ const AuthProvider = ({children}) => {
     phone,
     location,
     profile,
-    Availability,
     bussinessAddress,
     Socialmedia,
     ownerName,
     shopName,
+    openAt,
+    closeAt,
     selectedScale,
     selectedAvailabity,
     products,
@@ -834,31 +1021,20 @@ const AuthProvider = ({children}) => {
       const payload = {
         name: shopName,
         email: email,
-        description: 'description',
-        phone: '9999999999',
+        description: description,
+        phone: phone,
+        location: location,
         googleData: {},
-        profile:
-          'https://images.pexels.com/photos/674010/pexels-photo-674010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+        profile: profile,
+        bussinessAddress: bussinessAddress,
+        Socialmedia: Socialmedia,
+        ownerName: ownerName,
+        selectedScale: selectedScale,
+        selectedAvailabity: selectedAvailabity,
         fcmToken: fcmToken,
-        openTime: '9:00 am',
-        closeTime: '10:00 pm',
-        categoriesPost: [
-          {
-            title: 'new Post 1 Title',
-            categories: ['Technology', 'AI'],
-            images: ['image1.jpg', 'image2.jpg'],
-          },
-          {
-            title: 'new Post 2 Title',
-            categories: ['Lifestyle', 'Travel'],
-            images: ['image3.jpg', 'image4.jpg'],
-          },
-          {
-            title: 'new Post 3 Title',
-            categories: ['Food', 'Cooking'],
-            images: ['image5.jpg', 'image6.jpg'],
-          },
-        ],
+        openTime: openAt,
+        closeTime: closeAt,
+        categoriesPost: products,
       };
 
       const headers = {
@@ -996,9 +1172,13 @@ const AuthProvider = ({children}) => {
         email,
         password,
         name,
+        isAcceptTermConditions: true,
+        roleId: userRole === 'buyer' ? 0 : 1,
+        fcmToken: fcmToken,
+        gender: 'male',
       });
       const user = response.data;
-      navigation.navigate('Home');
+      // navigation.navigate('Home');
     } catch (error) {
       console.error('Error creating and registering new user:', error);
     }
@@ -1024,23 +1204,76 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  // const VerifyOTP = async (email, otp) => {
+  //   try {
+  //     const response = await axios.post(`${apiURL}/api/user/verifyOTP`, {
+  //       emailPhone: email,
+  //       otp,
+  //       fcmToken: fcmToken,
+  //     });
+
+  //     const user = response.data;
+  //     setUserdata(response.data);
+
+  //     // ✅ Save user token & data
+  //     await AsyncStorage.setItem('userToken', user.token);
+  //     await AsyncStorage.setItem('userData', JSON.stringify(user));
+
+  //     // ✅ Save selected user role
+  //     await AsyncStorage.setItem('selectedUserRole', userRole);
+
+  //     // Debugging: Check if values are stored correctly
+  //     const storedToken = await AsyncStorage.getItem('userToken');
+  //     const storedRole = await AsyncStorage.getItem('selectedUserRole');
+  //     // console.log('Stored Token:', storedToken); // 🔍 Should not be null
+  //     // console.log('Stored Role:', storedRole); // 🔍 Should match userRole state
+
+  //     if (response.data.msg) {
+  //       console.log('Success', 'Verification successful!');
+  //       navigation.navigate('AddressScreen');
+  //     } else {
+  //       Alert.alert('Error', response.data.message);
+  //     }
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       Alert.alert(
+  //         'Error',
+  //         error.response?.data?.body || 'Something went wrong.',
+  //       );
+  //     } else {
+  //       Alert.alert('Error', 'Invalid OTP or password.');
+  //     }
+  //   }
+  // };
+
   const VerifyOTP = async (email, otp) => {
+    console.log('user', email);
+
     try {
       const response = await axios.post(`${apiURL}/api/user/verifyOTP`, {
         emailPhone: email,
         otp,
         fcmToken: fcmToken,
       });
+
       const user = response.data;
       setUserdata(response.data);
-      // console.log('userdata', response.data);
-      // ✅ Ensure AsyncStorage saves the token correctly
+
+      // ✅ Save user token & data
       await AsyncStorage.setItem('userToken', user.token);
       await AsyncStorage.setItem('userData', JSON.stringify(user));
 
-      // Debugging: Check if token is saved correctly
+      // ✅ Save selected user role
+      await AsyncStorage.setItem('selectedUserRole', userRole);
+
+      // Debugging: Check if values are stored correctly
       const storedToken = await AsyncStorage.getItem('userToken');
-      //  console.log('Stored Token:', storedToken); // 🔍 Should not be null
+      const storedRole = await AsyncStorage.getItem('selectedUserRole');
+      console.log('Stored Token:', storedToken); // 🔍 Should not be null
+      console.log('Stored Role:', storedRole); // 🔍 Should match userRole state
+
+      console.log('user', user);
+      // ✅ OneSignal: Set external user ID and add role tag
 
       if (response.data.msg) {
         console.log('Success', 'Verification successful!');
@@ -1050,9 +1283,12 @@ const AuthProvider = ({children}) => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        Alert.alert('Error', error.response.data.body);
+        Alert.alert(
+          'Error',
+          error.response?.data?.body || 'Something went wrong.',
+        );
       } else {
-        Alert.alert('Error', 'Invalid otp or password.');
+        Alert.alert('Error', 'Invalid OTP or password.');
       }
     }
   };

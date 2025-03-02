@@ -62,7 +62,7 @@ export default function AddProducts({navigation, route}) {
 
   const handlePress = async () => {
     setErrors({media: ''});
-    // if (!validateInputs()) return;
+    if (!validateInputs()) return;
 
     try {
       await createSellerProfile(

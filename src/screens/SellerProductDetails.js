@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,19 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import {useIsFocused} from '@react-navigation/native';
 
 const {width, height} = Dimensions.get('window');
 
-export default function SellerProductDetails({navigation}) {
+export default function SellerProductDetails({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const [Data, setData] = useState([]);
+
+  useEffect(() => {
+    console.log('data', route.params.item.images);
+    setData(route?.params?.item);
+  }, [useIsFocused()]);
 
   const product = {
     id: 1,
@@ -34,6 +41,36 @@ export default function SellerProductDetails({navigation}) {
       require('../assets/packagedfood.png'),
     ],
   };
+  const ImageCarousel = ({images}) => {
+    return (
+      <View style={{height: 300}}>
+        <FlatList
+          data={images}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item, index) => index.toString()}
+          snapToInterval={width} // Ensure images snap in place
+          decelerationRate="fast"
+          snapToAlignment="center"
+          renderItem={({item}) => (
+            <View
+              style={{width, justifyContent: 'center', alignItems: 'center'}}>
+              <Image
+                source={{uri: item}}
+                style={{
+                  width: width * 0.9, // Ensure images are not exceeding screen width
+                  height: 300,
+                  resizeMode: 'cover',
+                  borderRadius: 10,
+                }}
+              />
+            </View>
+          )}
+        />
+      </View>
+    );
+  };
 
   return (
     <ScrollView
@@ -48,7 +85,9 @@ export default function SellerProductDetails({navigation}) {
           horizontal
           renderItem={({item}) => (
             <View style={styles.imageContainer}>
-              <Image source={item} style={styles.image} />
+              <View style={styles.imageContainer}>
+                <ImageCarousel images={route.params.item.images} />
+              </View>
             </View>
           )}
           keyExtractor={(item, index) => index.toString()}
@@ -64,18 +103,18 @@ export default function SellerProductDetails({navigation}) {
         <Text
           numberOfLines={2}
           style={[styles.title, {color: isDark ? '#fff' : '#000'}]}>
-          {product.title}
+          {Data.description}
         </Text>
         <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
-          <Ionicons name="location-outline" size={16} /> {product.location}
+          <Ionicons name="location-outline" size={16} /> {Data.location}
         </Text>
         <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
-          <Ionicons name="call-outline" size={16} /> {product.contact}
+          <Ionicons name="call-outline" size={16} /> {Data.contactNumber}
         </Text>
         <Text style={[styles.info, {color: isDark ? '#fff' : '#000'}]}>
-          <Ionicons name="mail-outline" size={16} /> {product.email}
+          <Ionicons name="mail-outline" size={16} /> {Data.contactEmail}
         </Text>
-        <Text
+        {/* <Text
           numberOfLines={5}
           style={[
             styles.description,
@@ -89,20 +128,21 @@ export default function SellerProductDetails({navigation}) {
             styles.description,
             {marginTop: 0, color: isDark ? '#fff' : 'black'},
           ]}>
-          {product.description}
-        </Text>
+          {Data.description}
+        </Text> */}
       </View>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
+          onPress={() => Linking.openURL(`tel:${Data?.contactNumber}`)}
           style={[styles.button, {backgroundColor: 'rgba(7, 201, 29, 1)'}]}>
           <Ionicons name="call-outline" size={20} color="#fff" />
           <Text style={styles.buttonText}>Call</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Chatscreen', {item: product});
+            navigation.navigate('Chatscreen', {item: Data});
           }}
           style={[styles.button, {backgroundColor: 'rgba(15, 92, 246, 1)'}]}>
           <Ionicons name="chatbubble-outline" size={20} color="#fff" />

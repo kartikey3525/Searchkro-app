@@ -31,7 +31,7 @@ export default function Login({navigation}) {
     password: '',
     username: '',
   });
-  const {signInWithGoogle, handleLogin, handleResetPassword} =
+  const {signInWithGoogle, handleLogin, handleResetPassword, handleRegister} =
     useContext(AuthContext);
 
   const {theme} = useContext(ThemeContext);
@@ -96,7 +96,9 @@ export default function Login({navigation}) {
 
     setIsLoading(true);
     try {
-      await handleLogin(email, password, username);
+      await (isnew
+        ? handleRegister(email, password, username)
+        : handleLogin(email, password, username));
       console.log('Success', 'Login successful!');
       navigation.navigate('OTPScreen', {
         emailPhone: email,

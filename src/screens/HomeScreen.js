@@ -45,9 +45,12 @@ export default function HomeScreen({navigation}) {
   } = useContext(AuthContext);
 
   useEffect(() => {
-    userRole === 'buyer' ? getCategories() : getSellerCategories();
-    userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
-    //  console.log('posts data ', posts);
+    if (isFocused) {
+      // console.log('Home screen is focused');
+      userRole === 'buyer' ? getCategories() : getSellerCategories();
+      userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
+      // console.log('posts data ', posts[0]);
+    }
   }, [isFocused]);
 
   const flatListKey = `flat-list-${numColumns}`;
@@ -74,11 +77,20 @@ export default function HomeScreen({navigation}) {
           marginBottom: 15,
           alignItems: 'center',
         }}
-        onPress={() =>
-          item.id == 12
-            ? navigation.navigate('Categories', {item: item})
-            : navigation.navigate('Subcategory', {item: item.subCategories})
-        }>
+        onPress={() => {
+          if (userRole === 'buyer') {
+            if (item.id === 12) {
+              navigation.navigate('Categories', {item: item});
+            } else {
+              navigation.navigate('Subcategory', {item: item.subCategories});
+            }
+          } else {
+            navigation.navigate('preferences', {
+              item: item,
+              category: item.name,
+            });
+          }
+        }}>
         <View
           style={[
             styles.square,
@@ -279,9 +291,9 @@ export default function HomeScreen({navigation}) {
               color: isDark ? '#fff' : '#000',
             },
           ]}>
-          {item.title}
+          {item.description}
         </Text>
-        <Text
+        {/* <Text
           numberOfLines={2}
           style={[
             styles.recListText,
@@ -292,7 +304,7 @@ export default function HomeScreen({navigation}) {
             },
           ]}>
           {item.description}
-        </Text>
+        </Text> */}
       </TouchableOpacity>
     );
   };
