@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  FlatList,
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -34,8 +35,7 @@ export default function AddProducts({navigation, route}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState({
-    email: '',
-    password: '',
+    media: '',
   });
   const {getCategories, fullCategorydata, handleLogin, createSellerProfile} =
     useContext(AuthContext);
@@ -47,6 +47,7 @@ export default function AddProducts({navigation, route}) {
   }, [useIsFocused]);
 
   const handleCategoryChange = value => {
+    // console.log('handleCategoryChange', value);
     setSelectedCategories(value); // Update selected categories
   };
   const validateInputs = () => {
@@ -61,31 +62,36 @@ export default function AddProducts({navigation, route}) {
   };
 
   const handlePress = async () => {
-    setErrors({media: ''});
-    if (!validateInputs()) return;
-
+    // if (!name || media.length === 0 || selectedCategories.length === 0) {
+    //   Alert.alert('Error', 'Please add a name, image, and category.');
+    //   return;
+    // }
     try {
       await createSellerProfile(
-      route.params.email,
-      route.params.description,
-      route.params.phone,
-      route.params.location,
-      route.params.media,
-      route.params.selectedCategories,
-      route.params.bussinessAddress,
-      route.params.Socialmedia,
-      route.params.ownerName,
-      route.params.shopName,
-      route.params.selectedScale, 
-      route.params.openAt,
-      route.params.closeAt,
-      route.params.selectedAvailabity, products);
+        route.params.email,
+        route.params.description,
+        route.params.phone,
+        route.params.location,
+        route.params.media, // Use the current media state
+        route.params.selectedCategories, // Use the current selected categories
+        route.params.bussinessAddress,
+        route.params.Socialmedia,
+        route.params.ownerName,
+        route.params.shopName,
+        route.params.selectedScale,
+        route.params.openAt,
+        route.params.closeAt,
+        route.params.selectedAvailabity,
+        products, // Pass the products array
+      );
+      // Navigate back after successful submission
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
   const handleAddProduct = () => {
     if (!name || media.length === 0 || selectedCategories.length === 0) {
       Alert.alert('Error', 'Please add a name, image, and category.');
@@ -102,15 +108,19 @@ export default function AddProducts({navigation, route}) {
 
     // Reset fields
     setname('');
-    setMedia([]);
+    setMedia([]); // Make sure selectedCategories updates
     setSelectedCategories([]);
+    // Log to confirm reset
+    // console.log('Resetting categories:', selectedCategories);
   };
 
   // Function to remove a product
   const handleRemoveProduct = (category, index) => {
-    setProducts(prevProducts =>
-      prevProducts.filter((product, i) => !(i === index && product.categories.includes(category)))
-    );
+    setProducts(prevProducts => {
+      const updatedProducts = [...prevProducts];
+      updatedProducts.splice(index, 1); // Remove the product at the specified index
+      return updatedProducts;
+    });
   };
 
   // Group products by category
@@ -123,7 +133,6 @@ export default function AddProducts({navigation, route}) {
     });
     return acc;
   }, {});
-
 
   return (
     <ScrollView
@@ -207,18 +216,14 @@ export default function AddProducts({navigation, route}) {
           <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
             {media.slice(1, 8).map((item, index) => (
               <View key={index} style={styles.mediaItem}>
-                {/* {item.type.startsWith('image') ? ( */}
-                <>
-                  <Image source={{uri: item}} style={styles.mediaPreview} />
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => {
-                      setMedia(media.filter((_, i) => i !== index));
-                    }}>
-                    <Entypo name="cross" size={18} color={'black'} />
-                  </TouchableOpacity>
-                </>
-                {/* ) : null} */}
+                <Image source={{uri: item}} style={styles.mediaPreview} />
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setMedia(media.filter((_, i) => i !== index + 1)); // Fix index offset
+                  }}>
+                  <Entypo name="cross" size={18} color={'black'} />
+                </TouchableOpacity>
               </View>
             ))}
 
@@ -328,6 +333,7 @@ export default function AddProducts({navigation, route}) {
         placeholder={'Select Categories'}
         selectedValues={selectedCategories}
         onChangeValue={handleCategoryChange}
+        isMultiSelect // Ensure multi-select is enabled
       />
 
       <HelperText
@@ -347,82 +353,112 @@ export default function AddProducts({navigation, route}) {
       </TouchableOpacity>
 
       {/* Display Products Grouped by Categories */}
-      {Object.keys(groupedProducts).map(category => (
-        <View
-          key={category}
-          style={{marginLeft: '5%', marginBottom: 5, alignSelf: 'flex-start'}}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              marginBottom: 2,
-              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-            }}>
-            {category}
-          </Text>
-          <View style={{flexDirection: 'row'}}>
-            {groupedProducts[category].map((product, index) => (
-              <View
-                key={index}
+      <View style={{maxHeight: 260}}>
+        <ScrollView
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}>
+          {Object.keys(groupedProducts).map(category => (
+            <View
+              key={category}
+              style={{
+                marginBottom: 10,
+                alignSelf: 'flex-start', // Align to left
+                width: '100%', // Ensure it takes full width
+                paddingLeft: 10, // Add some padding for better alignment
+              }}>
+              <Text
                 style={{
-                  padding: 10,
-                  borderRadius: 5,
-                  marginBottom: 10,
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                  marginBottom: 5,
                 }}>
-                {/* Show Images */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    marginTop: 5,
-                  }}>
-                  {product.images.map((uri, imgIndex) => (
+                {category}
+              </Text>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  {groupedProducts[category].map((product, index) => (
                     <View
-                      key={imgIndex}
-                      style={{position: 'relative', marginRight: 2}}>
-                      <Image
-                        source={{uri}}
-                        style={{width: 60, height: 60, borderRadius: 5}}
-                      />
-                      {/* Remove Button */}
-                      <TouchableOpacity
+                      key={index}
+                      style={{
+                        padding: 6,
+                        borderRadius: 5,
+                        marginRight: 5, // Space between items
+                      }}>
+                      {/* Images */}
+                      <View
+                        style={{flexDirection: 'row', position: 'relative'}}>
+                        {product.images.map((uri, imgIndex) => (
+                          <View
+                            key={imgIndex}
+                            style={{
+                              position: 'absolute',
+                              left: imgIndex * 7,
+                              zIndex: imgIndex,
+                            }}>
+                            <Image
+                              source={{uri}}
+                              style={{
+                                width: 60,
+                                height: 60,
+                                borderRadius: 5,
+                                borderWidth: 2,
+                                borderColor: isDark ? 'white' : 'black',
+                              }}
+                            />
+                            {/* Remove Button */}
+                            <TouchableOpacity
+                              style={{
+                                position: 'absolute',
+                                top: -5,
+                                right: -5,
+                                backgroundColor: isDark ? 'black' : 'white',
+                                borderRadius: 10,
+                                padding: 2,
+                              }}
+                              onPress={() =>
+                                handleRemoveProduct(category, index)
+                              }>
+                              <Entypo
+                                name="cross"
+                                size={18}
+                                color={isDark ? 'white' : 'black'}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </View>
+
+                      {/* Product Name */}
+                      <Text
+                        numberOfLines={1}
                         style={{
-                          position: 'absolute',
-                          top: -5,
-                          right: -5,
-                          backgroundColor: isDark ? 'black' : 'white',
-                          borderRadius: 10,
-                          padding: 2,
-                        }}
-                        onPress={() => handleRemoveProduct(category, index)}>
-                        <Entypo
-                          name="cross"
-                          size={18}
-                          color={isDark ? 'white' : 'black'}
-                        />
-                      </TouchableOpacity>
+                          fontSize: 14,
+                          fontWeight: 'bold',
+                          width: 80,
+                          color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                          marginTop: 60,
+                        }}>
+                        {product.name}
+                      </Text>
                     </View>
                   ))}
                 </View>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-                  }}>
-                  {product.name}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      ))}
+              </ScrollView>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Post Button */}
       <TouchableOpacity
         style={[styles.blueButton, {margin: '20%'}]}
-        onPress={() => handlePress()}>
-        <Text style={[styles.buttonText, {color: '#fff'}]}>Submit</Text>
+        onPress={handlePress}
+        disabled={isLoading}>
+        <Text style={[styles.buttonText, {color: '#fff'}]}>
+          {isLoading ? 'Submitting...' : 'Submit'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -24,6 +24,7 @@ import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
 import {useIsFocused} from '@react-navigation/native';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function EditProfile({navigation}) {
   const [email, setEmail] = useState('');
@@ -104,9 +105,9 @@ export default function EditProfile({navigation}) {
 
   const handlePress = async () => {
     setErrors({phone: '', name: '', gender: ''});
-    // if (!validateInputs()) return;
+    if (!validateInputs()) return;
     try {
-      console.log('imageUrl121', media[0]);
+      console.log('imageUrl121', value);
 
       // await uploadImage(media); // Wait for the URL
 
@@ -161,6 +162,7 @@ export default function EditProfile({navigation}) {
   };
 
   return (
+    // <KeyboardAvoidingContainer>
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[
@@ -196,7 +198,7 @@ export default function EditProfile({navigation}) {
             />
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setMedia([])} // Properly reset media array
+              onPress={() => setMedia([])} // Reset media array properly
             >
               <Entypo name="cross" size={25} color="black" />
             </TouchableOpacity>
@@ -204,8 +206,8 @@ export default function EditProfile({navigation}) {
         ) : (
           <Image
             source={
-              Userfulldata
-                ? {uri: Userfulldata?.profile[0]}
+              Userfulldata && Userfulldata.profile?.length > 0
+                ? {uri: Userfulldata.profile[0]}
                 : require('../assets/User-image.png')
             }
             style={{
@@ -401,6 +403,9 @@ export default function EditProfile({navigation}) {
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         }}
+        textInputProps={{
+          selectionColor: isDark ? '#fff' : '#000', // Set cursor color
+        }}
         placeholderTextColor={isDark ? '#fff' : '#000'}
         defaultCode="IN"
         style={{}}
@@ -416,28 +421,15 @@ export default function EditProfile({navigation}) {
         {errors.phone}
       </HelperText>
       <Dropdown
+        placeholder="Select Gender"
         item={[
           {label: 'Male', value: 'male'},
-          {
-            label: 'Female',
-            value: 'female',
-          },
-          {
-            label: 'Others',
-            value: 'others',
-          },
+          {label: 'Female', value: 'female'},
+          {label: 'Others', value: 'others'},
         ]}
         selectedValues={gender}
         onChangeValue={handleCategoryChange}
-        style={[
-          styles.inputContainer,
-          {
-            borderColor: isDark
-              ? 'rgba(37, 37, 37, 1)'
-              : 'rgba(231, 231, 231, 1) ',
-          },
-        ]}
-        placeholder="Gender"
+        single={true} // Enable single selection
       />
       <HelperText
         type="error"
@@ -482,6 +474,7 @@ export default function EditProfile({navigation}) {
         }}
       />
     </ScrollView>
+    // </KeyboardAvoidingContainer>
   );
 }
 
@@ -523,13 +516,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 10,
-  },
-  mediaItem: {
-    width: '20%', // Slight margin for spacing
-    margin: '2%',
-    aspectRatio: 1, // Keeps items square
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   mediaPreview: {
     width: '100%',

@@ -133,16 +133,23 @@ export default function CategoryScreen({navigation, route}) {
         }}>
         <SearchBar
           placeholder={'Search Categories'}
-          lists={fullCategorydata}  
-          setFilteredLists={setFilteredLists} 
+          lists={fullCategorydata}
+          setFilteredLists={setFilteredLists}
           searchKey="name"
         />
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.73, flexGrow: 1}}>
-          {filteredLists.map((item, index) => (
-            <View key={item.id}>{rendersquareList({item, index})}</View>
-          ))}
+          {filteredLists && filteredLists.length > 0 ? (
+            filteredLists.map((item, index) => (
+              <View key={item.id}>{rendersquareList({item, index})}</View>
+            ))
+          ) : (
+            <View
+              style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+              <Text>No data available</Text>
+            </View>
+          )}
         </ScrollView>
       </View>
     </View>

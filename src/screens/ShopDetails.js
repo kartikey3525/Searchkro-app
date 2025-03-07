@@ -44,8 +44,14 @@ export default function ShopDetails({navigation, route}) {
     RatingLiked,
   } = useContext(AuthContext);
 
-  const userId = route?.params?.item?.userId;
+  const userId =
+    route?.params?.item?.categoriesPost?.length > 0
+      ? route?.params?.item?._id
+      : route?.params?.item?.userId;
+
   useEffect(() => {
+    // console.log('userId', userId);
+
     if (userId) {
       // If categoriesPost is missing or empty, fetch the single shop
       if (

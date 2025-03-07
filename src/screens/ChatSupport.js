@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import io from 'socket.io-client';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -106,84 +107,89 @@ export default function ChatSupport({navigation}) {
   };
 
   return (
-    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <Header header={'Chat Support'} />
+    <KeyboardAvoidingContainer>
+      <View
+        style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+        <Header header={'Chat Support'} />
 
-      {/* Chat Messages List */}
-      <View style={styles.chatContainer}>
-        <FlatList
-          data={messages}
-          inverted
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item, index}) => {
-            const isSentByUser = item.senderId === userId;
+        {/* Chat Messages List */}
+        <View style={styles.chatContainer}>
+          <FlatList
+            data={messages}
+            inverted
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item, index}) => {
+              const isSentByUser = item.senderId === userId;
 
-            return (
-              <View
-                style={[
-                  styles.messageRow,
-                  isSentByUser ? styles.sentRow : styles.receivedRow,
-                ]}>
-                {/* Profile Picture and Message */}
-                {!isSentByUser && index === 0 && (
-                  <Image
-                    source={require('../assets/user-male.png')}
-                    style={styles.profileImage}
-                  />
-                )}
-
+              return (
                 <View
                   style={[
-                    styles.messageContainer,
-                    isSentByUser ? styles.sentMessage : styles.receivedMessage,
+                    styles.messageRow,
+                    isSentByUser ? styles.sentRow : styles.receivedRow,
                   ]}>
-                  {item.text && (
-                    <Text
-                      style={[
-                        styles.message,
-                        {color: isDark ? '#fff' : '#000'},
-                      ]}>
-                      {item.text}
-                    </Text>
+                  {/* Profile Picture and Message */}
+                  {!isSentByUser && index === 0 && (
+                    <Image
+                      source={require('../assets/user-male.png')}
+                      style={styles.profileImage}
+                    />
                   )}
-                  {item.image && (
-                    <Image source={{uri: item.image}} style={styles.image} />
-                  )}
-                </View>
-              </View>
-            );
-          }}
-        />
-      </View>
 
-      {/* Input Area */}
-      <View
-        style={[
-          styles.inputContainer,
-          {backgroundColor: isDark ? '#121212' : '#fff'},
-        ]}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
-          style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
-          placeholder="Write your message"
-        />
-        <FontAwesome
-          name={'paperclip'}
-          size={22}
-          color={isDark ? 'rgba(255, 255, 255, 0.46)' : 'rgba(0, 0, 0, 0.46)'}
-          style={{padding: 5}}
-        />
-        <Ionicons
-          onPress={sendMessage}
-          name={'send'}
-          size={20}
-          color="rgba(0, 174, 239, 1)"
-          style={{padding: 5}}
-        />
+                  <View
+                    style={[
+                      styles.messageContainer,
+                      isSentByUser
+                        ? styles.sentMessage
+                        : styles.receivedMessage,
+                    ]}>
+                    {item.text && (
+                      <Text
+                        style={[
+                          styles.message,
+                          {color: isDark ? '#fff' : '#000'},
+                        ]}>
+                        {item.text}
+                      </Text>
+                    )}
+                    {item.image && (
+                      <Image source={{uri: item.image}} style={styles.image} />
+                    )}
+                  </View>
+                </View>
+              );
+            }}
+          />
+        </View>
+
+        {/* Input Area */}
+        <View
+          style={[
+            styles.inputContainer,
+            {backgroundColor: isDark ? '#121212' : '#fff'},
+          ]}>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
+            style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
+            placeholder="Write your message"
+          />
+          <FontAwesome
+            name={'paperclip'}
+            size={22}
+            color={isDark ? 'rgba(255, 255, 255, 0.46)' : 'rgba(0, 0, 0, 0.46)'}
+            style={{padding: 5}}
+          />
+          <Ionicons
+            onPress={sendMessage}
+            name={'send'}
+            size={20}
+            color="rgba(0, 174, 239, 1)"
+            style={{padding: 5}}
+          />
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingContainer>
   );
 }
 

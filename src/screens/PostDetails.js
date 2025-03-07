@@ -20,6 +20,7 @@ const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import LocationPermission from '../hooks/uselocation';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function PostDetails({navigation, route}) {
   const [email, setEmail] = useState('');
@@ -30,22 +31,20 @@ export default function PostDetails({navigation, route}) {
   const phoneInput = useRef(null);
   const isFocused = useIsFocused();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const {isposting, setisposting} = useContext(AuthContext);
-
- 
 
   const handleCategoryChange = value => {
     setSelectedCategories(value); // Update selected categories
   };
 
-  const {getCategories, fullCategorydata, createPost} = useContext(AuthContext);
+  const {getCategories, fullCategorydata, location, setisposting} =
+    useContext(AuthContext);
 
   useEffect(() => {
-    getCategories(); 
+    getCategories();
     setisposting(false);
     setSelectedCategories(route?.params?.selectedcategory); // Set the selected category by ID
   }, [isFocused]);
@@ -126,7 +125,6 @@ export default function PostDetails({navigation, route}) {
 
     setIsLoading(true);
     try {
-      console.log('Success', 'Login successful!');
       navigation.navigate('uploadimage', {
         email: email,
         description: description,
@@ -142,8 +140,9 @@ export default function PostDetails({navigation, route}) {
   };
 
   return (
+    // <KeyboardAvoidingContainer>
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <LocationPermission setLocation={setLocation} />
+      {/* <LocationPermission setLocation={setLocation} /> */}
 
       <Header header={'Post Details'} />
 
@@ -243,6 +242,9 @@ export default function PostDetails({navigation, route}) {
         layout="second"
         onChangeText={text => setphone(text)}
         onChangeFormattedText={text => setFormattedphone(text)}
+        textInputProps={{
+          selectionColor: isDark ? '#fff' : '#000', // Set cursor color
+        }}
       />
 
       <HelperText type="error" visible={!!errors.phone} style={{height: 10}}>
@@ -307,6 +309,7 @@ export default function PostDetails({navigation, route}) {
         </Text>
       </TouchableOpacity>
     </View>
+    // </KeyboardAvoidingContainer>
   );
 }
 

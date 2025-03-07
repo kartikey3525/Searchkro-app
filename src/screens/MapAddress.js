@@ -14,6 +14,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {ThemeContext} from '../context/themeContext';
 import MapView, {UrlTile} from 'react-native-maps';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function MapAddress({navigation}) {
   const {theme} = useContext(ThemeContext);
@@ -55,11 +56,12 @@ export default function MapAddress({navigation}) {
   ]);
 
   return (
-    <View style={[styles.container]}>
-      <MapView style={styles.map} region={region} onRegionChange={setRegion}>
-        {marker && <Marker coordinate={marker} title="Searched Location" />}
-      </MapView>
-      {/* <MapView
+    <KeyboardAvoidingContainer>
+      <View style={[styles.container]}>
+        <MapView style={styles.map} region={region} onRegionChange={setRegion}>
+          {marker && <Marker coordinate={marker} title="Searched Location" />}
+        </MapView>
+        {/* <MapView
         style={styles.map}
         initialRegion={{
           latitude: 37.7749, // San Francisco
@@ -78,146 +80,149 @@ export default function MapAddress({navigation}) {
         />
       </MapView> */}
 
-      <View
-        style={{
-          position: 'absolute',
-          marginTop: 50,
-          width: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            position: 'absolute',
+            marginTop: 50,
+            width: '100%',
             justifyContent: 'center',
+            alignItems: 'center',
           }}>
           <View
-            style={[
-              styles.inputContainer,
-              {backgroundColor: isDark ? '#000000' : '#FFFFFF'},
-            ]}>
-            <Octicons
-              name="location"
-              size={22}
-              color={isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'}
-              style={{marginRight: 5}}
-            />
-            <TextInput
-              // value={'text'}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <View
               style={[
-                styles.searchInput,
-                {color: isDark ? '#FFFFFF' : '#000000'},
-              ]}
-              // onChangeText={setText}
-              placeholderTextColor={isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'}
-              placeholder="Search Location"
-              autoCapitalize="none"
-              onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-            />
+                styles.inputContainer,
+                {backgroundColor: isDark ? '#000000' : '#FFFFFF'},
+              ]}>
+              <Octicons
+                name="location"
+                size={22}
+                color={isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'}
+                style={{marginRight: 5}}
+              />
+              <TextInput
+                // value={'text'}
+                style={[
+                  styles.searchInput,
+                  {color: isDark ? '#FFFFFF' : '#000000'},
+                ]}
+                // onChangeText={setText}
+                placeholderTextColor={
+                  isDark ? '#FFFFFF' : 'rgba(94, 95, 96, 1)'
+                }
+                placeholder="Search Location"
+                autoCapitalize="none"
+                onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
+              />
+            </View>
+
+            <View
+              style={{
+                backgroundColor: isDark ? '#000000' : 'white',
+                height: 45,
+                width: '12%',
+                alignSelf: 'center',
+                borderRadius: 10,
+                borderColor: isDark
+                  ? 'rgba(233, 233, 233, 1)'
+                  : 'rgba(233, 233, 233, 1)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 1.5,
+                marginLeft: 10,
+              }}>
+              <Entypo
+                name="cross"
+                size={28}
+                color={isDark ? '#FFFFFF' : 'black'}
+              />
+            </View>
           </View>
 
           <View
             style={{
-              backgroundColor: isDark ? '#000000' : 'white',
-              height: 45,
-              width: '12%',
+              width: '86%',
               alignSelf: 'center',
+              backgroundColor: isDark ? '#000000' : 'white',
               borderRadius: 10,
-              borderColor: isDark
-                ? 'rgba(233, 233, 233, 1)'
-                : 'rgba(233, 233, 233, 1)',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderWidth: 1.5,
-              marginLeft: 10,
+              marginTop: 10,
             }}>
-            <Entypo
-              name="cross"
-              size={28}
-              color={isDark ? '#FFFFFF' : 'black'}
+            <FlatList
+              data={suggestedLocations}
+              renderItem={({item}) => (
+                <View
+                  style={{
+                    alignSelf: 'flex-start',
+                    width: '88%',
+                    padding: 2,
+                    margin: 10,
+                    marginRight: 0,
+                    backgroundColor: isDark ? '#000000' : 'white',
+                  }}>
+                  <Text
+                    style={[
+                      styles.smallText,
+                      {
+                        textAlign: 'left',
+                        color: isDark ? '#FFFFFF' : '#000000',
+                        fontSize: 20,
+                        left: 8,
+                      },
+                    ]}>
+                    {item.location}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.smallText,
+                      {
+                        color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
+                        textAlign: 'left',
+                        fontSize: 17,
+                        left: 8,
+                      },
+                    ]}>
+                    {item.location}
+                  </Text>
+                </View>
+              )}
+              keyExtractor={item => item.id.toString()}
             />
           </View>
-        </View>
 
-        <View
-          style={{
-            width: '86%',
-            alignSelf: 'center',
-            backgroundColor: isDark ? '#000000' : 'white',
-            borderRadius: 10,
-            marginTop: 10,
-          }}>
-          <FlatList
-            data={suggestedLocations}
-            renderItem={({item}) => (
-              <View
-                style={{
-                  alignSelf: 'flex-start',
-                  width: '88%',
-                  padding: 2,
-                  margin: 10,
-                  marginRight: 0,
-                  backgroundColor: isDark ? '#000000' : 'white',
-                }}>
-                <Text
-                  style={[
-                    styles.smallText,
-                    {
-                      textAlign: 'left',
-                      color: isDark ? '#FFFFFF' : '#000000',
-                      fontSize: 20,
-                      left: 8,
-                    },
-                  ]}>
-                  {item.location}
-                </Text>
-                <Text
-                  style={[
-                    styles.smallText,
-                    {
-                      color: isDark ? '#FFFFFF' : 'rgba(99, 99, 99, 1)',
-                      textAlign: 'left',
-                      fontSize: 17,
-                      left: 8,
-                    },
-                  ]}>
-                  {item.location}
-                </Text>
-              </View>
-            )}
-            keyExtractor={item => item.id.toString()}
+          <MaterialIcons
+            name="my-location"
+            size={22}
+            color="white"
+            style={{
+              alignSelf: 'center',
+              position: 'absolute',
+              bottom: 100,
+              backgroundColor: 'rgba(0, 0, 0, 0.51)',
+              padding: 7,
+              borderRadius: 50,
+              right: 30,
+            }}
           />
+
+          <TouchableOpacity
+            style={styles.blueBotton}
+            onPress={() => navigation.navigate('BottomTabs')}>
+            <Text
+              style={[
+                styles.smallText,
+                {color: '#fff', fontSize: 22, marginBottom: 0},
+              ]}>
+              Done
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <MaterialIcons
-          name="my-location"
-          size={22}
-          color="white"
-          style={{
-            alignSelf: 'center',
-            position: 'absolute',
-            bottom: 100,
-            backgroundColor: 'rgba(0, 0, 0, 0.51)',
-            padding: 7,
-            borderRadius: 50,
-            right: 30,
-          }}
-        />
-
-        <TouchableOpacity
-          style={styles.blueBotton}
-          onPress={() => navigation.navigate('BottomTabs')}>
-          <Text
-            style={[
-              styles.smallText,
-              {color: '#fff', fontSize: 22, marginBottom: 0},
-            ]}>
-            Done
-          </Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingContainer>
   );
 }
 

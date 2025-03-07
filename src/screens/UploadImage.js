@@ -23,15 +23,15 @@ export default function UploadImage({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState({
     email: '',
     password: '',
   });
   const {handleRegister, handleLogin, createPost} = useContext(AuthContext);
-  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
-
+  const {media, selectMedia, requestCameraPermission, setMedia} =
+    useImagePicker();
 
   const validateInputs = () => {
     if (media.length === 0) {
@@ -47,7 +47,7 @@ export default function UploadImage({navigation, route}) {
   const handlePress = async () => {
     setErrors({media: ''});
     if (!validateInputs()) return;
-    // console.log('media', media);
+    console.log('media', media);
     try {
       await createPost(
         route.params.selectedCategories,
@@ -191,7 +191,9 @@ export default function UploadImage({navigation, route}) {
                   styles.mediaItem,
                   {
                     backgroundColor: isDark ? '#1E1E1E' : 'rgb(255, 255, 255)',
-                    borderColor: isDark ? '#555' : 'rgba(176, 176, 176, 1)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(176, 176, 176, 1)',
+                    borderStyle: 'dashed',
                   },
                 ]}>
                 <Entypo

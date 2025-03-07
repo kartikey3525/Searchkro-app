@@ -1,18 +1,18 @@
 import {useContext, useState} from 'react';
-import {Platform, PermissionsAndroid} from 'react-native';
+import {Platform, PermissionsAndroid, Alert} from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import {AuthContext} from '../context/authcontext';
 
 const useImagePicker = () => {
-  const {getCategories, userdata, getUserData, apiURL} =
-    useContext(AuthContext);
-
+  const {userdata, apiURL} = useContext(AuthContext);
   const [media, setMedia] = useState([]);
 
   // Function to upload image and get URL
   const uploadImage = async uri => {
     try {
+      console.log('Starting image upload for URI:', uri);
+
       const formData = new FormData();
       formData.append('image', {
         uri: uri,
@@ -20,10 +20,15 @@ const useImagePicker = () => {
         type: 'image/jpeg',
       });
 
+      console.log('FormData prepared:', formData);
+
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
         'Content-Type': 'multipart/form-data',
       };
+
+      console.log('Sending request to:', `${apiURL}/api/user/uploadImage`);
+      console.log('Headers:', headers);
 
       const response = await axios.post(
         `${apiURL}/api/user/uploadImage`,
@@ -31,15 +36,31 @@ const useImagePicker = () => {
         {headers},
       );
 
+      console.log('Upload response received:', response.status, response.data);
+
       if (response.status === 200 && response.data?.data) {
         return response.data.data[0]; // Assuming API returns an array of URLs
       } else {
-        console.log('Failed to upload image:', response.data);
+        console.error('Failed to upload image:', response.data);
         Alert.alert('Upload Failed', 'Please try again later.');
         return null;
       }
     } catch (error) {
-      console.log('Error uploading image:', error);
+      console.error('Error uploading image:', error);
+
+      if (error.response) {
+        console.error('Server responded with:', error.response.data);
+        console.error('Status code:', error.response.status);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error setting up the request:', error.message);
+      }
+
+      Alert.alert(
+        'Upload Failed',
+        'An error occurred while uploading the image.',
+      );
       return null;
     }
   };

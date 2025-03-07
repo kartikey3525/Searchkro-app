@@ -22,6 +22,7 @@ import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
 import {useIsFocused} from '@react-navigation/native';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function RatedScreen({navigation, route}) {
   const [isLoading, setIsLoading] = useState(false);
@@ -89,246 +90,250 @@ export default function RatedScreen({navigation, route}) {
   };
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={[
-        styles.screen,
-        {backgroundColor: isDark ? '#000' : '#fff'},
-      ]}>
-      <Header header={'Rated review'} />
-
-      <View
-        style={[
-          styles.rectangle2,
-          {
-            overflow: 'hidden',
-            flexDirection: 'row',
-            height: 100,
-            backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
-          },
+    <KeyboardAvoidingContainer>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.screen,
+          {backgroundColor: isDark ? '#000' : '#fff'},
         ]}>
-        <Image
-          // source={require('../assets/shop-pic.png')}
-          source={
-            route?.params?.item?.profile?.[0]
-              ? {uri: route.params.item.profile[0]}
-              : require('../assets/shop-pic.png')
-          }
-          style={{
-            width: '30%',
-            height: '80%',
-            alignSelf: 'flex-start',
-            overflow: 'hidden',
-            borderRadius: 10,
-            margin: 8,
-          }}
-        />
+        <Header header={'Rated review'} />
 
-        <View style={{alignSelf: 'flex-start'}}>
-          <Text
-            numberOfLines={3}
-            style={[
-              styles.recListText,
-              {
-                fontWeight: '400',
-                fontSize: 20,
-                margin: 5,
-                color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
-                marginTop: 10,
-                marginLeft: 0,
-                width: Width * 0.57,
-              },
-            ]}>
-            {route?.params?.item?.name}
-          </Text>
-        </View>
-      </View>
-
-      <Text
-        style={[
-          styles.recListText,
-          {
-            fontWeight: 'bold',
-            fontSize: 18,
-            alignSelf: 'flex-start',
-            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
-            marginLeft: 30,
-            marginTop: 10,
-            marginBottom: 10,
-          },
-        ]}>
-        You have Rated
-      </Text>
-
-      <View
-        style={{
-          flexDirection: 'row',
-          alignSelf: 'flex-start',
-          marginLeft: 30,
-          marginBottom: 10,
-        }}>
-        <Rating
-          size={32}
-          rating={rating}
-          onChange={value => {
-            // console.log('User rating:', value);
-            setrating(value); // Update state
-          }}
-          starColor="#FFD700"
-          baseColor={isDark ? '#48484A' : '#D1D1D6'}
-        />
-      </View>
-      <HelperText type="error" visible={errors.rating !== ''}>
-        {errors.rating}
-      </HelperText>
-
-      <Text
-        style={[
-          styles.recListText,
-          {
-            fontWeight: 'bold',
-            fontSize: 18,
-            alignSelf: 'flex-start',
-            marginLeft: 30,
-            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
-            marginTop: 10,
-            marginBottom: 10,
-          },
-        ]}>
-        Post your review
-      </Text>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            height: 130,
-            alignItems: 'flex-start',
-            backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-          },
-        ]}>
-        <TextInput
-          value={description}
+        <View
           style={[
-            styles.textInput,
+            styles.rectangle2,
             {
-              height: 93,
-              backgroundColor: isDark ? '#121212' : '#fff',
-              color: isDark ? '#fff' : '#000',
+              overflow: 'hidden',
+              flexDirection: 'row',
+              height: 100,
+              backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
             },
-          ]}
-          onChangeText={setdescription}
-          numberOfLines={5}
-          multiline={true}
-          placeholder="Have any feedback you’d like to give about this product"
-          mode="outlined"
-          placeholderTextColor={'rgba(158, 158, 158, 1)'}
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText type="error" visible={errors.description !== ''}>
-        {errors.description}
-      </HelperText>
+          ]}>
+          <Image
+            // source={require('../assets/shop-pic.png')}
+            source={
+              route?.params?.item?.profile?.[0]
+                ? {uri: route.params.item.profile[0]}
+                : require('../assets/shop-pic.png')
+            }
+            style={{
+              width: '30%',
+              height: '80%',
+              alignSelf: 'flex-start',
+              overflow: 'hidden',
+              borderRadius: 10,
+              margin: 8,
+            }}
+          />
 
-      <Text
-        style={[
-          styles.recListText,
-          {
-            fontWeight: 'bold',
-            fontSize: 18,
+          <View style={{alignSelf: 'flex-start'}}>
+            <Text
+              numberOfLines={3}
+              style={[
+                styles.recListText,
+                {
+                  fontWeight: '400',
+                  fontSize: 20,
+                  margin: 5,
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
+                  marginTop: 10,
+                  marginLeft: 0,
+                  width: Width * 0.57,
+                },
+              ]}>
+              {route?.params?.item?.name}
+            </Text>
+          </View>
+        </View>
+
+        <Text
+          style={[
+            styles.recListText,
+            {
+              fontWeight: 'bold',
+              fontSize: 18,
+              alignSelf: 'flex-start',
+              color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
+              marginLeft: 30,
+              marginTop: 10,
+              marginBottom: 10,
+            },
+          ]}>
+          You have Rated
+        </Text>
+
+        <View
+          style={{
+            flexDirection: 'row',
             alignSelf: 'flex-start',
             marginLeft: 30,
-            color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
             marginBottom: 10,
-          },
-        ]}>
-        Add photo & Video
-      </Text>
-
-      <View>
-        <View style={{}}>
-          {media.length > 0 && media[0] ? (
-            <>
-              <Image
-                source={{uri: media[0]}}
-                style={[
-                  styles.mediaSelector,
-                  {borderWidth: 0, backgroundColor: 'rgba(248, 247, 247, 1)'},
-                ]}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.closeButton,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgb(0, 0, 0)'
-                      : 'rgb(255, 255, 255)',
-                  },
-                ]}
-                onPress={() => {
-                  setMedia(media.slice(1));
-                }}>
-                <Entypo
-                  name="cross"
-                  size={25}
-                  color={isDark ? 'white' : 'black'}
-                />
-              </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity onPress={selectMedia}>
-              <View
-                style={[
-                  styles.mediaSelector,
-                  {
-                    backgroundColor: isDark
-                      ? '#121212'
-                      : 'rgba(248, 247, 247, 1)',
-                  },
-                ]}>
-                <Entypo name="upload-to-cloud" size={45} color="grey" />
-                <Text
-                  style={{color: 'rgba(158, 158, 158, 1)', fontWeight: 'bold'}}>
-                  Upload Media
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
+          }}>
+          <Rating
+            size={32}
+            rating={rating}
+            onChange={value => {
+              // console.log('User rating:', value);
+              setrating(value); // Update state
+            }}
+            starColor="#FFD700"
+            baseColor={isDark ? '#48484A' : '#D1D1D6'}
+          />
         </View>
-      </View>
+        <HelperText type="error" visible={errors.rating !== ''}>
+          {errors.rating}
+        </HelperText>
 
-      <HelperText type="error" visible={errors.media !== ''}>
-        {errors.media}
-      </HelperText>
-      {media.length > 0 && (
-        <>
-          <Text
-            style={[
-              {
-                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                fontSize: 18,
-                textAlign: 'left',
-                marginBottom: 10,
-                fontWeight: '600',
-                alignSelf: 'flex-start',
-                marginLeft: '7%',
-                marginTop: '5%',
-              },
-            ]}>
-            Post images
-          </Text>
+        <Text
+          style={[
+            styles.recListText,
+            {
+              fontWeight: 'bold',
+              fontSize: 18,
+              alignSelf: 'flex-start',
+              marginLeft: 30,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
+              marginTop: 10,
+              marginBottom: 10,
+            },
+          ]}>
+          Post your review
+        </Text>
 
-          <View
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              height: 130,
+              alignItems: 'flex-start',
+              backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
+            },
+          ]}>
+          <TextInput
+            value={description}
             style={[
-              styles.imageContainer,
+              styles.textInput,
               {
-                flexWrap: 'wrap',
-                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                height: 93,
+                backgroundColor: isDark ? '#121212' : '#fff',
+                color: isDark ? '#fff' : '#000',
               },
-            ]}>
-            {media.slice(1, 8).map((item, index) => (
-              <View key={index} style={styles.mediaItem}>
-                {item.type.startsWith('image') ? (
+            ]}
+            onChangeText={setdescription}
+            numberOfLines={5}
+            multiline={true}
+            placeholder="Have any feedback you’d like to give about this product"
+            mode="outlined"
+            placeholderTextColor={'rgba(158, 158, 158, 1)'}
+            autoCapitalize="none"
+          />
+        </View>
+        <HelperText type="error" visible={errors.description !== ''}>
+          {errors.description}
+        </HelperText>
+
+        <Text
+          style={[
+            styles.recListText,
+            {
+              fontWeight: 'bold',
+              fontSize: 18,
+              alignSelf: 'flex-start',
+              marginLeft: 30,
+              color: isDark ? 'rgba(255, 255, 255, 1)' : '#000',
+              marginBottom: 10,
+            },
+          ]}>
+          Add photo & Video
+        </Text>
+
+        <View>
+          <View style={{}}>
+            {media.length > 0 && media[0] ? (
+              <>
+                <Image
+                  source={{uri: media[0]}}
+                  style={[
+                    styles.mediaSelector,
+                    {borderWidth: 0, backgroundColor: 'rgba(248, 247, 247, 1)'},
+                  ]}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.closeButton,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgb(0, 0, 0)'
+                        : 'rgb(255, 255, 255)',
+                    },
+                  ]}
+                  onPress={() => {
+                    setMedia(media.slice(1));
+                  }}>
+                  <Entypo
+                    name="cross"
+                    size={25}
+                    color={isDark ? 'white' : 'black'}
+                  />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity onPress={selectMedia}>
+                <View
+                  style={[
+                    styles.mediaSelector,
+                    {
+                      backgroundColor: isDark
+                        ? '#121212'
+                        : 'rgba(248, 247, 247, 1)',
+                    },
+                  ]}>
+                  <Entypo name="upload-to-cloud" size={45} color="grey" />
+                  <Text
+                    style={{
+                      color: 'rgba(158, 158, 158, 1)',
+                      fontWeight: 'bold',
+                    }}>
+                    Upload Media
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        <HelperText type="error" visible={errors.media !== ''}>
+          {errors.media}
+        </HelperText>
+        {media.length > 0 && (
+          <>
+            <Text
+              style={[
+                {
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                  fontSize: 18,
+                  textAlign: 'left',
+                  marginBottom: 10,
+                  fontWeight: '600',
+                  alignSelf: 'flex-start',
+                  marginLeft: '7%',
+                  marginTop: '5%',
+                },
+              ]}>
+              Post images
+            </Text>
+
+            <View
+              style={[
+                styles.imageContainer,
+                {
+                  flexWrap: 'wrap',
+                  backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                },
+              ]}>
+              {media.slice(1, 8).map((item, index) => (
+                <View key={index} style={styles.mediaItem}>
+                  {/* {item.type.startsWith('image') ? ( */}
                   <>
                     <Image source={{uri: item}} style={styles.mediaPreview} />
                     <TouchableOpacity
@@ -351,55 +356,56 @@ export default function RatedScreen({navigation, route}) {
                       />
                     </TouchableOpacity>
                   </>
-                ) : item.type.startsWith('video') ? null : (
+                  {/* ) : item.type.startsWith('video') ? null : (
                   <Text>{item.fileName}</Text>
-                )}
-              </View>
-            ))}
+                )} */}
+                </View>
+              ))}
 
-            {/* Add Selector Button */}
-            {media.length < 8 && (
-              <TouchableOpacity
-                onPress={selectMedia}
-                style={[
-                  styles.mediaItem,
-                  {
-                    backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: 'rgba(176, 176, 176, 1)',
-                    borderStyle: 'dashed',
-                  },
-                ]}>
-                <Entypo
-                  name="squared-plus"
-                  size={25}
-                  color="rgba(176, 176, 176, 1)"
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </>
-      )}
+              {/* Add Selector Button */}
+              {media.length < 8 && (
+                <TouchableOpacity
+                  onPress={selectMedia}
+                  style={[
+                    styles.mediaItem,
+                    {
+                      backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderColor: 'rgba(176, 176, 176, 1)',
+                      borderStyle: 'dashed',
+                    },
+                  ]}>
+                  <Entypo
+                    name="squared-plus"
+                    size={25}
+                    color="rgba(176, 176, 176, 1)"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </>
+        )}
 
-      <TouchableOpacity
-        disabled={route.params.item.feedback ? true : false}
-        style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
-        // onPress={() => navigation.navigate('shopdetails')}
-        onPress={() => handlePress()}>
-        <Text
-          style={[
-            styles.smallText,
-            {
-              color: '#fff',
-              fontSize: 22,
-              marginBottom: 0,
-            },
-          ]}>
-          Submit review
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          disabled={route.params.item.feedback ? true : false}
+          style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
+          // onPress={() => navigation.navigate('shopdetails')}
+          onPress={() => handlePress()}>
+          <Text
+            style={[
+              styles.smallText,
+              {
+                color: '#fff',
+                fontSize: 22,
+                marginBottom: 0,
+              },
+            ]}>
+            Submit review
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingContainer>
   );
 }
 

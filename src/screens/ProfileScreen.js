@@ -22,13 +22,12 @@ export default function ProfileScreen({navigation}) {
   const {theme, changeTheme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [selectedtheme, setselectedtheme] = useState('SystemDefault');
-  const {userRole,handleLogout} = useContext(AuthContext);
+  const {userRole, handleLogout} = useContext(AuthContext);
 
   const isFocused = useIsFocused();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
-  const {getCategories, userdata, getUserData, Userfulldata} =
-    useContext(AuthContext);
+  const {getCategories, getUserData, Userfulldata} = useContext(AuthContext);
 
   useEffect(() => {
     getUserData();
@@ -37,7 +36,7 @@ export default function ProfileScreen({navigation}) {
 
   useEffect(() => {}, [isFocused]);
 
-  const handleDelete = () => {
+  const handlelogout = () => {
     handleLogout();
     setModalVisible2(false);
   };
@@ -133,7 +132,7 @@ export default function ProfileScreen({navigation}) {
                       marginLeft: 2,
                     },
                   ]}>
-                  {Userfulldata?.name}
+                  {Userfulldata?.name ? Userfulldata?.name : 'fetching name...'}
                 </Text>
 
                 <Text
@@ -146,7 +145,9 @@ export default function ProfileScreen({navigation}) {
                       marginLeft: 2,
                     },
                   ]}>
-                  {Userfulldata?.email}
+                  {Userfulldata?.email
+                    ? Userfulldata?.email
+                    : 'fetching email...'}
                 </Text>
               </View>
               <Feather
@@ -165,10 +166,15 @@ export default function ProfileScreen({navigation}) {
             <View
               style={{
                 width: Width * 0.9,
-                height: Height * userRole === 'buyer' ? 0.63 : 0.63,
+                height: Height * (userRole === 'buyer' ? 0.65 : 0.39),
                 marginTop: 14,
-                elevation: 15,
                 borderRadius: 5,
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white', // Add background color for shadow to work
+                shadowColor: '#000', // Shadow color
+                shadowOffset: {width: 0, height: 2}, // Shadow offset
+                shadowOpacity: 0.25, // Shadow opacity
+                shadowRadius: 3.84, // Shadow blur radius
+                elevation: 5, // For Android shadow
               }}>
               {userRole === 'buyer' ? (
                 <Pressable
@@ -1002,7 +1008,7 @@ export default function ProfileScreen({navigation}) {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleDelete}
+                onPress={handlelogout}
                 style={styles.deleteButton}>
                 <Text style={styles.buttonText}>Logout</Text>
               </TouchableOpacity>
@@ -1068,7 +1074,7 @@ const styles = StyleSheet.create({
   recListText: {
     fontSize: 12,
     fontWeight: 'bold',
-    width: 110,
+    // width: 180,
     color: '#000',
   },
   smallText: {

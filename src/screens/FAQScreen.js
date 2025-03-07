@@ -20,14 +20,17 @@ export default function FAQScreen({navigation}) {
   const isDark = theme === 'dark';
 
   const isFocused = useIsFocused();
-  
-  const {getFAQs, FAQs} = useContext(AuthContext); 
+
+  const {getFAQs, FAQs} = useContext(AuthContext);
   const [filteredLists, setFilteredLists] = useState(FAQs);
-  
+
   useEffect(() => {
     getFAQs();
-    // console.log('FAQs screen', FAQs);
-  }, [isFocused]);
+  }, [isFocused]); // ✅ Trigger API call when screen is focused
+
+  useEffect(() => {
+    setFilteredLists(FAQs); // ✅ Update filtered list when FAQs change
+  }, [FAQs]); // ✅ Re-run when FAQs update
 
   const [selectedItemId, setSelectedItemId] = useState(null);
 
@@ -128,13 +131,12 @@ export default function FAQScreen({navigation}) {
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <Header header={'FAQs'} />
 
-       
       <SearchBar
-          placeholder={'Search for help'}
-          lists={FAQs}  
-          setFilteredLists={setFilteredLists} 
-          searchKey="question"
-        />
+        placeholder={'Search for help'}
+        lists={FAQs}
+        setFilteredLists={setFilteredLists}
+        searchKey="question"
+      />
       {filteredLists.map((item, index) => render2RectangleList(item, index))}
     </View>
   );
@@ -142,6 +144,7 @@ export default function FAQScreen({navigation}) {
 
 const styles = StyleSheet.create({
   screen: {
+    padding: 10,
     flex: 1,
     backgroundColor: '#fff',
   },

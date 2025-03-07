@@ -33,7 +33,7 @@ export default function ProfileSettings({navigation, route}) {
   const [name, setname] = useState('');
   const [phone, setphone] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
   const [open, setOpen] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ export default function ProfileSettings({navigation, route}) {
   const {media, selectMedia, requestCameraPermission, setMedia} =
     useImagePicker();
 
-  const {getCategories, userdata, getUserData, Userfulldata} =
+  const {getCategories, location, getUserData, Userfulldata} =
     useContext(AuthContext);
 
   useEffect(() => {
@@ -68,66 +68,6 @@ export default function ProfileSettings({navigation, route}) {
       .toString()
       .padStart(2, '0')}/${date.getFullYear()}`;
   };
-  const validateInputs = () => {
-    let valid = true;
-    let newErrors = {
-      phone: '',
-      location: '',
-      media: '',
-      categories: '',
-      name: '',
-    };
-
-    if (!name.trim()) {
-      newErrors.name = 'name is required.';
-      valid = false;
-    } else if (name.length < 4) {
-      newErrors.name = 'name must be at least 4 characters long.';
-      valid = false;
-    }
-
-    if (media.length === 0) {
-      newErrors.media = 'Please select at least one image.';
-      valid = false;
-    }
-    // Validate Phone Number
-    if (!phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
-      valid = false;
-    } else if (!phoneInput.current?.isValidNumber(phone)) {
-      newErrors.phone = 'Enter a valid phone number.';
-      valid = false;
-    }
-    // Validate Category Selection
-    if (selectedCategories.length === 0) {
-      newErrors.categories = 'Please select at least one category.';
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    return valid;
-  };
-
-  const handlePress = async () => {
-    setErrors({
-      phone: '',
-      location: '',
-      media: '',
-      categories: '',
-      name: '',
-    });
-    // if (!validateInputs()) return;
-
-    setIsLoading(true);
-    try {
-      console.log('Success', 'updated successfully!');
-      navigation.navigate('BottomTabs');
-    } catch (error) {
-      //   Alert.alert('Error', 'Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <ScrollView
@@ -136,7 +76,7 @@ export default function ProfileSettings({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-      <LocationPermission setLocation={setLocation} />
+      {/* <LocationPermission setLocation={setLocation} /> */}
 
       <Header header={'Profile'} />
 
@@ -148,23 +88,49 @@ export default function ProfileSettings({navigation, route}) {
             marginBottom: 10,
           },
         ]}>
-        <Image
-          source={
-            Userfulldata
-              ? {uri: Userfulldata?.profile[0]}
-              : require('../assets/User-image.png')
-          }
-          style={{
-            width: 120,
-            height: 120,
-            alignSelf: 'center',
-            overflow: 'hidden',
-            borderRadius: 100,
-            marginTop: 20,
-            borderWidth: 5,
-            borderColor: 'rgba(0, 0, 0, 0.14)',
-          }}
-        />
+        {media && media.length > 0 && media[0] ? (
+          <>
+            <Image
+              source={{uri: media[0]}}
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: 'center',
+                overflow: 'hidden',
+                borderRadius: 100,
+                top: 10,
+                borderWidth: 5,
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 1)'
+                  : 'rgba(231, 231, 231, 1)',
+              }}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMedia([])} // Properly reset media array
+            >
+              <Entypo name="cross" size={25} color="black" />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Image
+            source={
+              Userfulldata?.profile && Userfulldata.profile.length > 0
+                ? {uri: Userfulldata.profile[0]}
+                : require('../assets/User-image.png')
+            }
+            style={{
+              width: 120,
+              height: 120,
+              alignSelf: 'center',
+              overflow: 'hidden',
+              borderRadius: 100,
+              marginTop: 20,
+              borderWidth: 5,
+              borderColor: 'rgba(0, 0, 0, 0.14)',
+            }}
+          />
+        )}
 
         <View style={{alignSelf: 'center', marginTop: 30}}>
           <Text
@@ -453,14 +419,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 10,
-  },
-  mediaItem: {
-    width: '20%', // Slight margin for spacing
-    margin: '2%',
-    aspectRatio: 1, // Keeps items square
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
   },
   mediaPreview: {
     width: '100%',

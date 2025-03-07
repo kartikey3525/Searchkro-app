@@ -92,19 +92,14 @@ export default function Login({navigation}) {
 
   const handlePress = async () => {
     setErrors({email: '', password: '', username: ''});
-    // if (!validateInputs()) return;
+    if (!validateInputs()) return;
 
     setIsLoading(true);
     try {
-      await (isnew
-        ? handleRegister(email, password, username)
-        : handleLogin(email, password, username));
-      console.log('Success', 'Login successful!');
-      navigation.navigate('OTPScreen', {
-        emailPhone: email,
-        password: password,
-        username: username,
-      });
+      isnew
+        ? await handleRegister(email, password, username)
+        : await handleLogin(email, password);
+      // console.log('Success', 'Login successful!');
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -298,14 +293,13 @@ export default function Login({navigation}) {
       <TouchableOpacity
         style={styles.blueBotton}
         // onPress={() => navigation.navigate('OTPScreen')}
-        onPress={() => handlePress()}
-      >
+        onPress={() => handlePress()}>
         <Text
           style={[
             styles.smallText,
             {color: '#fff', fontSize: 22, marginBottom: 0},
           ]}>
-          Sent OTP{' '}
+          {isnew ? 'Sent OTP' : 'Login'}
         </Text>
       </TouchableOpacity>
 
@@ -322,11 +316,7 @@ export default function Login({navigation}) {
           {backgroundColor: isDark ? '#000' : '#fff'},
         ]}
         // onPress={() => navigation.navigate('BottomTabs')}
-       onPress={() => signInWithGoogle()}
-
-        
-        
-        >
+        onPress={() => signInWithGoogle()}>
         <Image
           source={require('../assets/Google.png')}
           style={{

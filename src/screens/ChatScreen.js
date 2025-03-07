@@ -19,6 +19,7 @@ import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 // Replace with your actual backend server URL
 const socket = io('http://YOUR_SERVER_IP:5000');
@@ -61,28 +62,27 @@ const ChatScreen = ({navigation, route}) => {
         image,
         senderId: userId,
       };
-  
+
       // Send user's message
-      socket.emit('sendMessage', { chatId, ...newMessage });
-      setMessages((prevMessages) => [newMessage, ...prevMessages]);
-  
+      socket.emit('sendMessage', {chatId, ...newMessage});
+      setMessages(prevMessages => [newMessage, ...prevMessages]);
+
       // Clear input
       setText('');
       setImage(null);
-  
+
       // Send a dummy response after 1 second
       setTimeout(() => {
         const botResponse = {
           id: Date.now() + 1,
-          text: "hello ! how are you :)",
+          text: 'hello ! how are you :)',
           image: null,
-          senderId: "bot",
+          senderId: 'bot',
         };
-        setMessages((prevMessages) => [botResponse, ...prevMessages]);
+        setMessages(prevMessages => [botResponse, ...prevMessages]);
       }, 1000);
     }
   };
-  
 
   const pickImage = () => {
     launchImageLibrary({mediaType: 'photo'}, response => {
@@ -93,301 +93,306 @@ const ChatScreen = ({navigation, route}) => {
   };
 
   return (
-    <View
-      style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+    <KeyboardAvoidingContainer>
       <View
-        style={[
-          styles.rectangle2,
-          {
-            flexDirection: 'row',
-            backgroundColor: isDark ? '#000' : '#fff',
-          },
-        ]}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-          style={{}}
-        />
-        <Image
-          source={require('../assets/User-image.png')}
-          style={{
-            width: 50,
-            height: 50,
-            marginLeft: 10,
-            marginRight: 10,
-          }}
-          resizeMode="contain"
-        />
-        <View style={{flex: 1}}>
-          <Text
-            numberOfLines={1}
-            style={[
-              styles.recListText,
-              {
-                fontWeight: 'bold',
-                fontSize: 15,
-                width: 180,
-                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
-              },
-            ]}>
-            {route?.params ? route?.params?.item?.title : 'seller name'}
-          </Text>
-          <Text
-            numberOfLines={2}
-            style={[
-              styles.recListText,
-              {
-                fontWeight: '500',
-                fontSize: 13,
-                width: 180,
-                marginTop: 5,
-                color: 'rgba(75, 203, 27, 1)',
-              },
-            ]}>
-            Online
-          </Text>
-        </View>
-        <Entypo
-          onPress={() => toggleModal('item.id')} // Use toggleModal instead of setModalVisible
-          name="dots-three-vertical"
-          size={24}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)'}
-          style={{alignSelf: 'flex-start', marginTop: 10}}
-        />
-        {selectedItemId === 'item.id' && (
-          <Pressable
+        style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+        <View
+          style={[
+            styles.rectangle2,
+            {
+              flexDirection: 'row',
+              backgroundColor: isDark ? '#000' : '#fff',
+            },
+          ]}>
+          <Entypo
+            onPress={() => navigation.goBack()}
+            name="chevron-thin-left"
+            size={20}
+            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
+            style={{}}
+          />
+          <Image
+            source={require('../assets/User-image.png')}
             style={{
-              position: 'absolute',
-              alignSelf: 'flex-end',
-              top: 40,
-              right: 30,
+              width: 50,
+              height: 50,
+              marginLeft: 10,
+              marginRight: 10,
             }}
-            onPress={() => toggleModal(item.id)}>
-            <View
+            resizeMode="contain"
+          />
+          <View style={{flex: 1}}>
+            <Text
+              numberOfLines={1}
               style={[
-                styles.modalContent,
-                {backgroundColor: isDark ? '#121212' : '#fff'},
+                styles.recListText,
+                {
+                  fontWeight: 'bold',
+                  fontSize: 15,
+                  width: 180,
+                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
+                },
               ]}>
-              <TouchableOpacity
-                style={{
-                  padding: 4,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 5,
-                }}
-                onPress={() => {}}>
-                <Octicons
-                  name={'history'}
-                  size={14}
-                  color={
-                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                  }
-                />
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 14,
-                      marginLeft: 5,
-                      fontWeight: '500',
-                      color: isDark
-                        ? 'rgba(255, 255, 255, 1)'
-                        : 'rgba(94, 95, 96, 1)',
-                    },
-                  ]}>
-                  View History
-                </Text>
-              </TouchableOpacity>
-
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: isDark ? 'grey' : 'lightgrey',
-                  width: 120,
-                  alignSelf: 'center',
-                  borderRadius: 10,
-                }}
-              />
-
-              <TouchableOpacity
-                style={{
-                  padding: 4,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 5,
-                }}
-                onPress={() => {}}>
-                <Entypo
-                  name={'block'}
-                  size={16}
-                  color={
-                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                  }
-                />
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 14,
-                      marginLeft: 5,
-                      fontWeight: '500',
-                      color: isDark
-                        ? 'rgba(255, 255, 255, 1)'
-                        : 'rgba(94, 95, 96, 1)',
-                    },
-                  ]}>
-                  Block
-                </Text>
-              </TouchableOpacity>
-
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: isDark ? 'grey' : 'lightgrey',
-                  width: 120,
-                  alignSelf: 'center',
-                  borderRadius: 10,
-                }}
-              />
-
-              <TouchableOpacity
-                style={{
-                  padding: 4,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 5,
-                }}
-                onPress={() => {}}>
-                <Octicons
-                  name={'mute'}
-                  size={16}
-                  color={
-                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                  }
-                />
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 14,
-                      marginLeft: 5,
-                      fontWeight: '500',
-                      color: isDark
-                        ? 'rgba(255, 255, 255, 1)'
-                        : 'rgba(94, 95, 96, 1)',
-                    },
-                  ]}>
-                  Mute
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        )}
-      </View>
-
-      <FlatList
-        data={messages}
-        inverted
-        keyExtractor={item => item.id.toString()}
-        renderItem={({item, index}) => {
-          const isLatestMessage =
-            index === 0 || messages[index - 1]?.senderId !== item.senderId;
-
-          const isSentByUser = item.senderId === userId;
-
-          return (
-            <View
+              {route?.params ? route?.params?.item?.title : 'seller name'}
+            </Text>
+            <Text
+              numberOfLines={2}
               style={[
-                styles.messageRow,
-                isSentByUser ? styles.sentRow : styles.receivedRow,
+                styles.recListText,
+                {
+                  fontWeight: '500',
+                  fontSize: 13,
+                  width: 180,
+                  marginTop: 5,
+                  color: 'rgba(75, 203, 27, 1)',
+                },
               ]}>
-              {/* Show Profile Picture on Left for Received Messages */}
-              {!isSentByUser && isLatestMessage && (
-                <Image
-                  source={require('../assets/user-male.png')}
-                  style={styles.profileImage}
-                />
-              )}
-
-              {/* Message Container */}
+              Online
+            </Text>
+          </View>
+          <Entypo
+            onPress={() => toggleModal('item.id')} // Use toggleModal instead of setModalVisible
+            name="dots-three-vertical"
+            size={24}
+            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)'}
+            style={{alignSelf: 'flex-start', marginTop: 10}}
+          />
+          {selectedItemId === 'item.id' && (
+            <Pressable
+              style={{
+                position: 'absolute',
+                alignSelf: 'flex-end',
+                top: 40,
+                right: 30,
+              }}
+              onPress={() => toggleModal(item.id)}>
               <View
                 style={[
-                  styles.messageContainer,
-                  isSentByUser ? styles.sentMessage : styles.receivedMessage,
+                  styles.modalContent,
+                  {backgroundColor: isDark ? '#121212' : '#fff'},
                 ]}>
-                {item.text ? (
+                <TouchableOpacity
+                  style={{
+                    padding: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 5,
+                  }}
+                  onPress={() => {}}>
+                  <Octicons
+                    name={'history'}
+                    size={14}
+                    color={
+                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                    }
+                  />
                   <Text
-                    style={[styles.message, {color: isDark ? '#fff' : '#000'}]}>
-                    {item.text}
+                    style={[
+                      styles.bigText,
+                      {
+                        fontSize: 14,
+                        marginLeft: 5,
+                        fontWeight: '500',
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgba(94, 95, 96, 1)',
+                      },
+                    ]}>
+                    View History
                   </Text>
-                ) : null}
-                {item.image && (
-                  <Image source={{uri: item.image}} style={styles.image} />
-                )}
-              </View>
+                </TouchableOpacity>
 
-              {/* Show Profile Picture on Right for Sent Messages */}
-              {/* {isSentByUser && isLatestMessage && (
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: isDark ? 'grey' : 'lightgrey',
+                    width: 120,
+                    alignSelf: 'center',
+                    borderRadius: 10,
+                  }}
+                />
+
+                <TouchableOpacity
+                  style={{
+                    padding: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 5,
+                  }}
+                  onPress={() => {}}>
+                  <Entypo
+                    name={'block'}
+                    size={16}
+                    color={
+                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.bigText,
+                      {
+                        fontSize: 14,
+                        marginLeft: 5,
+                        fontWeight: '500',
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgba(94, 95, 96, 1)',
+                      },
+                    ]}>
+                    Block
+                  </Text>
+                </TouchableOpacity>
+
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: isDark ? 'grey' : 'lightgrey',
+                    width: 120,
+                    alignSelf: 'center',
+                    borderRadius: 10,
+                  }}
+                />
+
+                <TouchableOpacity
+                  style={{
+                    padding: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: 5,
+                  }}
+                  onPress={() => {}}>
+                  <Octicons
+                    name={'mute'}
+                    size={16}
+                    color={
+                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.bigText,
+                      {
+                        fontSize: 14,
+                        marginLeft: 5,
+                        fontWeight: '500',
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgba(94, 95, 96, 1)',
+                      },
+                    ]}>
+                    Mute
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          )}
+        </View>
+
+        <FlatList
+          data={messages}
+          inverted
+          keyExtractor={item => item.id.toString()}
+          renderItem={({item, index}) => {
+            const isLatestMessage =
+              index === 0 || messages[index - 1]?.senderId !== item.senderId;
+
+            const isSentByUser = item.senderId === userId;
+
+            return (
+              <View
+                style={[
+                  styles.messageRow,
+                  isSentByUser ? styles.sentRow : styles.receivedRow,
+                ]}>
+                {/* Show Profile Picture on Left for Received Messages */}
+                {!isSentByUser && isLatestMessage && (
+                  <Image
+                    source={require('../assets/user-male.png')}
+                    style={styles.profileImage}
+                  />
+                )}
+
+                {/* Message Container */}
+                <View
+                  style={[
+                    styles.messageContainer,
+                    isSentByUser ? styles.sentMessage : styles.receivedMessage,
+                  ]}>
+                  {item.text ? (
+                    <Text
+                      style={[
+                        styles.message,
+                        {color: isDark ? '#fff' : '#000'},
+                      ]}>
+                      {item.text}
+                    </Text>
+                  ) : null}
+                  {item.image && (
+                    <Image source={{uri: item.image}} style={styles.image} />
+                  )}
+                </View>
+
+                {/* Show Profile Picture on Right for Sent Messages */}
+                {/* {isSentByUser && isLatestMessage && (
                 <Image
                   source={require('../assets/User-image.png')}
                   style={styles.profileImage}
                 />
               )} */}
-            </View>
-          );
-        }}
-      />
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: isDark ? '#000' : '#fff',
-          },
-        ]}>
-        <TextInput
-          style={[styles.input, {color: isDark ? '#fff' : '#000'}]}
-          value={text}
-          onChangeText={setText}
-          placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
-          placeholder="Enter amount or chat"
+              </View>
+            );
+          }}
         />
-        <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
-          <MaterialIcons
-            name="image"
-            size={35}
-            color={
-              isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
-            }
-          />
-        </TouchableOpacity>
 
-        <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
-          <Feather
-            name="plus-circle"
-            size={30}
-            color={
-              isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
-            }
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? '#000' : '#fff',
+            },
+          ]}>
+          <TextInput
+            style={[styles.input, {color: isDark ? '#fff' : '#000'}]}
+            value={text}
+            onChangeText={setText}
+            placeholderTextColor={isDark ? 'rgba(255, 255, 255, 0.51)' : '#000'}
+            placeholder="Enter amount or chat"
           />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
+            <MaterialIcons
+              name="image"
+              size={35}
+              color={
+                isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
+              }
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Image
-            source={require('../assets/chat-send-B.png')}
-            style={{
-              width: 20,
-              height: 20,
-              left: 2,
-              alignSelf: 'center',
-            }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
+            <Feather
+              name="plus-circle"
+              size={30}
+              color={
+                isDark ? 'rgba(255, 255, 255, 0.51)' : 'rgba(86, 86, 86, 0.48)'
+              }
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+            <Image
+              source={require('../assets/chat-send-B.png')}
+              style={{
+                width: 20,
+                height: 20,
+                left: 2,
+                alignSelf: 'center',
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingContainer>
   );
 };
 
@@ -395,6 +400,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    paddingTop: 20,
     paddingBottom: 0,
     backgroundColor: '#fff',
   },

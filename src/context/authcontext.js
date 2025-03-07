@@ -7,7 +7,7 @@ import messaging from '@react-native-firebase/messaging';
 let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {LogLevel, OneSignal} from 'react-native-onesignal';
+import auth from '@react-native-firebase/auth';
 
 const AuthContext = createContext();
 
@@ -45,234 +45,25 @@ const AuthProvider = ({children}) => {
 
   const isFocused = useIsFocused(); // ✅ Correct way to use `useIsFocused()`
 
-  // useEffect(() => {
-  //   // Check if OneSignal is initialized
-  //   if (!OneSignal) {
-  //     console.error('OneSignal is not initialized', OneSignal);
-  //     return;
-  //   }
-  //   // console.error('OneSignal is not initialized', OneSignal);
-
-  //   // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-
-  //   // Initialize OneSignal with your App ID
-  //   OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6'); // Replace with your OneSignal App ID
-
-  //   // Request notification permission
-  //   OneSignal.Notifications.requestPermission(true);
-  //   OneSignal.Notifications.getPermissionAsync();
-  //   const requestNotificationPermission = async () => {
-  //     const permission = await OneSignal.Notifications.requestPermission(true);
-  //     if (permission) {
-  //       console.log('Notification permission granted.');
-  //     } else {
-  //       console.log('Notification permission denied.');
-  //     }
-  //   };
-
-  //   requestNotificationPermission();
-  //   // Add event listener for notification clicks
-  //   OneSignal.Notifications.addEventListener('click', event => {
-  //     console.log('OneSignal: notification clicked:', event);
-  //   });
-
-  //   // Method for listening for notification clicks
-  //   OneSignal.Notifications.addEventListener('click', event => {
-  //     console.log('OneSignal: notification clicked:', event);
-
-  //     // Access notification details
-  //     const notification = event.notification;
-  //     const title = notification.title;
-  //     const body = notification.body;
-  //     const additionalData = notification.additionalData;
-
-  //     console.log('Notification Title:', title);
-  //     console.log('Notification Body:', body);
-  //     console.log('Additional Data:', additionalData);
-
-  //     // Use the data in your app
-  //     // Example: Navigate to a specific screen based on additionalData
-  //     if (additionalData && additionalData.screen) {
-  //       switch (additionalData.screen) {
-  //         case 'profile':
-  //           // Navigate to the profile screen
-  //           console.log('Navigating to profile screen');
-  //           break;
-  //         case 'settings':
-  //           // Navigate to the settings screen
-  //           console.log('Navigating to settings screen');
-  //           break;
-  //         default:
-  //           console.log('No specific screen to navigate to');
-  //       }
-  //     }
-  //   });
-
-  //   // Listen for permission changes
-  //   OneSignal.Notifications.addEventListener(
-  //     'permissionChange',
-  //     async event => {
-  //       console.log('Notification permission changed:', event.hasPermission);
-  //       if (event.hasPermission) {
-  //         const deviceState = await OneSignal.User.getDeviceState();
-  //         console.log('Device State after permission change:', deviceState);
-  //       }
-  //     },
-  //   );
-
-  //   // Set external user ID
-  //   const externalUserId = ' kartikey'; // Replace with your name or dynamic value
-  //   OneSignal.User.getExternalId(externalUserId)
-  //     .then(() => {
-  //       OneSignal.login('kartikey');
-  //       console.log('External User ID set:', externalUserId);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error setting external user ID:', error);
-  //     });
-
-  //   // Check subscription status
-
-  //   const addsubscription = async userdata => {
-  //     try {
-  //       const userId = 'kartikey1'; // Replace with the actual user ID from your response
-  //       const UserRole = 'buyer'; // Use the stored role or fetch it from the response
-
-  //       // Initialize OneSignal
-  //       OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6'); // Replace with your OneSignal App ID
-
-  //       // Set external user ID
-  //       await OneSignal.login(userId);
-  //       console.log('External User ID set:', userId);
-
-  //       // Add user role as a tag
-  //       await OneSignal.User.addTag('role', UserRole);
-  //       console.log('User role tag added:', UserRole);
-
-  //       // Ensure the user is subscribed
-  //       const isSubscribed = await OneSignal.User.pushSubscription.optIn();
-  //       if (isSubscribed) {
-  //         console.log('User is subscribed.');
-  //       } else {
-  //         console.log('User is not subscribed.');
-  //       }
-
-  //       // Log device state for debugging
-  //     } catch (error) {
-  //       console.error('Error adding subscription:', error);
-  //     }
-  //   };
-  //   // Replace with actual user data
-  //   addsubscription(userdata);
-
-  //   GoogleSignin.configure({
-  //     webClientId: 'searchkro-d6ff3.firebaseapp.com',
-  //     offlineAccess: true,
-  //   });
-  //   getDeviceToken();
-  //   checkLoginStatus();
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log('OneSignal:', OneSignal); // Log the OneSignal object
-  //   console.log('OneSignal.User:', OneSignal.User); // Log the User module
-
-  //   // Initialize OneSignal
-  //   OneSignal.initialize('016f7214-9a7e-407a-922c-82a83b6f1fa6');
-  //   OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-
-  //   // Request notification permission
-  //   OneSignal.Notifications.requestPermission(true);
-
-  //   // Set external_user_id (replace with actual userId from your database)
-  //   const userId = '67b719101fdcd9e4482a9d71'; // Example userId
-  //   if (OneSignal.User && OneSignal.User.setExternalUserId) {
-  //     OneSignal.User.setExternalUserId(userId); // Use OneSignal.User.setExternalUserId
-  //   } else {
-  //     console.error('OneSignal.User.setExternalUserId is not available');
-  //   }
-
-  //   // Listen for notification clicks
-  //   OneSignal.Notifications.addEventListener('click', event => {
-  //     console.log('OneSignal: notification clicked:', event);
-  //   });
-
-  //   // Get device token (FCM token) and verify it
-  //   const getDeviceToken = async () => {
-  //     try {
-  //       const deviceState = await OneSignal.getDeviceState();
-  //       if (deviceState && deviceState.userId) {
-  //         console.log('Device Token (OneSignal User ID):', deviceState.userId);
-
-  //         // Send the token to your backend for verification (if needed)
-  //         await sendTokenToBackend(deviceState.userId);
-  //       } else {
-  //         console.error('Device token (userId) not available');
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching device token:', error);
-  //     }
-  //   };
-
-  //   // Function to send the token to your backend for verification
-  //   const sendTokenToBackend = async token => {
-  //     try {
-  //       const response = await fetch(
-  //         'https://your-backend-api.com/verify-token',
-  //         {
-  //           method: 'POST',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           body: JSON.stringify({token}),
-  //         },
-  //       );
-
-  //       if (response.ok) {
-  //         console.log('Token successfully sent to backend for verification');
-  //       } else {
-  //         console.error('Failed to send token to backend');
-  //       }
-  //     } catch (error) {
-  //       console.error('Error sending token to backend:', error);
-  //     }
-  //   };
-
-  //   // Call the function to get and verify the token
-  //   getDeviceToken();
-
-  //   // Check login status (if applicable)
-  //   checkLoginStatus();
-  // }, []);
-
   useEffect(() => {
-    // ✅ Configure Google Sign-In
     GoogleSignin.configure({
-      webClientId: 'searchkro-d6ff3.firebaseapp.com',
+      webClientId:
+        '872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com',
       offlineAccess: true,
+      forceCodeForRefreshToken: true,
     });
-    // ✅ Get Device Token
+
     getDeviceToken();
     checkLoginStatus();
-    // ✅ Handle initial notification (App was killed & opened from notification)
+
+    // ✅ Handle Initial Notification (App was killed & opened from notification)
     const handleInitialNotification = async () => {
       try {
         const remoteMessage = await messaging().getInitialNotification();
-        console.log(
-          '📩 Full Remote Message:',
-          JSON.stringify(remoteMessage, null, 2),
-        );
-
         console.log('📩 Initial Notification:', remoteMessage);
 
-        if (remoteMessage?.notification) {
-          const {title, body} = remoteMessage.notification;
-          Alert.alert(
-            title || 'Notification',
-            body || 'You have a new message',
-          );
-        } else {
-          console.log('⚠️ No initial notification found.');
+        if (remoteMessage) {
+          navigation.navigate('Notification'); // ✅ Navigate to Notification screen
         }
       } catch (error) {
         console.error('❌ Error fetching initial notification:', error);
@@ -281,63 +72,38 @@ const AuthProvider = ({children}) => {
 
     handleInitialNotification();
 
-    // ✅ Handle notification click when app is in background or quit state
+    // ✅ Handle Notification Click When App is in Background
     const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
       remoteMessage => {
-        if (!remoteMessage) {
-          console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
-          return;
-        }
         console.log('📬 Notification opened from background:', remoteMessage);
+
+        if (remoteMessage) {
+          navigation.navigate('Notification'); // ✅ Navigate to Notification screen
+        } else {
+          console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
+        }
       },
     );
 
-    // ✅ Handle foreground notifications
+    // ✅ Handle Foreground Notifications
     const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      try {
-        if (!remoteMessage) {
-          console.log('⚠️ No remoteMessage found in onMessage.');
-          return;
-        }
+      console.log('📥 Foreground Notification:', remoteMessage);
 
-        const {notification} = remoteMessage;
-        if (notification) {
-          Alert.alert(
-            notification.title || 'Notification',
-            notification.body || 'You have a new message',
-          );
-        } else {
-          console.log('⚠️ No notification data found in foreground message.');
-        }
-      } catch (error) {
-        console.error('❌ Error handling foreground notification:', error);
+      if (remoteMessage?.notification) {
+        Alert.alert(
+          remoteMessage.notification.title || 'Notification',
+          remoteMessage.notification.body || 'You have a new message',
+          [
+            {text: 'Open', onPress: () => navigation.navigate('Notification')}, // ✅ Navigate
+            {text: 'Cancel', style: 'cancel'},
+          ],
+        );
       }
     });
 
-    // ✅ Handle notification click when the app is in foreground
-    const handleAppStateChange = async nextAppState => {
-      if (nextAppState === 'active') {
-        const remoteMessage = await messaging().getInitialNotification();
-        if (remoteMessage?.notification) {
-          Alert.alert(
-            remoteMessage.notification.title || 'Notification',
-            remoteMessage.notification.body || 'You have a new message',
-          );
-        }
-      }
-    };
-
-    // ✅ Listen for app state changes
-    const appStateListener = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-
-    // ✅ Cleanup function
     return () => {
       unsubscribeOnOpen();
       unsubscribeOnMessage();
-      appStateListener.remove();
     };
   }, []);
 
@@ -428,7 +194,7 @@ const AuthProvider = ({children}) => {
           image: 'https://i.postimg.cc/W1bRGDRM/see-more.png',
         },
       ];
-      // console.log('newData130', newData);
+      // console.log('userdata.token', userdata.token);
       setcategorydata(newData);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -448,13 +214,13 @@ const AuthProvider = ({children}) => {
         },
       });
 
-      const FAQs = response.data;
+      const faqs = response.data;
 
-      //  console.log('FAQs', FAQs);
-      setFAQs(FAQs);
+      // console.log('FAQs', faqs);
+      setFAQs(faqs);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('Error', error.response.data.body);
+        console.log('Error223', error.response.data.body);
       } else {
         console.log('Error', 'Failed to load categories');
       }
@@ -508,7 +274,7 @@ const AuthProvider = ({children}) => {
         url += `?category=${encodeURIComponent(category.trim())}`;
       }
 
-      console.log('Fetching data from URL:', url); // Log the URL
+      // console.log('Fetching data from URL:', url); // Log the URL
 
       const response = await axios.get(url, {
         headers: {
@@ -902,7 +668,7 @@ const AuthProvider = ({children}) => {
         description: description,
         contactNumber: phone,
         contactEmail: email,
-        location: location,
+        location: 'New York, NY',
         latitude: location.latitude,
         longitude: location.longitude,
         locationUrl: 'https://maps.google.com/?q=New+York',
@@ -1001,12 +767,50 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const deleteAccount = async id => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.delete(
+        `${apiURL}/api/user/deleteProfile`, // Passing id as a query param
+        {headers},
+      );
+
+      console.log('Deleted Account Response:', response.data);
+      // Reset navigation and go to Login screen
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
+
+      // Clear user session
+      setUserdata(null);
+      setIsLoggedIn(false);
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'commonscreen'}],
+      });
+      // Update local state by filtering out the deleted post
+      // setPostsHistory(prevPosts => prevPosts.filter(post => post._id !== id));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(
+          'Error deleting post:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.log('Error:', error);
+      }
+    }
+  };
+
   const createSellerProfile = async (
     email,
     description,
     phone,
     location,
     profile,
+    selectedCategories,
     bussinessAddress,
     Socialmedia,
     ownerName,
@@ -1017,6 +821,25 @@ const AuthProvider = ({children}) => {
     selectedAvailabity,
     products,
   ) => {
+    console.log(
+      'Response 787:',
+      // email,
+      // description,
+      // phone,
+      // location,
+      profile,
+      selectedCategories,
+      // bussinessAddress,
+      // Socialmedia,
+      // ownerName,
+      // shopName,
+      // openAt,
+      // closeAt,
+      // selectedScale,
+      // selectedAvailabity,
+      products,
+    );
+
     try {
       const payload = {
         name: shopName,
@@ -1026,6 +849,7 @@ const AuthProvider = ({children}) => {
         location: location,
         googleData: {},
         profile: profile,
+        selectedCategories: selectedCategories,
         bussinessAddress: bussinessAddress,
         Socialmedia: Socialmedia,
         ownerName: ownerName,
@@ -1050,8 +874,10 @@ const AuthProvider = ({children}) => {
       );
 
       console.log('Response 171:', response.data);
+      Alert.alert('Success', 'Profile updated successfully!');
+      // navigation.goBack();
       // Alert.alert('Success', 'Post created successfully!');
-      // navigation.navigate('BottomTabs');
+      navigation.navigate('BottomTabs');
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -1168,86 +994,47 @@ const AuthProvider = ({children}) => {
 
   const handleRegister = async (email, password, name) => {
     try {
-      const response = await api.post('api/register', {
-        email,
+      const response = await axios.post(`${apiURL}/api/user/sendOTP`, {
+        emailPhone: email,
         password,
         name,
         isAcceptTermConditions: true,
         roleId: userRole === 'buyer' ? 0 : 1,
         fcmToken: fcmToken,
-        gender: 'male',
       });
       const user = response.data;
-      // navigation.navigate('Home');
+
+      navigation.navigate('OTPScreen', {
+        emailPhone: email,
+        password: password,
+        username: name,
+      });
     } catch (error) {
-      console.error('Error creating and registering new user:', error);
+      console.error('Error registering new user:', error);
     }
   };
 
-  const handleLogin = async (email, password, username) => {
+  const handleLogin = async (email, password) => {
     try {
-      const response = await axios.post(`${apiURL}/api/user/sendOTP`, {
+      const response = await axios.post(`${apiURL}/api/user/login`, {
         emailPhone: email,
         password,
-        username,
+        // username,
         isAcceptTermConditions: true,
         roleId: userRole === 'buyer' ? 0 : 1,
         fcmToken: fcmToken,
-        gender: 'male',
       });
 
       const user = response.data;
 
-      // navigation.navigate('BottomTabs'); // Redirect to home
+      navigation.navigate('BottomTabs'); // Redirect to home
     } catch (error) {
       console.error('Login error:', error);
     }
   };
 
-  // const VerifyOTP = async (email, otp) => {
-  //   try {
-  //     const response = await axios.post(`${apiURL}/api/user/verifyOTP`, {
-  //       emailPhone: email,
-  //       otp,
-  //       fcmToken: fcmToken,
-  //     });
-
-  //     const user = response.data;
-  //     setUserdata(response.data);
-
-  //     // ✅ Save user token & data
-  //     await AsyncStorage.setItem('userToken', user.token);
-  //     await AsyncStorage.setItem('userData', JSON.stringify(user));
-
-  //     // ✅ Save selected user role
-  //     await AsyncStorage.setItem('selectedUserRole', userRole);
-
-  //     // Debugging: Check if values are stored correctly
-  //     const storedToken = await AsyncStorage.getItem('userToken');
-  //     const storedRole = await AsyncStorage.getItem('selectedUserRole');
-  //     // console.log('Stored Token:', storedToken); // 🔍 Should not be null
-  //     // console.log('Stored Role:', storedRole); // 🔍 Should match userRole state
-
-  //     if (response.data.msg) {
-  //       console.log('Success', 'Verification successful!');
-  //       navigation.navigate('AddressScreen');
-  //     } else {
-  //       Alert.alert('Error', response.data.message);
-  //     }
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       Alert.alert(
-  //         'Error',
-  //         error.response?.data?.body || 'Something went wrong.',
-  //       );
-  //     } else {
-  //       Alert.alert('Error', 'Invalid OTP or password.');
-  //     }
-  //   }
-  // };
-
   const VerifyOTP = async (email, otp) => {
-    console.log('user', email);
+    // console.log('user', email);
 
     try {
       const response = await axios.post(`${apiURL}/api/user/verifyOTP`, {
@@ -1265,12 +1052,6 @@ const AuthProvider = ({children}) => {
 
       // ✅ Save selected user role
       await AsyncStorage.setItem('selectedUserRole', userRole);
-
-      // Debugging: Check if values are stored correctly
-      const storedToken = await AsyncStorage.getItem('userToken');
-      const storedRole = await AsyncStorage.getItem('selectedUserRole');
-      console.log('Stored Token:', storedToken); // 🔍 Should not be null
-      console.log('Stored Role:', storedRole); // 🔍 Should match userRole state
 
       console.log('user', user);
       // ✅ OneSignal: Set external user ID and add role tag
@@ -1307,7 +1088,7 @@ const AuthProvider = ({children}) => {
       // Reset navigation and go to Login screen
       navigation.reset({
         index: 0,
-        routes: [{name: 'Login'}],
+        routes: [{name: 'commonscreen'}],
       });
     } catch (error) {
       console.error('Error during logout:', error);
@@ -1339,18 +1120,77 @@ const AuthProvider = ({children}) => {
 
   const signInWithGoogle = async () => {
     try {
-      await GoogleSignin.hasPlayServices(); // Ensure Google Play Services is available
-      const {fcmToken} = await GoogleSignin.signIn(); // Start Google login flow
+      // Check if Google Play Services is available
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
 
-      const googleCredential = auth.GoogleAuthProvider.credential(fcmToken);
+      // Sign in with Google
+      const signInResult = await GoogleSignin.signIn();
 
-      return (
-        await auth().signInWithCredential(googleCredential),
-        navigation.navigate('BottomTabs')
+      // Extract the ID token from the sign-in result
+      let idToken = signInResult.data.idToken; // For older versions of the library
+      if (!idToken) {
+        idToken = signInResult.user?.data.idToken; // For newer versions of the library
+      }
+
+      if (!idToken) {
+        throw new Error('No ID token found');
+      }
+
+      // Create a Google credential with the token
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      // Sign in the user with the credential
+      const userCredential = await auth().signInWithCredential(
+        googleCredential,
       );
+      // console.log(
+      //   'User signed in successfully:1120',
+      //   userCredential.user._user,
+      // );
+      const headers = {
+        Authorization: `Bearer ${idToken}`,
+
+        // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+      const response = await axios.post(
+        `${apiURL}/api/user/googleLogin`,
+        {
+          email: userCredential.user._user.email,
+          name: userCredential.user._user.displayName,
+          profile: userCredential.user._user.photoURL,
+          roleId: userRole === 'buyer' ? 0 : 1,
+          fcmToken: fcmToken,
+          idToken: idToken,
+        },
+        // {headers},
+      );
+
+      const user = response.data;
+      console.log('user', user);
+      // console.log('User signed in successfully:', userCredential.user._user);
+      setUserdata(user);
+      // ✅ Save user token & data
+      await AsyncStorage.setItem('userToken', user.token);
+      await AsyncStorage.setItem('userData', JSON.stringify(user));
+
+      // ✅ Save selected user role
+      await AsyncStorage.setItem('selectedUserRole', userRole);
+
+      // Navigate to the desired screen after successful sign-in
+      navigation.navigate('AddressScreen');
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      throw error;
+
+      // Handle specific errors
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled the login flow');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign-in is already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Google Play Services is not available or outdated');
+      } else {
+        console.error('Unknown error during Google Sign-In:', error);
+      }
     }
   };
 
@@ -1419,6 +1259,7 @@ const AuthProvider = ({children}) => {
         getNotification,
         notificationList,
         deleteNotification,
+        deleteAccount,
       }}>
       {children}
     </AuthContext.Provider>

@@ -21,6 +21,7 @@ import {ThemeContext} from '../context/themeContext';
 import {Dimensions} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 import useImagePicker from '../hooks/useImagePicker';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
@@ -90,377 +91,384 @@ export default function ReportIssue({navigation}) {
   };
   
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={[
-        styles.screen,
-        {backgroundColor: isDark ? '#000' : '#fff'},
-      ]}>
-      <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-          marginBottom: 20,
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            {
-              fontSize: 20,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              textAlign: 'center',
-              width: Width * 0.76,
-              color: isDark ? '#fff' : '#000',
-            },
-          ]}>
-          Report an issue
-        </Text>
-
-        <FontAwesome
-          onPress={() => navigation.goBack()}
-          name="send"
-          size={20}
-          color="rgba(6, 196, 217, 1)"
-          style={{marginLeft: 0}}
-        />
-      </View>
-
-      <Text
-        style={[
-          styles.recListText,
-          {
-            fontWeight: 'bold',
-            fontSize: 18,
-            alignSelf: 'center',
-            marginBottom: 10,
-            color: isDark ? '#fff' : '#000',
-          },
+    <KeyboardAvoidingContainer>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.screen,
+          {backgroundColor: isDark ? '#000' : '#fff'},
         ]}>
-        Upload Your Picture
-      </Text>
-      <View>
-        <View style={{}}>
-          {media.length > 0 && media[0] ? (
-            <TouchableOpacity
-              onPress={
-                // selectMedia
-                () => setModalVisible(!modalVisible)
-              }>
-              <Image
-                source={{uri: media[0]}}
-                style={[styles.mediaSelector, {borderWidth: 0}]}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={
-                // selectMedia
-                () => setModalVisible(!modalVisible)
-              }>
-              <View
-                style={[
-                  styles.mediaSelector,
-                  {backgroundColor: isDark ? '#121212' : '#fff'},
-                ]}>
-                <Text
-                  style={{color: 'rgba(158, 158, 158, 1)', fontWeight: 'bold'}}>
-                  Select file
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-      <HelperText type="error" visible={!!errors.media}>
-        {errors.media}
-      </HelperText>
-      {media.length > 0 && (
-        <>
+        <View
+          style={{
+            alignItems: 'center',
+            width: Width,
+            flexDirection: 'row',
+            height: Height * 0.1,
+            justifyContent: 'flex-start',
+            marginBottom: 20,
+          }}>
+          <Entypo
+            onPress={() => navigation.goBack()}
+            name="chevron-thin-left"
+            size={20}
+            color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
+            style={{marginLeft: 20, padding: 5}}
+          />
           <Text
             style={[
               {
-                color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-                fontSize: 18,
-                textAlign: 'left',
-                marginBottom: 10,
-                fontWeight: '600',
-                alignSelf: 'flex-start',
-                marginLeft: '7%',
-                marginTop: '5%',
+                fontSize: 20,
+                fontWeight: 'bold',
+                alignSelf: 'center',
+                textAlign: 'center',
+                width: Width * 0.76,
+                color: isDark ? '#fff' : '#000',
               },
             ]}>
-            Add more images
+            Report an issue
           </Text>
 
-          <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
-            {media.slice(1, 8).map((item, index) => (
-              <View key={index} style={styles.mediaItem}>
-                {item.type.startsWith('image') ? (
-                  <>
-                    <Image
-                      source={{uri: item.uri}}
-                      style={styles.mediaPreview}
-                    />
-                    <TouchableOpacity
-                      style={[styles.closeButton2]}
-                      onPress={() => {
-                        // Remove the image from media array
-                        setMedia(media.filter((mediaItem, i) => i !== index));
-                      }}>
-                      <Entypo name="cross" size={18} color="black" />
-                    </TouchableOpacity>
-                  </>
-                ) : item.type.startsWith('video') ? null : (
-                  <Text>{item.fileName}</Text>
-                )}
-              </View>
-            ))}
+          <FontAwesome
+            onPress={() => navigation.goBack()}
+            name="send"
+            size={20}
+            color="rgba(6, 196, 217, 1)"
+            style={{marginLeft: 0}}
+          />
+        </View>
 
-            {/* Add Selector Button */}
-            {media.length < 8 && (
+        <Text
+          style={[
+            styles.recListText,
+            {
+              fontWeight: 'bold',
+              fontSize: 18,
+              alignSelf: 'center',
+              marginBottom: 10,
+              color: isDark ? '#fff' : '#000',
+            },
+          ]}>
+          Upload Your Picture
+        </Text>
+        <View>
+          <View style={{}}>
+            {media.length > 0 && media[0] ? (
               <TouchableOpacity
-                onPress={selectMedia}
-                style={[
-                  styles.mediaItem,
-                  {
-                    backgroundColor: isDark ? '#121212' : 'rgb(255, 255, 255)',
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    borderColor: 'rgba(176, 176, 176, 1)',
-                    borderStyle: 'dashed',
-                  },
-                ]}>
-                <Entypo
-                  name="squared-plus"
-                  size={25}
-                  color="rgba(176, 176, 176, 1)"
+                onPress={
+                  // selectMedia
+                  () => setModalVisible(!modalVisible)
+                }>
+                <Image
+                  source={{uri: media[0]}}
+                  style={[styles.mediaSelector, {borderWidth: 0}]}
                 />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={
+                  // selectMedia
+                  () => setModalVisible(!modalVisible)
+                }>
+                <View
+                  style={[
+                    styles.mediaSelector,
+                    {backgroundColor: isDark ? '#121212' : '#fff'},
+                  ]}>
+                  <Text
+                    style={{
+                      color: 'rgba(158, 158, 158, 1)',
+                      fontWeight: 'bold',
+                    }}>
+                    Select file
+                  </Text>
+                </View>
               </TouchableOpacity>
             )}
           </View>
-        </>
-      )}
-      <Text
-        style={[
-          styles.recListText,
-          {
-            fontWeight: 'bold',
-            fontSize: 18,
-            alignSelf: 'flex-start',
-            marginLeft: 30,
-            marginTop: 10,
-            marginBottom: 10,
-            color: isDark ? '#fff' : '#000',
-          },
-        ]}>
-        Product description
-      </Text>
+        </View>
+        <HelperText type="error" visible={!!errors.media}>
+          {errors.media}
+        </HelperText>
+        {media.length > 0 && (
+          <>
+            <Text
+              style={[
+                {
+                  color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                  fontSize: 18,
+                  textAlign: 'left',
+                  marginBottom: 10,
+                  fontWeight: '600',
+                  alignSelf: 'flex-start',
+                  marginLeft: '7%',
+                  marginTop: '5%',
+                },
+              ]}>
+              Add more images
+            </Text>
 
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            height: 130,
-            alignItems: 'flex-start',
-            backgroundColor: isDark ? '#121212' : '#fff',
-          },
-        ]}>
-        <TextInput
-          value={description}
-          style={[
-            styles.textInput,
-            {
-              borderColor: isDark
-                ? 'rgba(37, 37, 37, 1)'
-                : 'rgba(231, 231, 231, 1)',
-              height: 93,
-              backgroundColor: isDark ? '#121212' : '#fff',
-              color: isDark ? '#fff' : '#000',
-            },
-          ]}
-          onChangeText={setdescription}
-          numberOfLines={5}
-          multiline={true}
-          placeholder=" Product description. . ."
-          mode="outlined"
-          placeholderTextColor={'rgba(158, 158, 158, 1)'}
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.description}>
-        {errors.description}
-      </HelperText>
+            <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
+              {media.slice(1, 8).map((item, index) => (
+                <View key={index} style={styles.mediaItem}>
+                  {item.type.startsWith('image') ? (
+                    <>
+                      <Image
+                        source={{uri: item.uri}}
+                        style={styles.mediaPreview}
+                      />
+                      <TouchableOpacity
+                        style={[styles.closeButton2]}
+                        onPress={() => {
+                          // Remove the image from media array
+                          setMedia(media.filter((mediaItem, i) => i !== index));
+                        }}>
+                        <Entypo name="cross" size={18} color="black" />
+                      </TouchableOpacity>
+                    </>
+                  ) : item.type.startsWith('video') ? null : (
+                    <Text>{item.fileName}</Text>
+                  )}
+                </View>
+              ))}
 
-      <TouchableOpacity
-        style={[styles.blueBotton, {margin: '15%'}]}
-        onPress={handlePress}>
+              {/* Add Selector Button */}
+              {media.length < 8 && (
+                <TouchableOpacity
+                  onPress={selectMedia}
+                  style={[
+                    styles.mediaItem,
+                    {
+                      backgroundColor: isDark
+                        ? '#121212'
+                        : 'rgb(255, 255, 255)',
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      borderColor: 'rgba(176, 176, 176, 1)',
+                      borderStyle: 'dashed',
+                    },
+                  ]}>
+                  <Entypo
+                    name="squared-plus"
+                    size={25}
+                    color="rgba(176, 176, 176, 1)"
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </>
+        )}
         <Text
           style={[
-            styles.smallText,
+            styles.recListText,
             {
-              color: '#fff',
-              fontSize: 22,
-              marginBottom: 0,
+              fontWeight: 'bold',
+              fontSize: 18,
+              alignSelf: 'flex-start',
+              marginLeft: 30,
+              marginTop: 10,
+              marginBottom: 10,
+              color: isDark ? '#fff' : '#000',
             },
           ]}>
-          Submit report
+          Product description
         </Text>
-      </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent={true}>
         <View
           style={[
-            styles.modalContainer,
+            styles.inputContainer,
             {
-              backgroundColor: isDark
-                ? 'rgba(255, 255, 255, 0.19)'
-                : 'rgba(0, 0, 0, 0.3)',
+              height: 130,
+              alignItems: 'flex-start',
+              backgroundColor: isDark ? '#121212' : '#fff',
             },
           ]}>
+          <TextInput
+            value={description}
+            style={[
+              styles.textInput,
+              {
+                borderColor: isDark
+                  ? 'rgba(37, 37, 37, 1)'
+                  : 'rgba(231, 231, 231, 1)',
+                height: 93,
+                backgroundColor: isDark ? '#121212' : '#fff',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
+            onChangeText={setdescription}
+            numberOfLines={5}
+            multiline={true}
+            placeholder=" Product description. . ."
+            mode="outlined"
+            placeholderTextColor={'rgba(158, 158, 158, 1)'}
+            autoCapitalize="none"
+          />
+        </View>
+        <HelperText
+          type="error"
+          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          visible={!!errors.description}>
+          {errors.description}
+        </HelperText>
+
+        <TouchableOpacity
+          style={[styles.blueBotton, {margin: '15%'}]}
+          onPress={handlePress}>
+          <Text
+            style={[
+              styles.smallText,
+              {
+                color: '#fff',
+                fontSize: 22,
+                marginBottom: 0,
+              },
+            ]}>
+            Submit report
+          </Text>
+        </TouchableOpacity>
+
+        <Modal visible={modalVisible} transparent={true}>
           <View
             style={[
-              styles.modalContent,
-              {backgroundColor: isDark ? '#121212' : '#fff'},
+              styles.modalContainer,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(255, 255, 255, 0.19)'
+                  : 'rgba(0, 0, 0, 0.3)',
+              },
             ]}>
             <View
-              style={{
-                height: 5,
-                backgroundColor: 'lightgrey',
-                width: 60,
-                position: 'absolute',
-                alignSelf: 'center',
-                borderRadius: 10,
-                top: 16,
-              }}
-            />
-            <TouchableOpacity
-              style={[styles.closeButton, {}]}
-              onPress={() => {
-                setModalVisible(false);
-              }}>
-              <Entypo
-                name="cross"
-                size={22}
-                color={isDark ? '#fff' : 'black'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                flexDirection: 'row',
-                height: 50,
-                marginTop: 30,
-                width: Width,
-                alignItems: 'center',
-                borderBottomWidth: 1,
-                padding: 10,
-                borderBottomColor: isDark
-                  ? 'rgba(255, 255, 255, 0.2)'
-                  : 'rgba(0, 0, 0, 0.2)',
-              }}
-              onPress={requestCameraPermission}>
-              <Entypo
-                name={'camera'}
-                size={22}
-                color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
-                style={{marginRight: 15, marginLeft: 20}}
-              />
-
-              <Text
-                style={[
-                  {
-                    fontSize: 16,
-                    fontWeight: '400',
-                    marginLeft: 6,
-                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-                  },
-                ]}>
-                Take Photo
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => selectMedia()}
-              style={{
-                flexDirection: 'row',
-                width: Width,
-                alignItems: 'center',
-                borderBottomWidth: 1,
-                height: 50,
-                padding: 10,
-                borderBottomColor: isDark
-                  ? 'rgba(255, 255, 255, 0.2)'
-                  : 'rgba(0, 0, 0, 0.2)',
-              }}>
-              <MaterialCommunityIcons
-                name={'image'}
-                size={28}
-                color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
-                style={{marginRight: 10, marginLeft: 18}}
-              />
-
-              <Text
-                style={[
-                  {
-                    fontSize: 16,
-                    fontWeight: '400',
-                    marginLeft: 6,
-                    color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-                  },
-                ]}>
-                Choose from Gallery
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                if (media.length > 0) {
-                  // Remove the first image from the media array
-                  setMedia(media.slice(1));
-                }
-                setModalVisible(false); // Close the modal
-              }}
-              style={{
-                flexDirection: 'row',
-                width: Width,
-                alignItems: 'center',
-                padding: 10,
-                height: 60,
-                marginBottom: 20,
-              }}>
-              <FontAwesome
-                name={'trash'}
-                size={22}
-                color="rgb(255, 0, 0)"
-                style={{marginRight: 15, marginLeft: 22}}
-              />
-              <Text
+              style={[
+                styles.modalContent,
+                {backgroundColor: isDark ? '#121212' : '#fff'},
+              ]}>
+              <View
                 style={{
-                  fontSize: 16,
-                  fontWeight: '400',
-                  marginLeft: 6,
-                  color: 'rgb(255, 0, 0)',
+                  height: 5,
+                  backgroundColor: 'lightgrey',
+                  width: 60,
+                  position: 'absolute',
+                  alignSelf: 'center',
+                  borderRadius: 10,
+                  top: 16,
+                }}
+              />
+              <TouchableOpacity
+                style={[styles.closeButton, {}]}
+                onPress={() => {
+                  setModalVisible(false);
                 }}>
-                Remove Current Photo
-              </Text>
-            </TouchableOpacity>
+                <Entypo
+                  name="cross"
+                  size={22}
+                  color={isDark ? '#fff' : 'black'}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  height: 50,
+                  marginTop: 30,
+                  width: Width,
+                  alignItems: 'center',
+                  borderBottomWidth: 1,
+                  padding: 10,
+                  borderBottomColor: isDark
+                    ? 'rgba(255, 255, 255, 0.2)'
+                    : 'rgba(0, 0, 0, 0.2)',
+                }}
+                onPress={requestCameraPermission}>
+                <Entypo
+                  name={'camera'}
+                  size={22}
+                  color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
+                  style={{marginRight: 15, marginLeft: 20}}
+                />
+
+                <Text
+                  style={[
+                    {
+                      fontSize: 16,
+                      fontWeight: '400',
+                      marginLeft: 6,
+                      color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                    },
+                  ]}>
+                  Take Photo
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => selectMedia()}
+                style={{
+                  flexDirection: 'row',
+                  width: Width,
+                  alignItems: 'center',
+                  borderBottomWidth: 1,
+                  height: 50,
+                  padding: 10,
+                  borderBottomColor: isDark
+                    ? 'rgba(255, 255, 255, 0.2)'
+                    : 'rgba(0, 0, 0, 0.2)',
+                }}>
+                <MaterialCommunityIcons
+                  name={'image'}
+                  size={28}
+                  color={isDark ? '#fff' : 'rgb(0, 0, 0)'}
+                  style={{marginRight: 10, marginLeft: 18}}
+                />
+
+                <Text
+                  style={[
+                    {
+                      fontSize: 16,
+                      fontWeight: '400',
+                      marginLeft: 6,
+                      color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+                    },
+                  ]}>
+                  Choose from Gallery
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  if (media.length > 0) {
+                    // Remove the first image from the media array
+                    setMedia(media.slice(1));
+                  }
+                  setModalVisible(false); // Close the modal
+                }}
+                style={{
+                  flexDirection: 'row',
+                  width: Width,
+                  alignItems: 'center',
+                  padding: 10,
+                  height: 60,
+                  marginBottom: 20,
+                }}>
+                <FontAwesome
+                  name={'trash'}
+                  size={22}
+                  color="rgb(255, 0, 0)"
+                  style={{marginRight: 15, marginLeft: 22}}
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '400',
+                    marginLeft: 6,
+                    color: 'rgb(255, 0, 0)',
+                  }}>
+                  Remove Current Photo
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+    </KeyboardAvoidingContainer>
   );
 }
 

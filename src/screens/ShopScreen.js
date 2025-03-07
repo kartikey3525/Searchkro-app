@@ -25,6 +25,7 @@ import RatingButtons from '../components/RatingButtons';
 import {useIsFocused} from '@react-navigation/native';
 import {AuthContext} from '../context/authcontext';
 import RatingTest from '../components/RatingTest';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function ShopScreen({navigation, route}) {
   const {theme} = useContext(ThemeContext);
@@ -170,7 +171,8 @@ export default function ShopScreen({navigation, route}) {
                     left: 5,
                   },
                 ]}>
-                {formatDate(item.createdAt)}
+                {/* {formatDate(item.createdAt)} */}
+                {item.openTime}-{item.closeTime}
               </Text>
             </View>
 
@@ -356,37 +358,39 @@ export default function ShopScreen({navigation, route}) {
   };
 
   return (
-    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+    <KeyboardAvoidingContainer>
       <View
-        style={{
-          alignItems: 'center',
-          width: Width,
-          flexDirection: 'row',
-          height: Height * 0.1,
-          justifyContent: 'flex-start',
-        }}>
-        <Entypo
-          onPress={() => navigation.goBack()}
-          name="chevron-thin-left"
-          size={20}
-          color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-          style={{marginLeft: 20, padding: 5}}
-        />
-        <Text
-          style={[
-            styles.bigText,
-            {
-              fontSize: 20,
-              color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              width: Width * 0.72,
-              textAlign: 'center',
-            },
-          ]}>
-          {}Shop
-        </Text>
+        style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
         <View
+          style={{
+            alignItems: 'center',
+            width: Width,
+            flexDirection: 'row',
+            height: Height * 0.1,
+            justifyContent: 'flex-start',
+          }}>
+          <Entypo
+            onPress={() => navigation.goBack()}
+            name="chevron-thin-left"
+            size={20}
+            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
+            style={{marginLeft: 20, padding: 5}}
+          />
+          <Text
+            style={[
+              styles.bigText,
+              {
+                fontSize: 20,
+                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
+                fontWeight: 'bold',
+                alignSelf: 'center',
+                width: Width * 0.72,
+                textAlign: 'center',
+              },
+            ]}>
+            {}Shop
+          </Text>
+          {/* <View
           style={{
             backgroundColor: 'rgba(207, 207, 207, 0.12)',
             height: 45,
@@ -408,325 +412,339 @@ export default function ShopScreen({navigation, route}) {
             }}
             resizeMode="contain"
           />
+        </View> */}
         </View>
-      </View>
 
-      <View
-        style={{
-          width: Width,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            width: Width,
             justifyContent: 'center',
-            marginBottom: 15,
+            alignItems: 'center',
           }}>
           <View
-            style={[
-              styles.inputContainer,
-              {backgroundColor: isDark ? 'rgb(0, 0, 0)' : '#fff'},
-            ]}>
-            <Image
-              source={require('../assets/search-icon.png')}
-              style={{
-                width: 20,
-                height: 20,
-                alignSelf: 'center',
-                left: 10,
-              }}
-              resizeMode="contain"
-            />
-            <TextInput
-              // value={'text'}
-              style={[
-                styles.searchInput,
-                {
-                  color: isDark
-                    ? 'rgba(255, 255, 255, 1)'
-                    : 'rgba(94, 95, 96, 1)',
-                },
-              ]}
-              // onChangeText={setText}
-              placeholderTextColor={
-                isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-              }
-              placeholder="Search here"
-              onChangeText={searchFilterFunction}
-              autoCorrect={false}
-              value={searchText}
-              autoCapitalize="none"
-              // onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
-            />
-          </View>
-
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
             style={{
-              backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
-              height: 50,
-              width: '13%',
-              alignSelf: 'center',
-              borderRadius: 10,
-              borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.31)'
-                : 'rgb(0, 0, 0)',
-              justifyContent: 'center',
+              flexDirection: 'row',
               alignItems: 'center',
-              borderWidth: 1,
-              marginLeft: 10,
+              justifyContent: 'center',
+              marginBottom: 15,
             }}>
-            <Image
-              source={require('../assets/category-icon.png')}
-              style={{
-                width: 24,
-                height: 24,
-                alignSelf: 'center',
-              }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
-          {filteredLists.map((item, index) => (
-            <View key={item.id ?? `post-${index}`}>
-              {render2RectangleList({item, index})}
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}>
-        <Pressable
-          style={[styles.modalContainer]}
-          onPress={() => setModalVisible(false)}>
-          <View
-            style={[
-              styles.modalContent,
-              {
-                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)',
-              },
-            ]}>
-            <Pressable
-              style={{
-                height: 5,
-                backgroundColor: 'lightgrey',
-                width: 60,
-                position: 'absolute',
-                alignSelf: 'center',
-                borderRadius: 10,
-                top: 10,
-              }}
-              onPress={() => setModalVisible(false)}
-            />
             <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: '5%',
-                alignSelf: 'flex-start',
-              }}>
-              <Text
-                style={[
-                  styles.bigText,
-                  {
-                    fontSize: 17,
-                    fontWeight: 'bold',
-                    width: Width * 0.76,
-                    color: isDark
-                      ? 'rgba(255, 255, 255, 1)'
-                      : 'rgba(0, 0, 0, 1)',
-                  },
-                ]}>
-                Quick sort
-              </Text>
-
-              <Text
-                style={[
-                  styles.bigText,
-                  {
-                    color: isDark
-                      ? 'rgba(255, 255, 255, 1)'
-                      : 'rgba(0, 0, 0, 1)',
-                    fontSize: 17,
-                    fontWeight: 'bold',
-                  },
-                ]}>
-                Reset
-              </Text>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: '5%',
-                alignSelf: 'flex-start',
-              }}>
-              <TouchableOpacity
-                style={{
-                  borderRadius: 15,
-                  borderWidth: 1,
-                  padding: 10,
-                  flexDirection: 'row',
-                  borderColor: 'rgba(228, 228, 228, 1)',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  marginRight: '10%',
-                }}>
-                <Octicons
-                  name={'star-fill'}
-                  size={22}
-                  color={
-                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                  }
-                />
-
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      marginLeft: 6,
-                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                    },
-                  ]}>
-                  Top Rated
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  borderRadius: 15,
-                  borderWidth: 1,
-                  padding: 10,
-                  flexDirection: 'row',
-                  borderColor: 'rgba(228, 228, 228, 1)',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}>
-                <Octicons
-                  name={'star-fill'}
-                  size={22}
-                  color={
-                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                  }
-                />
-
-                <Text
-                  style={[
-                    styles.bigText,
-                    {
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      marginLeft: 6,
-                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                    },
-                  ]}>
-                  Quick Response
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View
-              style={{
-                height: 1,
-                backgroundColor: 'lightgrey',
-                width: Width * 0.9,
-                alignSelf: 'center',
-                borderRadius: 10,
-                margin: 18,
-                marginTop: 18,
-              }}
-            />
-
-            <Text
               style={[
-                styles.bigText,
-                {
-                  fontSize: 17,
-                  fontWeight: 'bold',
-                  alignSelf: 'flex-start',
-                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                },
+                styles.inputContainer,
+                {backgroundColor: isDark ? 'rgb(0, 0, 0)' : '#fff'},
               ]}>
-              Rating
-            </Text>
-            <RatingButtons onSelectRating={setSelectedRating} />
-
-            <View
-              style={{
-                height: 1,
-                backgroundColor: 'lightgrey',
-                width: Width * 0.9,
-                alignSelf: 'center',
-                borderRadius: 10,
-                margin: 15,
-              }}
-            />
-            <Text
-              style={[
-                styles.bigText,
-                {
-                  fontSize: 17,
-                  fontWeight: 'bold',
-                  alignSelf: 'flex-start',
-                  color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
-                },
-              ]}>
-              Distance to me
-            </Text>
-            <SliderContainer sliderValue={value}>
-              <Slider
-                animateTransitions
-                trackStyle={{
-                  width: Width * 0.9,
-                  backgroundColor: 'rgba(228, 228, 228, 1)',
+              <Image
+                source={require('../assets/search-icon.png')}
+                style={{
+                  width: 20,
+                  height: 20,
+                  alignSelf: 'center',
+                  left: 10,
                 }}
-                thumbStyle={{
-                  backgroundColor: 'white',
-                  borderWidth: 5,
-                  borderColor: '#00AEEF',
-                }}
-                minimumTrackStyle={{backgroundColor: '#00AEEF'}}
-                minimumValue={0}
-                maximumValue={5}
-                step={1}
-                thumbTintColor="#00AEEF"
+                resizeMode="contain"
               />
-            </SliderContainer>
-            <TouchableOpacity
-              style={styles.blueBotton}
-              onPress={() => [
-                setModalVisible(false),
-                getFilteredPosts(
-                  route?.params?.selectedcategory,
-                  selectedRating,
-                  value,
-                ),
-              ]}>
-              <Text
+              <TextInput
+                // value={'text'}
                 style={[
-                  styles.smallText,
-                  {color: '#fff', fontSize: 22, marginBottom: 0},
-                ]}>
-                Apply
-              </Text>
+                  styles.searchInput,
+                  {
+                    color: isDark
+                      ? 'rgba(255, 255, 255, 1)'
+                      : 'rgba(94, 95, 96, 1)',
+                  },
+                ]}
+                // onChangeText={setText}
+                placeholderTextColor={
+                  isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                }
+                placeholder="Search here"
+                onChangeText={searchFilterFunction}
+                autoCorrect={false}
+                value={searchText}
+                autoCapitalize="none"
+                // onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
+              />
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={{
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                height: 50,
+                width: '13%',
+                alignSelf: 'center',
+                borderRadius: 10,
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.31)'
+                  : 'rgb(0, 0, 0)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 1,
+                marginLeft: 10,
+              }}>
+              <Image
+                source={require('../assets/category-icon.png')}
+                style={{
+                  width: 24,
+                  height: 24,
+                  alignSelf: 'center',
+                }}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           </View>
-        </Pressable>
-      </Modal>
-    </View>
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
+            {filteredLists.map((item, index) => (
+              <View key={item.id ?? `post-${index}`}>
+                {render2RectangleList({item, index})}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setModalVisible(false)}>
+          <Pressable
+            style={[styles.modalContainer]}
+            onPress={() => setModalVisible(false)}>
+            <View
+              style={[
+                styles.modalContent,
+                {
+                  backgroundColor: isDark
+                    ? 'rgb(0, 0, 0)'
+                    : 'rgb(255, 255, 255)',
+                },
+              ]}>
+              <Pressable
+                style={{
+                  height: 5,
+                  backgroundColor: 'lightgrey',
+                  width: 60,
+                  position: 'absolute',
+                  alignSelf: 'center',
+                  borderRadius: 10,
+                  top: 10,
+                }}
+                onPress={() => setModalVisible(false)}
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: '5%',
+                  alignSelf: 'flex-start',
+                }}>
+                <Text
+                  style={[
+                    styles.bigText,
+                    {
+                      fontSize: 17,
+                      fontWeight: 'bold',
+                      width: Width * 0.76,
+                      color: isDark
+                        ? 'rgba(255, 255, 255, 1)'
+                        : 'rgba(0, 0, 0, 1)',
+                    },
+                  ]}>
+                  Quick sort
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setValue(''),
+                      setSelectedRating(null),
+                      setModalVisible(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.bigText,
+                      {
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgba(0, 0, 0, 1)',
+                        fontSize: 17,
+                        fontWeight: 'bold',
+                      },
+                    ]}>
+                    Reset
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: '5%',
+                  alignSelf: 'flex-start',
+                }}>
+                <TouchableOpacity
+                  style={{
+                    borderRadius: 15,
+                    borderWidth: 1,
+                    padding: 10,
+                    flexDirection: 'row',
+                    borderColor: 'rgba(228, 228, 228, 1)',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    marginRight: '10%',
+                  }}>
+                  <Octicons
+                    name={'star-fill'}
+                    size={22}
+                    color={
+                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                    }
+                  />
+
+                  <Text
+                    style={[
+                      styles.bigText,
+                      {
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        marginLeft: 6,
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgb(0, 0, 0)',
+                      },
+                    ]}>
+                    Top Rated
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    borderRadius: 15,
+                    borderWidth: 1,
+                    padding: 10,
+                    flexDirection: 'row',
+                    borderColor: 'rgba(228, 228, 228, 1)',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <Octicons
+                    name={'star-fill'}
+                    size={22}
+                    color={
+                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                    }
+                  />
+
+                  <Text
+                    style={[
+                      styles.bigText,
+                      {
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        marginLeft: 6,
+                        color: isDark
+                          ? 'rgba(255, 255, 255, 1)'
+                          : 'rgb(0, 0, 0)',
+                      },
+                    ]}>
+                    Quick Response
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: 'lightgrey',
+                  width: Width * 0.9,
+                  alignSelf: 'center',
+                  borderRadius: 10,
+                  margin: 18,
+                  marginTop: 18,
+                }}
+              />
+
+              <Text
+                style={[
+                  styles.bigText,
+                  {
+                    fontSize: 17,
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start',
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                  },
+                ]}>
+                Rating
+              </Text>
+              <RatingButtons onSelectRating={setSelectedRating} />
+
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: 'lightgrey',
+                  width: Width * 0.9,
+                  alignSelf: 'center',
+                  borderRadius: 10,
+                  margin: 15,
+                }}
+              />
+              <Text
+                style={[
+                  styles.bigText,
+                  {
+                    fontSize: 17,
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start',
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                  },
+                ]}>
+                Distance to me
+              </Text>
+              <SliderContainer sliderValue={value}>
+                <Slider
+                  animateTransitions
+                  trackStyle={{
+                    width: Width * 0.9,
+                    backgroundColor: 'rgba(228, 228, 228, 1)',
+                  }}
+                  thumbStyle={{
+                    backgroundColor: 'white',
+                    borderWidth: 5,
+                    borderColor: '#00AEEF',
+                  }}
+                  minimumTrackStyle={{backgroundColor: '#00AEEF'}}
+                  minimumValue={0}
+                  maximumValue={5}
+                  step={1}
+                  thumbTintColor="#00AEEF"
+                />
+              </SliderContainer>
+              <TouchableOpacity
+                style={styles.blueBotton}
+                onPress={() => [
+                  setModalVisible(false),
+                  getFilteredPosts(
+                    route?.params?.selectedcategory,
+                    selectedRating,
+                    value,
+                  ),
+                ]}>
+                <Text
+                  style={[
+                    styles.smallText,
+                    {color: '#fff', fontSize: 22, marginBottom: 0},
+                  ]}>
+                  Apply
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
+    </KeyboardAvoidingContainer>
   );
 }
 const styles = StyleSheet.create({

@@ -23,14 +23,14 @@ export default function PrivacyandSecurity({navigation}) {
   const [modalVisible, setModalVisible] = useState(false);
 
   
-  const {getPostsHistory, handleLogout,deletePost} = useContext(AuthContext);
+  const {getPostsHistory, deleteAccount, deletePost} = useContext(AuthContext);
 
   useEffect(() => { 
     // console.log('get PostsHistory', PostsHistory[0]);
   }, [useIsFocused()]);
 
   const handleDelete = () => {
-    handleLogout() 
+    deleteAccount(); 
     setModalVisible(false);
   };
   return (

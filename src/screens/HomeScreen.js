@@ -25,7 +25,7 @@ export default function HomeScreen({navigation}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [numColumns, setNumColumns] = useState(4);
   const isFocused = useIsFocused();
@@ -42,6 +42,9 @@ export default function HomeScreen({navigation}) {
     getSellerCategories,
     getPosts,
     posts,
+    location,
+    notificationList,
+    setLocation,
   } = useContext(AuthContext);
 
   useEffect(() => {
@@ -49,9 +52,18 @@ export default function HomeScreen({navigation}) {
       // console.log('Home screen is focused');
       userRole === 'buyer' ? getCategories() : getSellerCategories();
       userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
-      // console.log('posts data ', posts[0]);
+
+      // console.log('posts data ', nearbyPosts[0]);
     }
   }, [isFocused]);
+
+  useEffect(() => {
+    if (userRole === 'buyer') {
+      setFilteredLists([recentPosts, nearbyPosts]);
+    } else {
+      setFilteredLists([posts]);
+    }
+  }, [userRole, recentPosts, nearbyPosts, posts]);
 
   const flatListKey = `flat-list-${numColumns}`;
 
@@ -188,8 +200,9 @@ export default function HomeScreen({navigation}) {
               styles.recListText,
               {
                 fontWeight: 'bold',
+                marginTop: 5,
                 fontSize: 12,
-                marginLeft: 12,
+                marginLeft: 10,
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
@@ -225,7 +238,7 @@ export default function HomeScreen({navigation}) {
               flexDirection: 'row',
               marginBottom: 5,
               alignItems: 'center',
-              marginTop: 2,
+              marginTop: 5,
             }}>
             <Image
               source={
@@ -315,14 +328,6 @@ export default function HomeScreen({navigation}) {
       : [posts ?? []],
   );
 
-  useEffect(() => {
-    if (userRole === 'buyer') {
-      setFilteredLists([recentPosts, nearbyPosts]);
-    } else {
-      setFilteredLists([posts]);
-    }
-  }, [userRole, recentPosts, nearbyPosts, posts]);
- 
   return (
     <View
       style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}>
@@ -350,14 +355,16 @@ export default function HomeScreen({navigation}) {
             marginBottom: 5,
             marginTop: 20,
           }}>
-          <Image
-            source={require('../assets/logo.png')}
-            style={{
-              width: 60,
-              height: 60,
-            }}
-            resizeMode="contain"
-          />
+          <Pressable onPress={() => navigation.navigate('Profilescreen')}>
+            <Image
+              source={require('../assets/logo.png')}
+              style={{
+                width: 60,
+                height: 60,
+              }}
+              resizeMode="contain"
+            />
+          </Pressable>
           <View
             style={[
               styles.inputContainer,
@@ -409,7 +416,7 @@ export default function HomeScreen({navigation}) {
                       ? 'rgba(252, 252, 252, 0.4)'
                       : 'rgba(0, 0, 0, 0.4)',
                   }}>
-                  {errorMessage || '6391 Elgin St. Celina, Delaware 10299...'}
+                  {errorMessage || 'Fetching current location...'}
                 </Text>
               )}
             </View>
@@ -445,16 +452,20 @@ export default function HomeScreen({navigation}) {
                 }}
                 resizeMode="contain"
               />
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 9,
-                  right: 11,
-                  backgroundColor: 'red',
-                  height: 6,
-                  width: 6,
-                  borderRadius: 10,
-                }}></View>
+
+              {notificationList.length != 0 ? (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 9,
+                    right: 11,
+                    backgroundColor: 'red',
+                    height: 6,
+                    width: 6,
+                    borderRadius: 10,
+                  }}
+                />
+              ) : null}
             </TouchableOpacity>
           ) : null}
 
@@ -490,7 +501,7 @@ export default function HomeScreen({navigation}) {
           placeholder={'Search here'}
           lists={userRole === 'buyer' ? [recentPosts, nearbyPosts] : [posts]}
           setFilteredLists={setFilteredLists}
-          searchKey="title"  
+          searchKey="title"
         />
 
         {userRole === 'buyer' ? (
@@ -610,11 +621,15 @@ export default function HomeScreen({navigation}) {
                     flexWrap: 'wrap',
                     marginTop: '2%',
                   }}>
-                  {filteredLists[0].map(item => (
-                    <View key={item._id} style={{width: '48%', margin: '1%'}}>
-                      {renderSellerRectangleList({item})}
-                    </View>
-                  ))}
+                  {filteredLists.length > 0 ? (
+                    filteredLists[0].map(item => (
+                      <View key={item._id} style={{width: '48%', margin: '1%'}}>
+                        {renderSellerRectangleList({item})}
+                      </View>
+                    ))
+                  ) : (
+                    <Text>No items found</Text>
+                  )}
                 </View>
               </View>
             </ScrollView>
@@ -679,7 +694,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(255, 255, 255)',
     width: 125,
     marginRight: 2,
-    height: 200,
+    height: 180,
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 10,

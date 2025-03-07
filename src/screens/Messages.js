@@ -206,13 +206,14 @@ export default function Messages({navigation}) {
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
       <Header header={'New message'} />
-
-      <SearchBar
-        placeholder={'Search '}
-        lists={recentPostList}
-        setFilteredLists={setFilteredLists}
-        searchKey="title"
-      />
+      <View style={{padding: 10}}>
+        <SearchBar
+          placeholder={'Search '}
+          lists={recentPostList}
+          setFilteredLists={setFilteredLists}
+          searchKey="title"
+        />
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredLists.map((item, index) => render2RectangleList(item, index))}
       </ScrollView>
