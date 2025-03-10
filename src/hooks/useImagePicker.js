@@ -8,19 +8,21 @@ const useImagePicker = () => {
   const {userdata, apiURL} = useContext(AuthContext);
   const [media, setMedia] = useState([]);
 
-  // Function to upload image and get URL
-  const uploadImage = async uri => {
+  const uploadImage = async (uri, mimeType = 'image/jpeg') => {
     try {
-      console.log('Starting image upload for URI:', uri);
+      console.log('Starting image upload for URI:', uri, 'Type:', mimeType);
+      if (!userdata.token) {
+        console.error('No token found');
+        Alert.alert('Authentication Error', 'No valid token found.');
+        return null;
+      }
 
       const formData = new FormData();
       formData.append('image', {
         uri: uri,
-        name: `photo_${Date.now()}.jpg`,
-        type: 'image/jpeg',
+        name: `photo_${Date.now()}.${mimeType.split('/')[1] || 'jpg'}`,
+        type: mimeType,
       });
-
-      console.log('FormData prepared:', formData);
 
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
@@ -36,36 +38,36 @@ const useImagePicker = () => {
         {headers},
       );
 
-      console.log('Upload response received:', response.status, response.data);
+      console.log('Upload response:', response.status, response.data);
 
       if (response.status === 200 && response.data?.data) {
-        return response.data.data[0]; // Assuming API returns an array of URLs
+        return response.data.data[0];
       } else {
-        console.error('Failed to upload image:', response.data);
+        console.error('Unexpected response:', response.status, response.data);
         Alert.alert('Upload Failed', 'Please try again later.');
         return null;
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-
       if (error.response) {
-        console.error('Server responded with:', error.response.data);
-        console.error('Status code:', error.response.status);
+        console.error(
+          'Server response:',
+          error.response.status,
+          error.response.data,
+        );
       } else if (error.request) {
         console.error('No response received:', error.request);
       } else {
-        console.error('Error setting up the request:', error.message);
+        console.error('Request setup error:', error.message);
       }
-
       Alert.alert(
         'Upload Failed',
-        'An error occurred while uploading the image.',
+        'Image size is too big , please choose smaller image.',
       );
       return null;
     }
   };
 
-  // Request camera permission (Android only)
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -79,7 +81,6 @@ const useImagePicker = () => {
             buttonPositive: 'OK',
           },
         );
-
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           console.log('Camera permission granted');
           launchCamera();
@@ -94,60 +95,46 @@ const useImagePicker = () => {
     }
   };
 
-  // Launch the camera to take a photo
   const launchCamera = async () => {
-    let options = {
-      mediaType: 'photo',
-      maxWidth: 400,
-      maxHeight: 400,
-    };
-
+    const options = {mediaType: 'photo', maxWidth: 400, maxHeight: 400};
     ImagePicker.launchCamera(options, async response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorMessage) {
         console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        if (response.assets && response.assets.length > 0) {
-          const localUri = response.assets[0].uri;
-          const uploadedUrl = await uploadImage(localUri);
-          if (uploadedUrl) {
-            setMedia(prevMedia => [...prevMedia, uploadedUrl]); // Add new URL to the array
-          }
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        const uploadedUrl = await uploadImage(
+          asset.uri,
+          asset.type || 'image/jpeg',
+        );
+        if (uploadedUrl) {
+          setMedia(prevMedia => [...prevMedia, uploadedUrl]);
         }
       }
     });
   };
 
-  // Launch image picker to select media
   const selectMedia = async () => {
     ImagePicker.launchImageLibrary(
-      {mediaType: 'photo', selectionLimit: 10}, // Allow multiple selection
+      {mediaType: 'photo', selectionLimit: 10},
       async response => {
         if (response.assets && response.assets.length > 0) {
           const uploadedUrls = await Promise.all(
-            response.assets.map(async asset => {
-              const uploadedUrl = await uploadImage(asset.uri);
-              return uploadedUrl;
-            }),
+            response.assets.map(async asset =>
+              uploadImage(asset.uri, asset.type || 'image/jpeg'),
+            ),
           );
-
           const validUrls = uploadedUrls.filter(url => url !== null);
           if (validUrls.length > 0) {
-            setMedia(prevMedia => [...prevMedia, ...validUrls]); // Append multiple URLs
+            setMedia(prevMedia => [...prevMedia, ...validUrls]);
           }
         }
       },
     );
   };
 
-  return {
-    media,
-    selectMedia,
-    launchCamera,
-    requestCameraPermission,
-    setMedia,
-  };
+  return {media, selectMedia, launchCamera, requestCameraPermission, setMedia};
 };
 
 export default useImagePicker;

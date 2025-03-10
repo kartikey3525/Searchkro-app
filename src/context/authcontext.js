@@ -8,6 +8,7 @@ let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
+import LocationPermission from '../hooks/uselocation';
 
 const AuthContext = createContext();
 
@@ -20,6 +21,7 @@ const AuthProvider = ({children}) => {
 
   const [fullCategorydata, setFullCategorydata] = useState([]);
   const [userRole, setUserRole] = useState('buyer');
+  const [location, setLocation] = useState(null);
 
   const [recentPosts, setrecentPosts] = useState([]);
   const [nearbyPosts, setnearbyPosts] = useState([]);
@@ -34,8 +36,8 @@ const AuthProvider = ({children}) => {
   const [RatingLiked, setRatingLiked] = useState([]);
 
   const [FAQs, setFAQs] = useState([]);
-
   const [userdata, setUserdata] = useState([]);
+
   const [Userfulldata, setUserfulldata] = useState([]);
 
   const [fcmToken, setFcmToken] = useState(null);
@@ -52,7 +54,7 @@ const AuthProvider = ({children}) => {
       offlineAccess: true,
       forceCodeForRefreshToken: true,
     });
-
+    <LocationPermission setLocation={setLocation} />;
     getDeviceToken();
     checkLoginStatus();
 
@@ -449,7 +451,7 @@ const AuthProvider = ({children}) => {
           error.response?.data || 'No error response',
         );
       } else {
-        console.error('Failed to load shop data');
+        console.error('Failed to load SingleShop data');
       }
     }
   };
@@ -490,7 +492,7 @@ const AuthProvider = ({children}) => {
           error.response?.data || 'No error response',
         );
       } else {
-        console.error('Failed to load shop data');
+        console.error('Failed to load ShopRating data');
       }
     }
   };
@@ -987,7 +989,7 @@ const AuthProvider = ({children}) => {
           error.response?.data || 'No error response',
         );
       } else {
-        console.error('Failed to load shop data');
+        console.error('Failed to load User data');
       }
     }
   };
@@ -1003,14 +1005,27 @@ const AuthProvider = ({children}) => {
         fcmToken: fcmToken,
       });
       const user = response.data;
-
       navigation.navigate('OTPScreen', {
         emailPhone: email,
         password: password,
         username: name,
       });
     } catch (error) {
-      console.error('Error registering new user:', error);
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
+        Alert.alert(
+          'Error',
+          error.response?.data?.body || 'Something went wrong.',
+        );
+      } else {
+        Alert.alert(
+          'Error',
+          error.response?.data?.body || 'Something went wrong.',
+        );
+      }
     }
   };
 
@@ -1026,10 +1041,22 @@ const AuthProvider = ({children}) => {
       });
 
       const user = response.data;
+      setUserdata(user);
 
+      await AsyncStorage.setItem('userToken', user.token);
+      await AsyncStorage.setItem('userData', JSON.stringify(user));
+      await AsyncStorage.setItem('selectedUserRole', userRole);
       navigation.navigate('BottomTabs'); // Redirect to home
     } catch (error) {
-      console.error('Login error:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error  :', error.response?.data || 'No error response');
+        Alert.alert(
+          'Error',
+          error.response?.data?.body || 'Something went wrong.',
+        );
+      } else {
+        console.error('Failed to load Login data');
+      }
     }
   };
 
@@ -1039,18 +1066,16 @@ const AuthProvider = ({children}) => {
     try {
       const response = await axios.post(`${apiURL}/api/user/verifyOTP`, {
         emailPhone: email,
+        roleId: userRole === 'buyer' ? 0 : 1,
         otp,
         fcmToken: fcmToken,
       });
 
       const user = response.data;
       setUserdata(response.data);
-
       // ✅ Save user token & data
       await AsyncStorage.setItem('userToken', user.token);
       await AsyncStorage.setItem('userData', JSON.stringify(user));
-
-      // ✅ Save selected user role
       await AsyncStorage.setItem('selectedUserRole', userRole);
 
       console.log('user', user);
@@ -1110,11 +1135,14 @@ const AuthProvider = ({children}) => {
         'A password reset email has been sent to your email address.',
       );
     } catch (error) {
-      console.error('Error sending password reset email:', error);
-      Alert.alert(
-        'Error',
-        'Failed to send password reset email. Please try again.',
-      );
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.error('Failed to load ResetPassword data');
+      }
     }
   };
 
@@ -1127,11 +1155,7 @@ const AuthProvider = ({children}) => {
       const signInResult = await GoogleSignin.signIn();
 
       // Extract the ID token from the sign-in result
-      let idToken = signInResult.data.idToken; // For older versions of the library
-      if (!idToken) {
-        idToken = signInResult.user?.data.idToken; // For newer versions of the library
-      }
-
+      let idToken = signInResult.data?.idToken || signInResult.user?.idToken;
       if (!idToken) {
         throw new Error('No ID token found');
       }
@@ -1143,54 +1167,50 @@ const AuthProvider = ({children}) => {
       const userCredential = await auth().signInWithCredential(
         googleCredential,
       );
-      // console.log(
-      //   'User signed in successfully:1120',
-      //   userCredential.user._user,
-      // );
+
+      // Prepare request headers
       const headers = {
         Authorization: `Bearer ${idToken}`,
-
-        // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
       };
-      const response = await axios.post(
-        `${apiURL}/api/user/googleLogin`,
-        {
-          email: userCredential.user._user.email,
-          name: userCredential.user._user.displayName,
-          profile: userCredential.user._user.photoURL,
-          roleId: userRole === 'buyer' ? 0 : 1,
-          fcmToken: fcmToken,
-          idToken: idToken,
-        },
-        // {headers},
-      );
+
+      const response = await axios.post(`${apiURL}/api/user/googleLogin`, {
+        email: userCredential.user.email,
+        name: userCredential.user.displayName,
+        profile: userCredential.user.photoURL,
+        roleId: userRole === 'buyer' ? 0 : 1,
+        fcmToken: fcmToken,
+        idToken: idToken,
+      });
 
       const user = response.data;
-      console.log('user', user);
-      // console.log('User signed in successfully:', userCredential.user._user);
       setUserdata(user);
+
+      // console.log('User:', user);
+
       // ✅ Save user token & data
       await AsyncStorage.setItem('userToken', user.token);
       await AsyncStorage.setItem('userData', JSON.stringify(user));
-
-      // ✅ Save selected user role
       await AsyncStorage.setItem('selectedUserRole', userRole);
 
-      // Navigate to the desired screen after successful sign-in
+      // Navigate to the next screen
       navigation.navigate('AddressScreen');
     } catch (error) {
       console.error('Google Sign-In Error:', error);
 
-      // Handle specific errors
+      let errorMessage = 'An unknown error occurred. Please try again.';
+
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('User cancelled the login flow');
+        errorMessage = 'You cancelled the sign-in process.';
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('Sign-in is already in progress');
+        errorMessage = 'Sign-in is already in progress. Please wait.';
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('Google Play Services is not available or outdated');
+        errorMessage = 'Google Play Services is not available or outdated.';
       } else {
-        console.error('Unknown error during Google Sign-In:', error);
+        errorMessage = error.message || 'Google Sign-In failed.';
       }
+
+      // Show alert with error message
+      Alert.alert('Google Sign-In Error', errorMessage);
     }
   };
 
@@ -1260,6 +1280,8 @@ const AuthProvider = ({children}) => {
         notificationList,
         deleteNotification,
         deleteAccount,
+        location,
+        setLocation,
       }}>
       {children}
     </AuthContext.Provider>

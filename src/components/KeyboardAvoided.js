@@ -1,46 +1,62 @@
-import React, {useEffect, useState} from 'react';
-import {View, Keyboard, Animated} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Keyboard,
+} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const KeyboardAvoidingContainer = ({children, style}) => {
-  const [translateY] = useState(new Animated.Value(0));
+const KeyboardAvoidingContainer = ({children, style, offset = 0}) => {
+  const insets = useSafeAreaInsets();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const keyboardDidShow = event => {
-      Animated.timing(translateY, {
-        toValue: -event.endCoordinates.height, // Move content up
-        duration: 250,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const keyboardDidHide = () => {
-      Animated.timing(translateY, {
-        toValue: 0, // Reset position
-        duration: 250,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const showSubscription = Keyboard.addListener(
+    const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-      keyboardDidShow,
+      () => {
+        setIsKeyboardVisible(true);
+      },
     );
-    const hideSubscription = Keyboard.addListener(
+    const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
-      keyboardDidHide,
+      () => {
+        setIsKeyboardVisible(false);
+      },
     );
 
     return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
     };
   }, []);
 
   return (
-    <Animated.View style={[{flex: 1, transform: [{translateY}]}, style]}>
+    <KeyboardAvoidingView
+      style={[styles.container, style]}
+      behavior={
+        isKeyboardVisible
+          ? Platform.OS === 'ios'
+            ? 'padding'
+            : 'height'
+          : undefined
+      }
+      keyboardVerticalOffset={
+        isKeyboardVisible
+          ? Platform.OS === 'ios'
+            ? insets.bottom + offset
+            : offset
+          : 0
+      }>
       {children}
-    </Animated.View>
+    </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default KeyboardAvoidingContainer;

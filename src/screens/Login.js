@@ -347,7 +347,7 @@ export default function Login({navigation}) {
           styles.whiteBotton,
           {backgroundColor: isDark ? '#000' : '#fff'},
         ]}
-        onPress={() => navigation.navigate('BottomTabs')}>
+        onPress={() => signInWithGoogle()}>
         <Image
           source={require('../assets/Facebook.png')}
           style={{

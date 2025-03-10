@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  Linking,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';

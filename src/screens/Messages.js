@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,40 @@ import {
   Pressable,
   Image,
   Dimensions,
-} from 'react-native'; 
+} from 'react-native';
 import {ThemeContext} from '../context/themeContext';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
+import {AuthContext} from '../context/authcontext';
+import {useIsFocused} from '@react-navigation/native';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-export default function Messages({navigation}) {
+export default function Messages({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const {getFilteredPosts, filteredPosts, getUserData, Userfulldata} =
+    useContext(AuthContext);
+  const [filteredLists, setFilteredLists] = useState(filteredPosts);
+
+  const isFocused = useIsFocused(); // ✅ Get boolean value
+
+  useEffect(() => {
+    if (isFocused) {
+      // ✅ Use the boolean value
+      getUserData();
+      getFilteredPosts();
+    }
+  }, [isFocused]); // ✅ Correct dependency
+
+  useEffect(() => {
+    if (filteredPosts.length > 0) {
+      setFilteredLists(filteredPosts); // ✅ Sync filteredLists with filteredPosts
+
+      // console.log('filteredPosts=', filteredPosts[0]); // ✅ Logs after state updates
+    }
+  }, [filteredPosts]);
 
   const [recentPostList, setRecentPostList] = useState([
     {
@@ -92,31 +115,14 @@ export default function Messages({navigation}) {
     },
   ]);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [filteredLists, setFilteredLists] = useState(recentPostList);
-
-  const handleLongPress = item => {
-    const updatedList = recentPostList.map(listItem =>
-      listItem.id === item.id
-        ? {...listItem, selected: !listItem.selected}
-        : listItem,
-    );
-    setRecentPostList(updatedList);
-    setSelectedItem(item);
-    setModalVisible(true);
-  };
-  const handleDelete = () => {
-    const updatedList = recentPostList.filter(
-      item => item.id !== selectedItem.id,
-    );
-    setRecentPostList(updatedList);
-    setModalVisible(false);
-  };
-
   const render2RectangleList = (item, index) => (
     <Pressable
-      onPress={() => navigation.navigate('Chatscreen', {item: item})}
+      onPress={() =>
+        navigation.navigate('Chatscreen', {
+          item: item,
+          userId: Userfulldata._id,
+        })
+      }
       key={index}
       style={{
         justifyContent: 'center',
@@ -134,7 +140,8 @@ export default function Messages({navigation}) {
           },
         ]}>
         <Image
-          source={item.img}
+          // source={recentPostList[0].img}
+          source={{uri: item.profile[0]}}
           style={{
             width: 66,
             height: 66,
@@ -165,7 +172,7 @@ export default function Messages({navigation}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
-            {item.title}
+            {item.name}
           </Text>
           <Text
             numberOfLines={2}
@@ -180,7 +187,7 @@ export default function Messages({navigation}) {
                 color: isDark ? '#fff' : '#1d1e20',
               },
             ]}>
-            {item.status}
+            {recentPostList[0].status}
           </Text>
           <View
             style={{
@@ -209,9 +216,9 @@ export default function Messages({navigation}) {
       <View style={{padding: 10}}>
         <SearchBar
           placeholder={'Search '}
-          lists={recentPostList}
+          lists={filteredPosts}
           setFilteredLists={setFilteredLists}
-          searchKey="title"
+          searchKey="name"
         />
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>

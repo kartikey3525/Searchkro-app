@@ -142,41 +142,40 @@ export default function OTPScreen({navigation, route}) {
           justifyContent: 'center',
         }}>
         <OtpInput
-  numberOfDigits={4}
-  focusColor="#00AEEF"
-  autoFocus={true}
-  hideStick={false}
-  blurOnFilled={true}
-  disabled={false}
-  pinCodeTextStyle={{
-    color: isDark ? '#fff' : '#000', // Ensure text color follows dark mode
-  }}
-  type="numeric"
-  secureTextEntry={false}
-  focusStickBlinkingDuration={400}
-  onFilled={() => handlePress()}
-  onTextChange={text => setotp(text)}
-  textInputProps={{
-    accessibilityLabel: 'One-Time Password',
-  }}
-  theme={{
-    containerStyle: styles.pincontainer,
-    pinCodeContainerStyle: styles.pinCodeContainer,
-    pinCodeTextStyle: {
-      ...styles.pinCodeText,
-      color: isDark ? '#fff' : '#000', // Ensure text color adapts to theme
-    },
-    focusStickStyle: styles.focusStick,
-    focusedPinCodeContainerStyle: styles.activePinCodeContainer,
-    placeholderTextStyle: {
-      ...styles.placeholderText,
-      color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', // Ensure placeholder adapts
-    },
-    filledPinCodeContainerStyle: styles.filledPinCodeContainer,
-    disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
-  }}
-/>
-
+          numberOfDigits={4}
+          focusColor="#00AEEF"
+          autoFocus={true}
+          hideStick={false}
+          blurOnFilled={true}
+          disabled={false}
+          pinCodeTextStyle={{
+            color: isDark ? '#fff' : '#000', // Ensure text color follows dark mode
+          }}
+          type="numeric"
+          secureTextEntry={false}
+          focusStickBlinkingDuration={400}
+          // onFilled={() => handlePress()}
+          onTextChange={text => setotp(text)}
+          textInputProps={{
+            accessibilityLabel: 'One-Time Password',
+          }}
+          theme={{
+            containerStyle: styles.pincontainer,
+            pinCodeContainerStyle: styles.pinCodeContainer,
+            pinCodeTextStyle: {
+              ...styles.pinCodeText,
+              color: isDark ? '#fff' : '#000', // Ensure text color adapts to theme
+            },
+            focusStickStyle: styles.focusStick,
+            focusedPinCodeContainerStyle: styles.activePinCodeContainer,
+            placeholderTextStyle: {
+              ...styles.placeholderText,
+              color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', // Ensure placeholder adapts
+            },
+            filledPinCodeContainerStyle: styles.filledPinCodeContainer,
+            disabledPinCodeContainerStyle: styles.disabledPinCodeContainer,
+          }}
+        />
       </View>
 
       <HelperText
@@ -225,8 +224,7 @@ export default function OTPScreen({navigation, route}) {
         style={styles.blueBotton}
         // onPress={() => setModalVisible(true)}
         // onPress={() => navigation.navigate('AddressScreen')}
-        onPress={() => handlePress()}
-      >
+        onPress={() => handlePress()}>
         <Text
           style={[
             styles.smallText,
