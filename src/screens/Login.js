@@ -281,13 +281,16 @@ export default function Login({navigation}) {
             styles.smallText,
             {textAlign: 'left', color: '#B2BACD', width: Width * 0.48},
           ]}>
-          Remenber me{' '}
+          Remember me{' '}
         </Text>
-        <Text
-          onPress={() => navigation.navigate('forgetpassword')}
-          style={[styles.smallText, {textAlign: 'left', color: '#43E2F3'}]}>
-          Forget Password?
-        </Text>
+
+        {!isnew ? (
+          <Text
+            onPress={() => navigation.navigate('forgetpassword')}
+            style={[styles.smallText, {textAlign: 'left', color: '#43E2F3'}]}>
+            Forget Password?
+          </Text>
+        ) : null}
       </Pressable>
 
       <TouchableOpacity

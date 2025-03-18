@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "872169733649-7j0kae17vh4i7b7991f30c4pkon8mmlc.apps.googleusercontent.com",
+          "client_id": "872169733649-8eice1clu6bfuoe7bcj3p8nt7o8uvrk2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.searchkro",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "certificate_hash": "c4258fe41b58000a4734bd79cb6bd9b5cec8ea7f"
           }
         },
         {
@@ -37,6 +37,13 @@
             {
               "client_id": "872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "872169733649-o97p9t31dnps350ou1n74u0clq1o4su0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.Searchkro"
+              }
             }
           ]
         }
@@ -44,4 +51,4 @@
     }
   ],
   "configuration_version": "1"
-}
+} 

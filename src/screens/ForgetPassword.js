@@ -11,11 +11,11 @@ import {HelperText} from 'react-native-paper';
 import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
 import {Dimensions} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import {useRef} from 'react';
+import Entypo from 'react-native-vector-icons/Entypo'; 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
+import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
 export default function ForgetPassword({navigation}) {
   const [email, setEmail] = useState('');

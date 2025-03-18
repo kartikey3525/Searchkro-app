@@ -9,6 +9,8 @@ import {
   ScrollView,
   Pressable,
   Modal,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
@@ -16,10 +18,10 @@ import {ThemeContext} from '../context/themeContext';
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 import SearchBar from '../components/SearchBar';
-import RatingTest from '../components/RatingTest';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import LocationPermission from '../hooks/uselocation'; // Import the component
+import LocationPermission from '../hooks/uselocation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen({navigation}) {
   const {theme} = useContext(ThemeContext);
@@ -81,6 +83,47 @@ export default function HomeScreen({navigation}) {
     {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
     {id: 12, title: 'See more', img: require('../assets/see-more.png')},
   ]);
+
+  // Check if the user is logged in
+  const checkLoginStatus = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('userToken');
+      return userToken !== null; // If token exists, the user is logged in
+    } catch (e) {
+      console.error('Error fetching user token:', e);
+      return false;
+    }
+  };
+
+  // Handle back button press
+  const handleBackPress = async () => {
+    const isLoggedIn = await checkLoginStatus();
+
+    // If the user is logged in and the Home screen is focused, exit the app
+    if (isLoggedIn && isFocused) {
+      ToastAndroid.show('App is closing', ToastAndroid.SHORT);
+      BackHandler.exitApp(); // Close the app
+      return true; // Prevent the default back action
+    }
+
+    // Let default back navigation behavior work on other screens
+    return false; // Default behavior (navigate to the previous screen)
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      // Attach the back button event listener only when the Home screen is focused
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        handleBackPress,
+      );
+
+      // Cleanup the event listener when the component is unmounted or the screen is changed
+      return () => {
+        backHandler.remove();
+      };
+    }
+  }, [isFocused]);
 
   const rendersquareList = ({item, index}) => {
     return (

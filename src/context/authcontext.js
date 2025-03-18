@@ -4,7 +4,9 @@ import {Alert, AppState} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 // let apiURL = 'http://192.168.1.31:8080';
-let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
+let apiURL = 'https://service.kartikengitech.info';
+// let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
+
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
@@ -27,6 +29,8 @@ const AuthProvider = ({children}) => {
   const [nearbyPosts, setnearbyPosts] = useState([]);
   const [filteredPosts, setfilteredPosts] = useState([]);
   const [singleShop, setSingleShop] = useState([]);
+  const [buyerList, setbuyerList] = useState([]);
+
   const [shopRating, setShopRating] = useState([]);
   const [imageUrl, setimageUrl] = useState([]);
 
@@ -52,7 +56,7 @@ const AuthProvider = ({children}) => {
       webClientId:
         '872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com',
       offlineAccess: true,
-      forceCodeForRefreshToken: true,
+      // forceCodeForRefreshToken: true,
     });
     <LocationPermission setLocation={setLocation} />;
     getDeviceToken();
@@ -424,7 +428,6 @@ const AuthProvider = ({children}) => {
       }
     }
   };
-
   const getSingleShop = async userId => {
     try {
       const headers = {
@@ -444,6 +447,35 @@ const AuthProvider = ({children}) => {
       } else {
         console.log('No shop found with the given userId');
       }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching shop:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.error('Failed to load SingleShop data');
+      }
+    }
+  };
+
+  const getBuyersList = async userId => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.get(
+        `${apiURL}/api/user/getAllProfileBuyer`,
+        {
+          headers,
+        },
+      );
+
+      const buyersList = response.data.data;
+
+      // console.log('buyersList', buyersList);
+      setbuyerList(buyersList);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -1101,6 +1133,10 @@ const AuthProvider = ({children}) => {
 
   const handleLogout = async () => {
     try {
+      // Sign out from Google Sign-In
+      await GoogleSignin.signOut();
+
+      // Clear local storage
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem('userData');
 
@@ -1282,6 +1318,8 @@ const AuthProvider = ({children}) => {
         deleteAccount,
         location,
         setLocation,
+        getBuyersList,
+        buyerList,
       }}>
       {children}
     </AuthContext.Provider>

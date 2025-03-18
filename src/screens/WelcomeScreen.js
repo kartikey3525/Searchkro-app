@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useNavigation} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext'; // Import Theme Context
@@ -19,6 +20,10 @@ export default function WelcomeScreen() {
   const navigation = useNavigation();
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate loading for demonstration purposes
+  setTimeout(() => setIsLoading(false), 3000); // Remove this after actual loading is done
 
   return (
     <ScrollView
@@ -27,103 +32,122 @@ export default function WelcomeScreen() {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-      <TouchableOpacity
-        style={{
-          flexDirection: 'row',
-          alignSelf: 'flex-end',
-          left: 30,
-        }}
-        onPress={() => navigation.navigate('commonscreen')}>
-        <Text
-          style={[
-            styles.smallText,
-            {
-              color: '#00AEEF',
-              width: 30,
-              top: 35,
-              alignSelf: 'center',
-              position: 'absolute',
-              right: 95,
-            },
-          ]}>
-          Skip
-        </Text>
-        <Image
-          source={require('../assets/Back-Container.png')}
-          style={{
-            width: 160,
-            height: 100,
-          }}
-          resizeMode="contain"
-        />
-      </TouchableOpacity>
-
-      <Image
-        source={
-          require('../assets/box-image-dark.png') // Light theme image
-        }
-        style={{
-          width: 353,
-          height: Height * 0.38,
-          alignSelf: 'center',
-        }}
-        resizeMode="contain"
-      />
-
-      <View style={{justifyContent: 'center'}}>
-        <Image
-          source={
-            isDark
-              ? require('../assets/welcome-rectangle-dark.png') // Dark theme image
-              : require('../assets/welcome-rectangle.png') // Light theme image
-          }
-          style={{width: Width * 0.99, height: Height * 0.5, marginTop: -40}}
-          resizeMode="contain"
-        />
-
-        <View
-          style={{
-            position: 'absolute',
-            alignItems: 'center',
-            alignSelf: 'center',
-            width: 300,
-          }}>
-          <View style={{flexDirection: 'row'}}>
-            <View
-              style={{
-                backgroundColor: '#00AEEF',
-                width: 10,
-                height: 10,
-                borderRadius: 100,
-                margin: 2,
-              }}
-            />
-            <View
-              style={{
-                backgroundColor: isDark ? '#444' : '#9DA49E1A',
-                width: 10,
-                height: 10,
-                borderRadius: 100,
-                margin: 2,
-              }}
-            />
-          </View>
-
-          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
-            "Style Starts Here!"
-          </Text>
-          <Text
-            style={[styles.smallText, {color: isDark ? '#E0E0E0' : '#1D1E20'}]}>
-            Shop the latest trends, exclusive collections, and timeless fashion.
-          </Text>
-
-          <TouchableOpacity
-            style={styles.blueBotton}
-            onPress={() => navigation.navigate('Welcome2')}>
-            <AntDesign name="arrowright" size={24} color="white" />
-          </TouchableOpacity>
+      {isLoading ? (
+        // Show the logo or loading spinner
+        <View style={styles.centered}>
+          <Image
+            source={require('../assets/logo.png')} // Replace with your logo path
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
-      </View>
+      ) : (
+        <>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignSelf: 'flex-end',
+              left: 30,
+            }}
+            onPress={() => navigation.navigate('commonscreen')}>
+            <Text
+              style={[
+                styles.smallText,
+                {
+                  color: '#00AEEF',
+                  width: 30,
+                  top: 35,
+                  alignSelf: 'center',
+                  position: 'absolute',
+                  right: 95,
+                },
+              ]}>
+              Skip
+            </Text>
+            <Image
+              source={require('../assets/Back-Container.png')}
+              style={{
+                width: 160,
+                height: 100,
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+
+          <Image
+            source={require('../assets/box-image-dark.png')} // Light theme image
+            style={{
+              width: 353,
+              height: Height * 0.38,
+              alignSelf: 'center',
+            }}
+            resizeMode="contain"
+          />
+
+          <View style={{justifyContent: 'center'}}>
+            <Image
+              source={
+                isDark
+                  ? require('../assets/welcome-rectangle-dark.png') // Dark theme image
+                  : require('../assets/welcome-rectangle.png') // Light theme image
+              }
+              style={{
+                width: Width * 0.99,
+                height: Height * 0.5,
+                marginTop: -40,
+              }}
+              resizeMode="contain"
+            />
+
+            <View
+              style={{
+                position: 'absolute',
+                alignItems: 'center',
+                alignSelf: 'center',
+                width: 300,
+              }}>
+              <View style={{flexDirection: 'row'}}>
+                <View
+                  style={{
+                    backgroundColor: '#00AEEF',
+                    width: 10,
+                    height: 10,
+                    borderRadius: 100,
+                    margin: 2,
+                  }}
+                />
+                <View
+                  style={{
+                    backgroundColor: isDark ? '#444' : '#9DA49E1A',
+                    width: 10,
+                    height: 10,
+                    borderRadius: 100,
+                    margin: 2,
+                  }}
+                />
+              </View>
+
+              <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+                "Style Starts Here!"
+              </Text>
+              <Text
+                style={[
+                  styles.smallText,
+                  {color: isDark ? '#E0E0E0' : '#1D1E20'},
+                ]}>
+                Shop the latest trends, exclusive collections, and timeless
+                fashion.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.blueBotton}
+                onPress={() => navigation.navigate('Welcome2')}>
+                <AntDesign name="arrowright" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -158,5 +182,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // New styles for centering logo
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 140, // Adjust size as needed
+    height: 140, // Adjust size as needed
   },
 });

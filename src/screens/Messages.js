@@ -20,9 +20,18 @@ const Height = Dimensions.get('window').height;
 export default function Messages({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const {getFilteredPosts, filteredPosts, getUserData, Userfulldata} =
-    useContext(AuthContext);
-  const [filteredLists, setFilteredLists] = useState(filteredPosts);
+  const {
+    getFilteredPosts,
+    filteredPosts,
+    getUserData,
+    Userfulldata,
+    getBuyersList,
+    userRole,
+    buyerList,
+  } = useContext(AuthContext);
+  const [filteredLists, setFilteredLists] = useState(
+    userRole === 'buyer' ? filteredPosts : buyerList,
+  );
 
   const isFocused = useIsFocused(); // ✅ Get boolean value
 
@@ -30,17 +39,19 @@ export default function Messages({navigation, route}) {
     if (isFocused) {
       // ✅ Use the boolean value
       getUserData();
-      getFilteredPosts();
+
+      userRole === 'buyer' ? getFilteredPosts() : getBuyersList();
     }
+    //  console.log('first', buyerList[0].isOnline);
   }, [isFocused]); // ✅ Correct dependency
 
   useEffect(() => {
-    if (filteredPosts.length > 0) {
-      setFilteredLists(filteredPosts); // ✅ Sync filteredLists with filteredPosts
-
-      // console.log('filteredPosts=', filteredPosts[0]); // ✅ Logs after state updates
+    if (userRole === 'buyer') {
+      setFilteredLists(filteredPosts.length > 0 ? filteredPosts : []);
+    } else {
+      setFilteredLists(buyerList.length > 0 ? buyerList : []);
     }
-  }, [filteredPosts]);
+  }, [filteredPosts, buyerList, userRole]);
 
   const [recentPostList, setRecentPostList] = useState([
     {
@@ -149,17 +160,20 @@ export default function Messages({navigation, route}) {
           }}
           resizeMode="contain"
         />
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 10,
-            position: 'absolute',
-            left: 60,
-            bottom: 0,
-            marginBottom: 10,
-            backgroundColor: 'rgba(75, 203, 27, 1)',
-          }}></View>
+
+        {item.isOnline ? (
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 10,
+              position: 'absolute',
+              left: 60,
+              bottom: 0,
+              marginBottom: 10,
+              backgroundColor: 'rgba(75, 203, 27, 1)',
+            }}></View>
+        ) : null}
         <View style={{flex: 1}}>
           <Text
             numberOfLines={1}
@@ -172,7 +186,7 @@ export default function Messages({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
-            {item.name}
+            {item?.name}
           </Text>
           <Text
             numberOfLines={2}
@@ -187,7 +201,7 @@ export default function Messages({navigation, route}) {
                 color: isDark ? '#fff' : '#1d1e20',
               },
             ]}>
-            {recentPostList[0].status}
+            {item.isOnline ? 'Active' : 'offline'}
           </Text>
           <View
             style={{
@@ -216,7 +230,7 @@ export default function Messages({navigation, route}) {
       <View style={{padding: 10}}>
         <SearchBar
           placeholder={'Search '}
-          lists={filteredPosts}
+          lists={userRole === 'buyer' ? filteredPosts : buyerList}
           setFilteredLists={setFilteredLists}
           searchKey="name"
         />

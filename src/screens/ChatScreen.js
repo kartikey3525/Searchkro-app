@@ -36,112 +36,108 @@ const ChatScreen = ({navigation, route}) => {
   const [image, setImage] = useState(null);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [message, setMessage] = useState('');
 
   const toggleModal = id =>
     setSelectedItemId(selectedItemId === id ? null : id);
 
   useEffect(() => {
-    console.log('item', item);
     const newSocket = io(`${apiURL}/chat`, {
       transports: ['websocket'],
       extraHeaders: {token: userToken},
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 3000,
     });
 
-    newSocket.on('connect', () => console.log('✅ Socket connected!'));
+    newSocket.on('connect', () => {
+      console.log('✅ Socket connected!');
+      setSocket(newSocket);
+      initializeChat(newSocket);
+    });
+
     newSocket.on('connect_error', error =>
       console.error('🚨 Socket connection error:', error.message),
     );
+
     newSocket.on('disconnect', () => console.log('🔌 Socket disconnected'));
 
-    setSocket(newSocket);
-    initializeChat(newSocket);
+    // 🔥 Prevent multiple event listeners by using `socket.off()`
+    newSocket.off('receiveMsg'); // Remove previous listeners before adding a new one
+
+    newSocket.on('receiveMsg', newMessage => {
+      console.log('📩 New message received:', newMessage);
+
+      // 🔥 Update messages immediately
+      setMessages(prevMessages => {
+        const updatedMessages = [newMessage, ...prevMessages];
+        console.log('🔄 Updated Messages:', updatedMessages);
+        return updatedMessages;
+      });
+    });
 
     return () => {
       newSocket.disconnect();
-      newSocket.off('connect');
-      newSocket.off('connect_error');
-      newSocket.off('disconnect');
-      newSocket.off('chatCreated');
-      newSocket.off('openChat');
+      newSocket.off('receiveMsg'); // Ensure cleanup
     };
   }, [apiURL, userToken, userId]);
 
-  const initializeChat = async socket => {
-    try {
-      console.log(
-        `🔹 Emitting createChat for user: ${userId} with token: ${userToken}`,
-      );
-      socket.emit('createChat', {userId, userToken});
-
-      socket.on('chatCreated', response => {
-        console.log('✅ Chat Created Response:', response);
-        if (response?.error) {
-          console.error('❌ Chat creation failed:', response.error);
-          return;
-        }
-        if (response?.data?._id) {
-          console.log(`✅ Chat ID set: ${response.data._id}`);
-          setChatId(response.data._id);
-        } else {
-          console.error('❌ No chatId in response:', response);
-        }
-      });
-
-      socket.on('openChat', newMessage => {
-        console.log('📩 Received openChat:', newMessage);
-        if (!newMessage?.msgData || !Array.isArray(newMessage.msgData)) {
-          console.error('❌ Invalid message data:', newMessage);
-          return;
-        }
-
-        const receivedMsgs = newMessage.msgData.map(msg => ({
-          _id: msg._id || Math.random().toString(),
-          text: msg.msg || '',
-          senderId: msg.senderId,
-          chatId: newMessage.data?._id,
-          image: msg.image || '',
-          date: msg.date || new Date().toISOString(),
-        }));
-        setMessages(prev => [...receivedMsgs, ...prev]);
-        setChatId(newMessage.data._id);
-      });
-    } catch (error) {
-      console.error('🚨 Error in initializeChat:', error.message);
+  const initializeChat = socket => {
+    if (!socket || !socket.connected) {
+      console.error('❌ Cannot emit createChat. Socket is disconnected!');
+      return;
     }
-  };
 
-  useEffect(() => {
-    if (chatId && socket) fetchMessages(chatId);
-  }, [chatId, socket]);
+    console.log(
+      `🔹 Emitting createChat for users: Sender=${userId}, Recipient=${recipientId}`,
+    );
 
-  const fetchMessages = async chatId => {
-    try {
-      const response = await fetch(`${apiURL}/api/chat/${chatId}/messages`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+    socket.emit('createChat', {userId: recipientId, userToken}, response => {
+      console.log(
+        '📩 Received createChat response:',
+        JSON.stringify(response, null, 2),
+      );
 
-      if (!response.ok) {
-        console.error('❌ Fetch messages failed:', response.status);
-        return;
+      if (response?.data?._id) {
+        setChatId(response.data._id);
+      } else {
+        console.error('❌ No chatId in response:', response);
       }
 
-      const data = await response.json();
-      console.log('📥 Fetched messages:', data);
-      setMessages(data.sort((a, b) => new Date(a.date) - new Date(b.date)));
-    } catch (error) {
-      console.error('❌ Fetch error:', error.message);
-    }
+      if (response?.msgData?.length) {
+        setMessages(response.msgData.reverse());
+      } else {
+        setMessages([]);
+      }
+    });
+
+    // Ensure openChat listener is set up once
+    socket.once('openChat', response => {
+      console.log('📩 Received openChat:', JSON.stringify(response, null, 2));
+
+      if (response?.data?._id) {
+        setChatId(response.data._id);
+      } else {
+        console.error('❌ No chatId in response:', response);
+      }
+
+      if (response?.msgData?.length) {
+        setMessages(response.msgData.reverse());
+      }
+    });
   };
 
   const sendMessage = async () => {
-    if (!chatId || !socket) {
-      console.error('❌ Cannot send message: chatId or socket missing');
+    if (!chatId) {
+      console.warn('⏳ Waiting for chatId...');
       return;
     }
+
+    if (!socket || !socket.connected) {
+      console.error('❌ Cannot send message: Socket is disconnected');
+      return;
+    }
+
     if (!text.trim() && !image) {
       console.log('⚠️ Nothing to send');
       return;
@@ -157,42 +153,35 @@ const ChatScreen = ({navigation, route}) => {
         }
       }
 
-      const newMessage = {
-        text: text.trim(),
-        image: imageUrl,
-        senderId: userId,
-        chatId,
-        date: new Date().toISOString(),
-        _id: Math.random().toString(),
-      };
+      socket.emit(
+        'sendMsg',
+        {
+          chatId,
+          msg: text.trim(),
+          msgType: image ? 'image' : 'text',
+          thumbnail: imageUrl || '',
+          userToken,
+        },
+        response => {
+          console.log('✅ Server Response:', response);
 
-      console.log('📤 Sending message:', newMessage);
+          if (response?.error) {
+            console.error('❌ Message send failed:', response.error);
+            return;
+          }
 
-      setMessages(prev => [newMessage, ...prev]);
+          if (!response.savedMessage?._id) {
+            console.error('❌ No valid server response');
+            return;
+          }
+
+          // ✅ Add only the confirmed message from the server
+          setMessages(prev => [response.savedMessage, ...prev]);
+        },
+      );
+
       setText('');
       setImage(null);
-
-      socket.emit('sendMsg', {...newMessage, userToken}, response => {
-        console.log('✅ Server Response:', response);
-        if (response?.error) {
-          console.error('❌ Message send failed:', response.error);
-          setMessages(prev => prev.filter(msg => msg._id !== newMessage._id));
-          return;
-        }
-        const savedMessage = {
-          _id: response.savedMessage?._id || newMessage._id,
-          text: response.savedMessage?.msg || newMessage.text,
-          image: response.savedMessage?.image || newMessage.image,
-          senderId: response.savedMessage?.senderId || newMessage.senderId,
-          chatId: response.savedMessage?.chatId || newMessage.chatId,
-          date: response.savedMessage?.date || newMessage.date,
-        };
-        console.log('🔄 Updating with saved message:', savedMessage);
-        setMessages(prev => [
-          savedMessage,
-          ...prev.filter(msg => msg._id !== newMessage._id),
-        ]);
-      });
     } catch (error) {
       console.error('🚨 Error sending message:', error.message);
     }
@@ -248,7 +237,11 @@ const ChatScreen = ({navigation, route}) => {
         <View
           style={[
             styles.rectangle2,
-            {flexDirection: 'row', backgroundColor: isDark ? '#000' : '#fff'},
+            {
+              flexDirection: 'row',
+              backgroundColor: isDark ? '#000' : '#fff',
+              zIndex: 9999,
+            },
           ]}>
           <Entypo
             onPress={() => navigation.goBack()}
@@ -258,7 +251,7 @@ const ChatScreen = ({navigation, route}) => {
           />
           <Image
             // source={require('../assets/User-image.png')}
-            source={{uri: item.images[0]}}
+            source={{uri: item.profile[0]}}
             style={{width: 50, height: 50, marginLeft: 10, marginRight: 10}}
             resizeMode="contain"
           />
@@ -274,7 +267,7 @@ const ChatScreen = ({navigation, route}) => {
                   color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
                 },
               ]}>
-              {item?.description}
+              {item?.name}
             </Text>
             <Text
               numberOfLines={2}
@@ -424,27 +417,36 @@ const ChatScreen = ({navigation, route}) => {
             </Pressable>
           )}
         </View>
-
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={messages}
           keyExtractor={item =>
             item._id?.toString() || Math.random().toString()
           }
+          inverted // ✅ Keeps the newest messages at the bottom
           renderItem={({item}) => {
-            console.log('🔍 Rendering message:', {
-              userId,
-              senderId: item.senderId,
-            });
-            const isSentByUser = item.senderId === userId;
+            console.log('🔍 Rendering message:', item);
+
+            const isSentByUser = String(item.senderId) === String(userId); // Ensure correct comparison
+
             return (
               <View
                 style={[
-                  styles.messageContainer,
+                  isSentByUser
+                    ? styles.senderContainer
+                    : styles.receivermessageContainer,
                   isSentByUser ? styles.sentMessage : styles.receivedMessage,
                 ]}>
-                {item.text && <Text style={styles.message}>{item.text}</Text>}
-                {item.image && (
-                  <Image source={{uri: item.image}} style={styles.image} />
+                {item.msg && (
+                  <Text
+                    style={
+                      isSentByUser ? styles.sendermessage : styles.message
+                    }>
+                    {item.msg}
+                  </Text>
+                )}
+                {item.thumbnail && (
+                  <Image source={{uri: item.thumbnail}} style={styles.image} />
                 )}
               </View>
             );
@@ -496,15 +498,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     elevation: 2,
   },
-  messageContainer: {
+  receivermessageContainer: {
     padding: 10,
     borderRadius: 10,
+    borderTopLeftRadius: 0,
+    marginVertical: 5,
+    maxWidth: '80%',
+  },
+  senderContainer: {
+    padding: 10,
+    borderRadius: 10,
+    borderTopRightRadius: 0,
     marginVertical: 5,
     maxWidth: '80%',
   },
   sentMessage: {backgroundColor: '#06C4D9', alignSelf: 'flex-end'},
   receivedMessage: {backgroundColor: '#E0E0E0', alignSelf: 'flex-start'},
-  message: {fontSize: 16, color: '#fff'},
+  message: {fontSize: 16, color: '#000'},
+  sendermessage: {fontSize: 16, color: '#fff'},
   image: {width: 150, height: 150, borderRadius: 10},
   inputContainer: {flexDirection: 'row', alignItems: 'center', padding: 10},
   input: {flex: 1, fontSize: 16, padding: 10, borderRadius: 10},
@@ -512,3 +523,4 @@ const styles = StyleSheet.create({
 });
 
 export default ChatScreen;
+

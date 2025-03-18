@@ -5,42 +5,70 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, '15.1'
+# Define the minimum iOS version
+platform :ios, '15.1' # Replace with your minimum supported iOS version
 prepare_react_native_project!
-use_modular_headers!
-
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+use_frameworks! :linkage => :static
+$RNFirebaseAsStaticFramework = true
+# Configure frameworks linkage if specified in environment variables
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
 
 target 'Searchkro' do
   config = use_native_modules!
-  use_frameworks! :linkage => :static
 
-  pod 'Firebase/Core'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Firestore'
-  pod 'Firebase/Messaging'
-
-  # Add this to resolve Firebase static library issues
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/Auth', :modular_headers => true
-  pod 'Firebase/Firestore', :modular_headers => true
-  pod 'Firebase/Messaging', :modular_headers => true
-  pod 'GoogleUtilities', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'FirebaseCoreExtension', :modular_headers => true
-  pod 'RecaptchaInterop', :modular_headers => true
- 
-  new_arch_enabled = true
   # React Native dependencies
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => false, # Enable Hermes (recommended)
-    :fabric_enabled => new_arch_enabled, # Enable Fabric
-    :new_arch_enabled => new_arch_enabled # Enable TurboModules
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+ENV['NODE_BINARY'] = '/Users/admin/.nvm/versions/node/v23.7.0/bin/node'
+  use_react_native!(
+  :path => "../node_modules/react-native",
+  :hermes_enabled => true,
+)
 
-  target 'SearchkroTests' do
-    inherit! :complete
+  # Add Firebase dependencies (if needed)
+ # Add Firebase dependencies with modular headers
+ pod 'Firebase/Core', :modular_headers => true
+ pod 'Firebase/Auth', :modular_headers => true
+ pod 'Firebase/Firestore', :modular_headers => true
+ pod 'Firebase/Messaging', :modular_headers => true
+ pod 'GoogleUtilities', :modular_headers => true
+ pod 'FirebaseCore', :modular_headers => true
+ pod 'FirebaseCoreExtension', :modular_headers => true
+ pod 'RecaptchaInterop', :modular_headers => true
+pod 'GoogleSignIn', :modular_headers => true
+ # Add dependencies for FirebaseAuth and FirebaseFirestore
+ pod 'FirebaseAuthInterop', :modular_headers => true
+ pod 'FirebaseAppCheckInterop', :modular_headers => true
+ pod 'FirebaseFirestoreInternal', :modular_headers => true
+
+ # Fix for leveldb-library
+ pod 'leveldb-library', :modular_headers => true
+
+  # Post-install hook for React Native
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+
+    # Fix for leveldb-library build settings
+    installer.pods_project.targets.each do |target|
+      if target.name == 'leveldb-library'
+        target.build_configurations.each do |config|
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'LEVELDB_PLATFORM_POSIX=1'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'LEVELDB_IS_BIG_ENDIAN=0'
+        end
+      end
+    end
   end
 end
