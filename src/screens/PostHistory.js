@@ -63,6 +63,40 @@ export default function PostHistory({navigation}) {
     // 2. Calling an API to delete from the database
   };
   
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    
+    // Get day with ordinal suffix (1st, 2nd, 3rd, 4th, etc.)
+    const day = date.getDate();
+    let dayWithSuffix;
+    if (day > 3 && day < 21) dayWithSuffix = day + 'th'; // covers 4th-20th
+    else {
+      switch (day % 10) {
+        case 1:  dayWithSuffix = day + 'st'; break;
+        case 2:  dayWithSuffix = day + 'nd'; break;
+        case 3:  dayWithSuffix = day + 'rd'; break;
+        default: dayWithSuffix = day + 'th';
+      }
+    }
+    
+    // Month names
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    
+    // Year
+    const year = date.getFullYear();
+    
+    // Time in 12-hour format with AM/PM
+    let hours = date.getHours();
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `${dayWithSuffix} ${month} ${year}, ${hours}:${minutes}${ampm}`;
+  };
+
   const render2RectangleList = ({item, index}) => {
     return (
       <Pressable
@@ -108,7 +142,7 @@ export default function PostHistory({navigation}) {
                   width: Width * 0.45,
                 },
               ]}>
-              {item.description}
+              {item.productName||'No name'}
             </Text>
 
             <View
@@ -131,8 +165,8 @@ export default function PostHistory({navigation}) {
                     lineHeight: 18,
                   },
                 ]}>
-                post : at 21th Nov 2024, 12:23pm
-                {/* {item.openTime} */}
+                post : at {formatDate(item.createdAt)}
+                {/* at 21th Nov 2024, 12:23pm */}
               </Text>
             </View>
           </View>
@@ -145,19 +179,25 @@ export default function PostHistory({navigation}) {
           />
         </View>
         {selectedItemId === item._id && (
-          <Pressable
-            style={{
-              position: 'absolute',
-              alignSelf: 'flex-end',
-              top: 10,
-              right: 24,
-            }}
-            onPress={() => toggleModal(item._id)}>
-            <View
-              style={[
-                styles.modalContent,
-                {backgroundColor: isDark ? '#121212' : 'white'},
-              ]}>
+      <>
+      {/* Overlay */}
+      <Pressable
+        style={styles.overlay}
+        onPress={() => setSelectedItemId(null)}
+      />
+      
+      {/* Modal content */}
+      <Pressable
+        style={[
+          styles.modalContentContainer,
+          {top: index * 10 + 15, right: 26},
+        ]}
+        onPress={() => {}} // Empty handler to prevent clicks from bubbling to overlay
+      >
+        <View style={[
+          styles.modalContent,
+          {backgroundColor: isDark ? '#121212' : 'white'},
+        ]}>
               <TouchableOpacity
                 style={{
                   padding: 4,
@@ -196,6 +236,7 @@ export default function PostHistory({navigation}) {
               />
             </View>
           </Pressable>
+        </>
         )}
       </Pressable>
     );
@@ -260,7 +301,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1,
+  }, 
+  modalContentContainer: {
+    position: 'absolute',
+    zIndex: 1,
+  }, 
   blueBotton: {
     backgroundColor: '#00AEEF',
     width: '100%',

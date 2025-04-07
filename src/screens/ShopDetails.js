@@ -8,6 +8,7 @@ import {
   ScrollView,
   Pressable,
   Linking,
+  Alert,
 } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -49,6 +50,47 @@ export default function ShopDetails({navigation, route}) {
       ? route?.params?.item?._id
       : route?.params?.item?.userId;
 
+      const shareShopDeepLink = async () => {
+        try {
+          // Get shop ID from your data
+          const shopId = Data._id || Data.id; 
+          const shopName = Data.name || "This shop";
+          
+          // Create deep link (replace with your actual domain and path)
+          const deepLink = `https://yourdomain.com/shop/${shopId}`;
+          const playStoreLink = 'https://play.google.com/store/apps/details?id=com.yourpackage';
+          
+          // Create the share message
+          const message = `Check out ${shopName} on our app!\n\n` +
+          `⭐ Rating: ${Data.averageRating || 'Not rated yet'}\n` +
+          `📍 Location: ${Data.businessAddress || ''}\n` +
+          `🕒 Hours: ${Data.openTime}-${Data.closeTime}\n\n` +
+          `${deepLink}\n\n` +
+            `Download our app: ${playStoreLink}`;
+          
+          const encodedMessage = encodeURIComponent(message);
+          const whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
+      
+          // Check if WhatsApp is installed
+          const supported = await Linking.canOpenURL(whatsappUrl);
+          
+          if (supported) {
+            await Linking.openURL(whatsappUrl);
+          } else {
+            // Fallback to web version if WhatsApp isn't installed
+            const webUrl = `https://wa.me/?text=${encodedMessage}`;
+            await Linking.openURL(webUrl);
+          }
+        } catch (error) {
+          console.error('Error sharing shop:', error);
+          let errorMessage = 'Could not share shop';
+          if (error.message.includes('No activity found to handle intent')) {
+            errorMessage = 'WhatsApp is not installed';
+          }
+          Alert.alert('Error', errorMessage);
+        }
+      };
+  
   useEffect(() => {
     // console.log('userId', userId);
 
@@ -142,13 +184,13 @@ export default function ShopDetails({navigation, route}) {
     ...(shopRating?.result?.map(item => item.count) || [1]),
   );
 
-  const highestRatedNumber =
-    shopRating?.result?.length > 0
-      ? shopRating.result.find(
-          item =>
-            item.count === Math.max(...shopRating.result.map(i => i.count), 0),
-        )?.rate || 0 // Ensure default to 0
-      : 0;
+  // const highestRatedNumber =
+  //   shopRating?.result?.length > 0
+  //     ? shopRating.result.find(
+  //         item =>
+  //           item.count === Math.max(...shopRating.result.map(i => i.count), 0),
+  //       )?.rate || 0 // Ensure default to 0
+  //     : 0;
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -188,6 +230,28 @@ export default function ShopDetails({navigation, route}) {
   //     setSelectedItemId(id); // Open modal for the clicked item
   //   }
   // };
+
+  const openWhatsApp = async phoneNumber => {
+    try {
+      // Remove all non-digit characters
+      const cleanedNumber = phoneNumber.replace(/\D/g, '');
+
+      // Check if WhatsApp is installed
+      const url = `whatsapp://send?phone=${cleanedNumber}`;
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        // If WhatsApp isn't installed, open browser version
+        const webUrl = `https://wa.me/${cleanedNumber}`;
+        await Linking.openURL(webUrl);
+      }
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+      Alert.alert('Error', 'Could not open WhatsApp');
+    }
+  };
 
   const Overview = () => (
     <View>
@@ -416,7 +480,7 @@ export default function ShopDetails({navigation, route}) {
                     marginBottom: 0,
                   },
                 ]}>
-                {highestRatedNumber}
+                {Data.averageRating}
               </Text>
               <Octicons
                 name="star-fill"
@@ -438,23 +502,10 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-              {Data.phone}
+            {sortedRatings?.length} Reviews
             </Text>
 
-            <Text
-              style={[
-                styles.bigText,
-                {
-                  alignSelf: 'flex-start',
-                  fontSize: 14,
-                  color: isDark ? 'white' : 'black',
-
-                  marginTop: 10,
-                  marginBottom: 0,
-                },
-              ]}>
-              88%
-            </Text>
+           
 
             <Text
               numberOfLines={1}
@@ -468,7 +519,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-              Recommended
+             {Data.averageRating<=4 ? 'Average' : 'Recommended'}
             </Text>
           </View>
         </View>
@@ -744,7 +795,7 @@ export default function ShopDetails({navigation, route}) {
                     marginBottom: 0,
                   },
                 ]}>
-                {Data?.rating?.averageRating}
+                {Data.averageRating}
               </Text>
               <Octicons
                 name="star-fill"
@@ -767,21 +818,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-              9876549812
-            </Text>
-
-            <Text
-              style={[
-                styles.bigText,
-                {
-                  alignSelf: 'flex-start',
-                  fontSize: 14,
-                  color: isDark ? 'white' : 'black',
-                  marginTop: 10,
-                  marginBottom: 0,
-                },
-              ]}>
-              88%
+              {sortedRatings?.length} Reviews
             </Text>
 
             <Text
@@ -796,7 +833,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-              Recommended
+               {Data.averageRating<=4 ? '' : 'Recommended'}
             </Text>
           </View>
         </View>
@@ -1239,7 +1276,7 @@ export default function ShopDetails({navigation, route}) {
             </Text>
           </Pressable> */}
 
-          <View
+          {/* <View
             style={{
               borderRadius: 5,
               borderWidth: 1,
@@ -1265,7 +1302,7 @@ export default function ShopDetails({navigation, route}) {
               ]}>
               share
             </Text>
-          </View>
+          </View> */}
         </View>
       </Pressable>
     );
@@ -1346,7 +1383,7 @@ export default function ShopDetails({navigation, route}) {
               backgroundColor: isDark ? '#000' : 'white',
               justifyContent: 'flex-start',
               bottom: 40,
-              right: 35,
+              right: 40,
               elevation: 1,
             }}>
             <View
@@ -1367,16 +1404,17 @@ export default function ShopDetails({navigation, route}) {
                   },
                 ]}>
                 <Text
+                  numberOfLines={2}
                   style={{
                     fontSize: 16,
                     fontWeight: 'bold',
                     marginTop: 2,
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   }}>
-                  Your Locaiton
+                  {Data?.name}
                 </Text>
 
-                <Text
+                {/* <Text
                   numberOfLines={1}
                   style={{
                     fontSize: 13,
@@ -1386,8 +1424,8 @@ export default function ShopDetails({navigation, route}) {
                       ? 'rgba(255, 255, 255, 1)'
                       : 'rgba(0, 0, 0, 0.4)',
                   }}>
-                  {Data?.businessAddress}
-                </Text>
+                  {Data?.name}
+                </Text> */}
               </View>
             </View>
           </View>
@@ -1396,7 +1434,8 @@ export default function ShopDetails({navigation, route}) {
             style={{
               alignSelf: 'flex-start',
               marginLeft: '8%',
-              bottom: '2%',
+              bottom: 35,
+
             }}>
             <View
               style={{
@@ -1504,16 +1543,26 @@ export default function ShopDetails({navigation, route}) {
             </Pressable>
 
             <Pressable
-              style={[
-                styles.iconStyle,
-                {backgroundColor: 'rgba(15, 92, 246, 1)'},
-              ]}>
-              <Ionicons
-                onPress={() => navigation.navigate('messages', {item: null})}
+               onPress={() => {
+                openWhatsApp(Data.phone);
+              }}
+             >
+              {/* <Ionicons
+                onPress={() => {
+                  openWhatsApp(Data.phone);
+                }}
                 name="chatbubble-ellipses-outline"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
-              />
+              /> */}
+              <Image
+            source={require('../assets/whatsapp.png')}
+            style={[
+              styles.iconStyle,
+              {width: 52,height: 52,backgroundColor: 'rgb(255, 255, 255)'},
+            ]}
+            resizeMode="contain"
+          />
             </Pressable>
 
             <Pressable
@@ -1540,7 +1589,7 @@ export default function ShopDetails({navigation, route}) {
               style={[
                 styles.iconStyle,
                 {backgroundColor: 'rgba(33, 150, 243, 1)'},
-              ]}>
+              ]} onPress={() => shareShopDeepLink()}>
               <FontAwesome
                 name="share"
                 size={26}
@@ -1609,7 +1658,9 @@ export default function ShopDetails({navigation, route}) {
                 : 'rgba(15, 92, 246, 1)',
             },
           ]}
-          onPress={() => navigation.navigate('messages', {item: null})}>
+          onPress={() => {
+            openWhatsApp(Data.phone);
+          }}>
           <Text
             style={[
               styles.smallText,

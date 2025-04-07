@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "872169733649-buqml7m56h8bfjmka9eegehops2gkkn9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.searchkro",
+            "certificate_hash": "5c7ad1ff548f0eed1086e5e2a8473d5ff7accc27"
+          }
+        },
+        {
           "client_id": "872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -51,4 +59,4 @@
     }
   ],
   "configuration_version": "1"
-} 
+}

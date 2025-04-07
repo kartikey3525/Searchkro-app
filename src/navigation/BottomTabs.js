@@ -98,7 +98,6 @@ const BottomTabs = () => {
         />
       )}
 
-      {userRole === 'buyer' ? (
         <Tab.Screen
           name="AddButton"
           component={EmptyComponent} // ✅ No inline function
@@ -109,7 +108,6 @@ const BottomTabs = () => {
             tabBarButton: () => <FloatingButton />, // ✅ Custom tab button remains
           }}
         />
-      ) : null}
 
       {userRole === 'buyer' ? (
         <Tab.Screen
@@ -138,10 +136,10 @@ const BottomTabs = () => {
               <Image
                 source={
                   focused
-                    ? require('../assets/notification-active.png')
-                    : require('../assets/notification.png')
+                    ? require('../assets/notification.png')
+                    : require('../assets/notification-bottom.png')
                 }
-                style={{width: 20, height: 23}}
+                style={{width: 22, height: 25}}
               />
             ),
           }}
@@ -149,7 +147,7 @@ const BottomTabs = () => {
       )}
       <Tab.Screen
         name="Profile"
-        component={userRole === 'buyer' ? ProfileScreen : SellerProfile}
+        component={ProfileScreen}
         options={({route}) => ({
           tabBarStyle: {display: 'none'}, // Hides the bottom tab bar
           tabBarIcon: ({focused, size}) => (

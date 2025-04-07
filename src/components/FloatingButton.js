@@ -9,11 +9,11 @@ const FloatingButton = ({}) => {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const navigation = useNavigation();
-  const {setisposting} = useContext(AuthContext);
+  const {userRole} = useContext(AuthContext);
 
   const handlePress = () => {
-    setisposting(true);
-    navigation.navigate('Categories');
+    // setisposting(true);
+    navigation.navigate(userRole==='buyer'?'postdetails':'AddProducts');
   };
 
   return (

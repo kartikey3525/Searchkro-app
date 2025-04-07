@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,49 +11,35 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {ThemeContext} from '../context/themeContext';
+import { ThemeContext } from '../context/themeContext';
 import Header from '../components/Header';
-import {AuthContext} from '../context/authcontext';
-import {useIsFocused} from '@react-navigation/native';
+import { AuthContext } from '../context/authcontext';
+import { useIsFocused } from '@react-navigation/native';
 import moment from 'moment';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-export default function NotificationScreen({navigation}) {
-  const {theme} = useContext(ThemeContext);
-  const isDark = theme === 'dark';
-  const [recentPostList, setRecentPostList] = useState([
-    {
-      id: 1,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
-    },
-    {
-      id: 2,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
-    },
-    {
-      id: 3,
-      title: ' Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
-    },
-  ]);
-  const {deleteNotification, getNotification, notificationList} =
+export default function NotificationScreen({ navigation ,route}) {
+  const { theme } = useContext(ThemeContext);
+  const { deleteNotification, getNotification, notificationList, markNotificationsAsRead ,userRole} =
     useContext(AuthContext);
-
-  useEffect(() => {
-    getNotification();
-  }, [useIsFocused()]);
+  const isDark = theme === 'dark';
+  const isFocused = useIsFocused();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const handleLongPress = item => {
+  useEffect(() => {
+    if (isFocused) {
+      console.log('Fetching notifications...');
+      getNotification();
+      markNotificationsAsRead();
+    }
+    console.log('Notification List:', notificationList[0]);
+  }, [isFocused]); // Removed notificationList from deps to avoid infinite loop
+
+  const handleLongPress = (item) => {
     setSelectedItem(item);
     setModalVisible(true);
   };
@@ -73,6 +59,14 @@ export default function NotificationScreen({navigation}) {
     }
   };
 
+  const extractTime = (dateStr) => {
+    return new Date(dateStr).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+  // navigation.navigate('sellerProductDetail', {item})
   const render2RectangleList = (item, index) => (
     <Pressable
       key={index}
@@ -83,6 +77,7 @@ export default function NotificationScreen({navigation}) {
         borderColor: isDark ? '#ccc' : '#fff',
         borderBottomWidth: 1,
       }}
+      onPress={() => [userRole==='buyer'?navigation.navigate('shopdetails', {item}):navigation.navigate('sellerProductDetail', {item})]}
       onLongPress={() => handleLongPress(item)}>
       <View
         style={[
@@ -93,7 +88,8 @@ export default function NotificationScreen({navigation}) {
           },
         ]}>
         <Image
-          source={recentPostList[0].img}
+          source={require('../assets/User-image.png')} // Replace with dynamic image if available
+          // source={{uri:  item?.images[0]||require('../assets/User-image.png')}}
           style={{
             width: 66,
             height: 66,
@@ -101,7 +97,7 @@ export default function NotificationScreen({navigation}) {
           }}
           resizeMode="contain"
         />
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Text
             numberOfLines={2}
             style={[
@@ -135,37 +131,28 @@ export default function NotificationScreen({navigation}) {
             name="checkmark-circle"
             size={24}
             color="rgba(6, 196, 217, 1)"
-            style={{marginRight: 10}}
+            style={{ marginRight: 10 }}
           />
         )}
       </View>
     </Pressable>
   );
 
-  const extractTime = dateStr => {
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
   return (
     <View
-      showsVerticalScrollIndicator={false}
-      style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+      style={[styles.screen, { backgroundColor: isDark ? '#000' : '#fff' }]}>
       <Header header={'Notifications'} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{height: Height * 0.8, flexGrow: 1}}>
+        style={{ height: Height * 0.8, flexGrow: 1 }}>
         {/* No Notifications Message */}
         {notificationList.length === 0 && (
           <View style={styles.noNotificationsContainer}>
             <Text
               style={[
                 styles.noNotificationsText,
-                {color: isDark ? '#fff' : '#000'},
+                { color: isDark ? '#fff' : '#000' },
               ]}>
               No notifications to show.
             </Text>
@@ -173,59 +160,63 @@ export default function NotificationScreen({navigation}) {
         )}
 
         {/* Today */}
-        {notificationList.filter(item =>
-          moment(item.date).isSame(moment(), 'day'),
-        ).length > 0 && (
+        {notificationList.filter((item) => moment(item.date).isSame(moment(), 'day')).length > 0 && (
           <>
-            <Text
-              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+            <Text style={[styles.sectionHeader, { color: isDark ? '#fff' : '#000' }]}>
               Today
             </Text>
             {notificationList
-              .filter(item => moment(item.date).isSame(moment(), 'day'))
+              .filter((item) => moment(item.date).isSame(moment(), 'day'))
               .map((item, index) => render2RectangleList(item, index))}
           </>
         )}
 
         {/* Yesterday */}
-        {notificationList.filter(item =>
-          moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
+        {notificationList.filter((item) =>
+          moment(item.date).isSame(moment().subtract(1, 'days'), 'day')
         ).length > 0 && (
           <>
-            <Text
-              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+            <Text style={[styles.sectionHeader, { color: isDark ? '#fff' : '#000' }]}>
               Yesterday
             </Text>
             {notificationList
-              .filter(item =>
-                moment(item.date).isSame(moment().subtract(1, 'days'), 'day'),
-              )
+              .filter((item) => moment(item.date).isSame(moment().subtract(1, 'days'), 'day'))
               .map((item, index) => render2RectangleList(item, index))}
           </>
         )}
 
         {/* This Week */}
         {notificationList.filter(
-          item =>
-            moment(item.date).isAfter(moment().subtract(7, 'days')) && // Within the last 7 days
-            !moment(item.date).isSame(moment(), 'day') && // Not today
-            !moment(item.date).isSame(moment().subtract(1, 'days'), 'day'), // Not yesterday
+          (item) =>
+            moment(item.date).isAfter(moment().subtract(7, 'days')) &&
+            !moment(item.date).isSame(moment(), 'day') &&
+            !moment(item.date).isSame(moment().subtract(1, 'days'), 'day')
         ).length > 0 && (
           <>
-            <Text
-              style={[styles.sectionHeader, {color: isDark ? '#fff' : '#000'}]}>
+            <Text style={[styles.sectionHeader, { color: isDark ? '#fff' : '#000' }]}>
               This Week
             </Text>
             {notificationList
               .filter(
-                item =>
-                  moment(item.date).isAfter(moment().subtract(7, 'days')) && // Within the last 7 days
-                  !moment(item.date).isSame(moment(), 'day') && // Not today
-                  !moment(item.date).isSame(
-                    moment().subtract(1, 'days'),
-                    'day',
-                  ), // Not yesterday
+                (item) =>
+                  moment(item.date).isAfter(moment().subtract(7, 'days')) &&
+                  !moment(item.date).isSame(moment(), 'day') &&
+                  !moment(item.date).isSame(moment().subtract(1, 'days'), 'day')
               )
+              .map((item, index) => render2RectangleList(item, index))}
+          </>
+        )}
+
+        {/* Older Notifications */}
+        {notificationList.filter(
+          (item) => moment(item.date).isBefore(moment().subtract(7, 'days'))
+        ).length > 0 && (
+          <>
+            <Text style={[styles.sectionHeader, { color: isDark ? '#fff' : '#000' }]}>
+              Older
+            </Text>
+            {notificationList
+              .filter((item) => moment(item.date).isBefore(moment().subtract(7, 'days')))
               .map((item, index) => render2RectangleList(item, index))}
           </>
         )}
@@ -237,46 +228,32 @@ export default function NotificationScreen({navigation}) {
           <View
             style={[
               styles.modalContent,
-              {backgroundColor: isDark ? '#121212' : '#fff'},
+              { backgroundColor: isDark ? '#121212' : '#fff' },
             ]}>
             <Text
               style={[
                 styles.modalText,
-                {
-                  fontWeight: 'bold',
-                  marginBottom: 10,
-                  color: isDark ? '#fff' : '#000',
-                },
+                { fontWeight: 'bold', marginBottom: 10, color: isDark ? '#fff' : '#000' },
               ]}>
-              Delete ?
+              Delete?
             </Text>
-            <Text style={[styles.modalText, {color: isDark ? '#fff' : '#000'}]}>
-              Are you sure want Delete?
+            <Text style={[styles.modalText, { color: isDark ? '#fff' : '#000' }]}>
+              Are you sure you want to delete?
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false), handleLongPress;
-                }}
+                onPress={() => setModalVisible(false)}
                 style={[
                   styles.cancelButton,
                   {
-                    backgroundColor: isDark
-                      ? 'rgba(51, 51, 51, 1)'
-                      : 'rgba(217, 217, 217, 1)',
+                    backgroundColor: isDark ? 'rgba(51, 51, 51, 1)' : 'rgba(217, 217, 217, 1)',
                   },
                 ]}>
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {color: isDark ? '#fff' : 'black'},
-                  ]}>
+                <Text style={[styles.buttonText, { color: isDark ? '#fff' : 'black' }]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={styles.deleteButton}>
+              <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
             </View>
@@ -298,16 +275,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     margin: 5,
     marginLeft: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: Height * 0.1,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: '26%',
   },
   rectangle2: {
     backgroundColor: '#fff',

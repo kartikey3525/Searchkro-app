@@ -30,11 +30,11 @@ export default function ProfileScreen({navigation}) {
   const {getCategories, getUserData, Userfulldata} = useContext(AuthContext);
 
   useEffect(() => {
-    getUserData();
-    // console.log('userdata50', Userfulldata);
+    if (isFocused) {
+      getUserData();
+      // console.log('userdata50', Userfulldata);
+    }
   }, [isFocused]);
-
-  useEffect(() => {}, [isFocused]);
 
   const handlelogout = () => {
     handleLogout();
@@ -68,15 +68,20 @@ export default function ProfileScreen({navigation}) {
         >
           <View style={styles.modalContent}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Entypo
-                onPress={() => navigation.goBack()}
-                name="chevron-thin-left"
-                size={20}
-                color={
-                  isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                }
-                style={{padding: 5}}
-              />
+              <TouchableOpacity
+                onPress={() =>  navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'BottomTabs' }],
+                })}>
+                <Entypo
+                  name="chevron-thin-left"
+                  size={20}
+                  color={
+                    isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
+                  }
+                  style={{padding: 0}}
+                />
+              </TouchableOpacity>
               <Text
                 style={[
                   styles.recListText,
@@ -105,21 +110,25 @@ export default function ProfileScreen({navigation}) {
                 elevation: 10,
                 borderRadius: 5,
               }}>
-              <Image
-                source={
-                  Userfulldata?.profile?.length > 0 && Userfulldata?.profile[0]
-                    ? {uri: Userfulldata.profile[0]}
-                    : require('../assets/User-image.png')
-                }
-                style={{
-                  width: Width * 0.15,
-                  height: Height * 0.07,
-                  marginLeft: 10,
-                  marginRight: 10,
-                  borderRadius: 100,
-                }}
-                resizeMode="cover"
-              />
+              <TouchableOpacity
+                onPress={() => navigation.navigate('profilesettings')}>
+                <Image
+                  source={
+                    Userfulldata?.profile?.length > 0 &&
+                    Userfulldata?.profile[0]
+                      ? {uri: Userfulldata.profile[0]}
+                      : require('../assets/User-image.png')
+                  }
+                  style={{
+                    width: Width * 0.15,
+                    height: Height * 0.07,
+                    marginLeft: 10,
+                    marginRight: 10,
+                    borderRadius: 100,
+                  }}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
 
               <View>
                 <Text
@@ -166,84 +175,30 @@ export default function ProfileScreen({navigation}) {
             <View
               style={{
                 width: Width * 0.9,
-                height: Height * (userRole === 'buyer' ? 0.65 : 0.39),
+                height: Height * (userRole === 'buyer' ? 0.58 : 0.45),
                 marginTop: 14,
                 borderRadius: 5,
-                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white', // Add background color for shadow to work
+                backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)', // Add background color for shadow to work
                 shadowColor: '#000', // Shadow color
                 shadowOffset: {width: 0, height: 2}, // Shadow offset
                 shadowOpacity: 0.25, // Shadow opacity
                 shadowRadius: 3.84, // Shadow blur radius
                 elevation: 5, // For Android shadow
               }}>
-              {userRole === 'buyer' ? (
-                <Pressable
-                  style={{
-                    width: Width * 0.9,
-                    height: Height * 0.065,
-                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
-                    justifyContent: 'center',
-                    borderBottomWidth: 1,
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.1)'
-                      : 'rgba(0, 0, 0, 0.1)',
-                    borderTopStartRadius: 5,
-                    borderTopRightRadius: 5,
-                  }}
-                  onPress={() => navigation.navigate('profilesettings')}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
-                      alignSelf: 'flex-start',
-                      alignItems: 'center',
-                      borderRadius: 5,
-                    }}>
-                    <Image
-                      source={require('../assets/profile-2.png')}
-                      style={{
-                        width: 25,
-                        height: 20,
-                        marginLeft: 15,
-                      }}
-                      resizeMode="contain"
-                    />
-
-                    <Text
-                      style={[
-                        styles.recListText,
-                        {
-                          fontSize: 15,
-                          width: Width * 0.66,
-                          color: isDark ? 'white' : 'black',
-                          marginLeft: 15,
-                          fontWeight: '600',
-                          letterSpacing: 0.5,
-                        },
-                      ]}>
-                      Profile Settings
-                    </Text>
-
-                    <AntDesign
-                      name="right"
-                      size={16}
-                      color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
-                      style={{padding: 5}}
-                    />
-                  </View>
-                </Pressable>
-              ) : null}
-
               <Pressable
                 style={{
-                  width: '100%',
+                  width: Width * 0.9,
                   height: Height * 0.065,
                   backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
                   justifyContent: 'center',
                   borderBottomWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.1)',
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'rgba(0, 0, 0, 0.1)',
+                  borderTopStartRadius: 5,
+                  borderTopRightRadius: 5,
                 }}
-                onPress={() => navigation.navigate('Notification')}>
+                onPress={() => navigation.navigate('profilesettings')}>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -253,7 +208,7 @@ export default function ProfileScreen({navigation}) {
                     borderRadius: 5,
                   }}>
                   <Image
-                    source={require('../assets/notification-setting.png')}
+                    source={require('../assets/profile-2.png')}
                     style={{
                       width: 25,
                       height: 20,
@@ -274,7 +229,7 @@ export default function ProfileScreen({navigation}) {
                         letterSpacing: 0.5,
                       },
                     ]}>
-                    Notifications setting
+                    Profile Settings
                   </Text>
 
                   <AntDesign
@@ -285,6 +240,64 @@ export default function ProfileScreen({navigation}) {
                   />
                 </View>
               </Pressable>
+
+              {userRole === 'seller' ? (
+                <Pressable
+                  style={{
+                    width: Width * 0.9,
+                    height: Height * 0.065,
+                    backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                    justifyContent: 'center',
+                    borderBottomWidth: 1,
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.1)'
+                      : 'rgba(0, 0, 0, 0.1)',
+                    borderTopStartRadius: 5,
+                    borderTopRightRadius: 5,
+                  }}
+                  onPress={() => navigation.navigate('ProductsList')}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'white',
+                      alignSelf: 'flex-start',
+                      alignItems: 'center',
+                      borderRadius: 5,
+                    }}>
+                    <Image
+                      source={require('../assets/product-img.png')}
+                      style={{
+                        width: 25,
+                        height: 20,
+                        marginLeft: 15,
+                      }}
+                      resizeMode="contain"
+                    />
+
+                    <Text
+                      style={[
+                        styles.recListText,
+                        {
+                          fontSize: 15,
+                          width: Width * 0.66,
+                          color: isDark ? 'white' : 'black',
+                          marginLeft: 15,
+                          fontWeight: '600',
+                          letterSpacing: 0.5,
+                        },
+                      ]}>
+                      Products
+                    </Text>
+
+                    <AntDesign
+                      name="right"
+                      size={16}
+                      color={isDark ? 'white' : 'rgba(0, 0, 0, 0.34)'}
+                      style={{padding: 5}}
+                    />
+                  </View>
+                </Pressable>
+              ) : null}
 
               <Pressable
                 style={{

@@ -28,20 +28,14 @@ export default function ForgetPassword({navigation}) {
     email: '',
     description: '',
   });
-  const {handleRegister, handleLogin, handleResetPassword} =
+  const {handleRegister, handleLogin, handleForgetPassword} =
     useContext(AuthContext);
 
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
 
-    if (!email && !description) {
-      setErrors(prevState => ({
-        ...prevState,
-        email: 'Email or phone number is required.',
-      }));
-      return false;
-    }
+    
 
     if (email && phoneRegex.test(email)) {
       // phone number is valid
@@ -50,27 +44,25 @@ export default function ForgetPassword({navigation}) {
     } else {
       setErrors(prevState => ({
         ...prevState,
-        email: 'Please enter a valid email address or phone number.',
+        email: 'Please enter a valid email address .',
       }));
       return false;
     }
 
-    setErrors({email: '', description: ''});
+    setErrors({email: '', });
     return true;
   };
 
   const handlePress = async () => {
-    setErrors({email: '', description: ''});
+    setErrors({email: '', });
     if (!validateInputs()) return;
 
     setIsLoading(true);
     try {
-      await handleLogin(email, description);
-      console.log('Success', 'Login successful!');
-      navigation.navigate('OTPScreen', {
-        emailPhone: email,
-        description: description,
-      });
+       await handleForgetPassword(email,);
+      // navigation.navigate('OTPScreen', {
+      //   emailPhone: email,
+      // });
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -162,8 +154,8 @@ export default function ForgetPassword({navigation}) {
 
         <TouchableOpacity
           style={styles.blueBotton}
-          onPress={() => navigation.navigate('OTPScreen')}
-          // onPress={() => handlePress()}
+          // onPress={() => navigation.navigate('OTPScreen')}
+          onPress={() => handlePress()}
         >
           <Text
             style={[

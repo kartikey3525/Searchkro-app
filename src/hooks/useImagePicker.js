@@ -1,5 +1,5 @@
 import {useContext, useState} from 'react';
-import {Platform, PermissionsAndroid, Alert} from 'react-native';
+import {Platform, PermissionsAndroid, Alert, ActivityIndicator} from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import {AuthContext} from '../context/authcontext';
@@ -7,13 +7,16 @@ import {AuthContext} from '../context/authcontext';
 const useImagePicker = () => {
   const {userdata, apiURL} = useContext(AuthContext);
   const [media, setMedia] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const uploadImage = async (uri, mimeType = 'image/jpeg') => {
+    setIsUploading(true);
     try {
       console.log('Starting image upload for URI:', uri, 'Type:', mimeType);
       if (!userdata.token) {
         console.error('No token found');
         Alert.alert('Authentication Error', 'No valid token found.');
+        setIsUploading(false);
         return null;
       }
 
@@ -30,8 +33,7 @@ const useImagePicker = () => {
       };
 
       console.log('Sending request to:', `${apiURL}/api/user/uploadImage`);
-      console.log('Headers:', headers);
-
+      
       const response = await axios.post(
         `${apiURL}/api/user/uploadImage`,
         formData,
@@ -65,7 +67,20 @@ const useImagePicker = () => {
         'Image size is too big , please choose smaller image.',
       );
       return null;
+    } finally {
+      setIsUploading(false);
     }
+  };
+
+  const showLoadingAlert = () => {
+    Alert.alert(
+      'Uploading Image',
+      'Please wait while we upload your image...',
+      [],
+      {
+        cancelable: false,
+      }
+    );
   };
 
   const requestCameraPermission = async () => {
@@ -103,6 +118,7 @@ const useImagePicker = () => {
       } else if (response.errorMessage) {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
+        showLoadingAlert();
         const asset = response.assets[0];
         const uploadedUrl = await uploadImage(
           asset.uri,
@@ -110,6 +126,7 @@ const useImagePicker = () => {
         );
         if (uploadedUrl) {
           setMedia(prevMedia => [...prevMedia, uploadedUrl]);
+          Alert.alert('Success', 'Image uploaded successfully!');
         }
       }
     });
@@ -120,6 +137,7 @@ const useImagePicker = () => {
       {mediaType: 'photo', selectionLimit: 10},
       async response => {
         if (response.assets && response.assets.length > 0) {
+          showLoadingAlert();
           const uploadedUrls = await Promise.all(
             response.assets.map(async asset =>
               uploadImage(asset.uri, asset.type || 'image/jpeg'),
@@ -128,13 +146,22 @@ const useImagePicker = () => {
           const validUrls = uploadedUrls.filter(url => url !== null);
           if (validUrls.length > 0) {
             setMedia(prevMedia => [...prevMedia, ...validUrls]);
+            Alert.alert('Success', `${validUrls.length} image(s) uploaded successfully!`);
           }
         }
       },
     );
   };
 
-  return {media, selectMedia, launchCamera, requestCameraPermission, setMedia};
+  return {
+    media, 
+    selectMedia, 
+    launchCamera, 
+    requestCameraPermission, 
+    setMedia,
+    uploadImage,
+    isUploading
+  };
 };
 
 export default useImagePicker;

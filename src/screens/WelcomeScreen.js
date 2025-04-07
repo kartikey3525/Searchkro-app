@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  ActivityIndicator,
+  Animated,
+  Easing,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useNavigation} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext'; // Import Theme Context
+import { ActivityIndicator } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -21,9 +23,21 @@ export default function WelcomeScreen() {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [isLoading, setIsLoading] = useState(true);
+  const scaleValue = new Animated.Value(0.5); // Initial scale value
 
+  useEffect(() => {
+    if (isLoading) {
+      // Start the animation when loading
+      Animated.timing(scaleValue, {
+        toValue: 50, // Final scale value
+        duration: 1000, // Animation duration in ms
+        easing: Easing.elastic(1), // Bouncy effect
+        useNativeDriver: true, // Better performance
+      }).start();
+    }
+  }, [isLoading]);
   // Simulate loading for demonstration purposes
-  setTimeout(() => setIsLoading(false), 3000); // Remove this after actual loading is done
+  setTimeout(() => setIsLoading(false), 1500); // Remove this after actual loading is done
 
   return (
     <ScrollView
@@ -32,16 +46,26 @@ export default function WelcomeScreen() {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#fff'},
       ]}>
-      {isLoading ? (
-        // Show the logo or loading spinner
-        <View style={styles.centered}>
-          <Image
-            source={require('../assets/logo.png')} // Replace with your logo path
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-      ) : (
+     {isLoading ? (
+  <View style={styles.centered}>
+    <Animated.Image
+      source={require('../assets/logo.png')}
+      style={[
+        styles.logo,
+        {
+          transform: [{ scale: scaleValue }],
+        },
+      ]}
+      resizeMode="contain"
+    />
+    {/* Optional: Add loading indicator below the logo */}
+    <ActivityIndicator 
+      size="large" 
+      color="#00AEEF" 
+      style={{marginTop: 20}}
+    />
+  </View>
+) : (
         <>
           <TouchableOpacity
             style={{
@@ -157,6 +181,14 @@ const styles = StyleSheet.create({
     width: Width,
     height: Height,
     justifyContent: 'center',
+  },centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 100,
+    height: 100,
   },
   smallText: {
     fontSize: 15,

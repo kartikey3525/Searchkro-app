@@ -26,21 +26,10 @@
       <meta-data
     android:name="com.google.android.geo.API_KEY"
     android:value="AIzaSyApbnvUVokFh4CDlQiYL0uI5FZkohP927M" />
-    
-<!-- <service android:name=".MyFirebaseMessagingService"
-    android:exported="false">
-    <intent-filter>
-        <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-    </intent-filter>
-</service>
-
-<receiver
-    android:exported="true"
-    android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBroadcastReceiver">
-    <intent-filter>
-        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-    </intent-filter>
-</receiver> -->
+    <meta-data
+    android:name="com.google.firebase.messaging.default_notification_icon"
+    android:resource="@drawable/ic_notification" />
+ 
 
 
       <activity
@@ -55,6 +44,12 @@
              <action android:name="android.media.action.IMAGE_CAPTURE" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="https" android:host="yourdomain.com" android:pathPrefix="/product"/>
+</intent-filter> 
       </activity>
     </application>
 </manifest>

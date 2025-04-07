@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -40,8 +41,9 @@ export default function RatedScreen({navigation, route}) {
   });
   const {handleRegister, handleLogin, PostRating} = useContext(AuthContext);
 
-  const {media, selectMedia, requestCameraPermission, setMedia} =
-    useImagePicker();
+  const {media, selectMedia, isUploading, setMedia} =
+  useImagePicker();
+  {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
 
   useEffect(() => {
     // console.log('route?.params?.item', route?.params?.item?._id);
@@ -248,7 +250,12 @@ export default function RatedScreen({navigation, route}) {
         </Text>
 
         <View>
-          <View style={{}}>
+          <View style={{
+            
+                  marginBottom: route.params.item.feedback ? '30%' : 0,
+
+
+          }}>
             {media.length > 0 && media[0] ? (
               <>
                 <Image
@@ -387,9 +394,8 @@ export default function RatedScreen({navigation, route}) {
           </>
         )}
 
-        <TouchableOpacity
-          disabled={route.params.item.feedback ? true : false}
-          style={[styles.blueBotton, {margin: '15%', marginBottom: '30%'}]}
+       {!route.params.item.feedback ?( <TouchableOpacity
+          style={[styles.blueBotton, {margin: '15%', marginBottom: '20%'}]}
           // onPress={() => navigation.navigate('shopdetails')}
           onPress={() => handlePress()}>
           <Text
@@ -403,7 +409,7 @@ export default function RatedScreen({navigation, route}) {
             ]}>
             Submit review
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>):null}
       </ScrollView>
     </KeyboardAvoidingContainer>
   );

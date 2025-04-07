@@ -83,7 +83,7 @@ const LocationPermission = ({setLocation}) => {
             },
             fallbackError => {
               console.error('Fallback location error:', fallbackError);
-              Alert.alert('Error', 'Unable to fetch location.');
+              // Alert.alert('Error', 'Unable to fetch location.');
             },
             {
               enableHighAccuracy: false, // Use network-based location

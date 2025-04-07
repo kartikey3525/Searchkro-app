@@ -2,55 +2,42 @@ import {
   View,
   Text,
   Image,
-  StyleSheet, 
+  StyleSheet,
   TouchableOpacity,
-  ScrollView, 
+  ScrollView,
   Pressable,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from 'react';
 import {HelperText} from 'react-native-paper';
-import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
 import {Dimensions} from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo'; 
-import {useRef} from 'react'; 
-import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native'; 
+import Entypo from 'react-native-vector-icons/Entypo';
+import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
-import DatePicker from 'react-native-date-picker'; 
+import DatePicker from 'react-native-date-picker';
 import Header from '../components/Header';
-import LocationPermission from '../hooks/uselocation';
 import useImagePicker from '../hooks/useImagePicker';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const Width = Dimensions.get('window').width;
-const Height = Dimensions.get('window').height;
+const {width: Width, height: Height} = Dimensions.get('window');
 
 export default function ProfileSettings({navigation, route}) {
+  // Context and theme
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [date, setDate] = useState(new Date());
 
-  const [name, setname] = useState('');
-  const [phone, setphone] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  // const [location, setLocation] = useState(null);
-  const [open, setOpen] = useState('');
-
-  const [isLoading, setIsLoading] = useState(false);
-  const phoneInput = useRef(null);
-  const isFocused = useIsFocused();
-
-  const {media, selectMedia, requestCameraPermission, setMedia} =
-    useImagePicker();
-
-  const {getCategories, location, getUserData, Userfulldata} =
-    useContext(AuthContext);
-
-  useEffect(() => {
-    getCategories();
-    getUserData();
-    // console.log('userdata50', Userfulldata?.dob);
-  }, [isFocused]);
+  // State
+  const [modalVisible1, setModalVisible1] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [shopData, setshopData] = useState(false);
 
   const [errors, setErrors] = useState({
     phone: '',
@@ -59,6 +46,121 @@ export default function ProfileSettings({navigation, route}) {
     categories: '',
     name: '',
   });
+
+  // Refs
+  const phoneInput = useRef(null);
+  const isFocused = useIsFocused();
+
+  // Custom hooks
+  const {media, selectMedia, isUploading, setMedia} =
+    useImagePicker();
+    {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
+  // Context data
+  const {
+    getCategories,
+    userRole,
+    getUserData,
+    Userfulldata,
+    userdata,
+    getSingleShop,
+    singleShop,
+    location,
+  } = useContext(AuthContext);
+
+  // Memoized styles
+  const dynamicStyles = {
+    screen: {
+      backgroundColor: isDark ? '#000' : '#fff',
+    },
+    textColor: {
+      color: isDark ? '#fff' : '#000',
+    },
+    borderColor: {
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+    },
+    modalContent: {
+      backgroundColor: isDark ? '#121212' : '#fff',
+    },
+    iconColor: {
+      color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+    },
+  };
+
+  // Data fetching
+  useEffect(() => {
+    getCategories();
+    // getUserData();
+  }, [isFocused]);
+
+  useEffect(() => {
+    // getUserData();
+    setshopData(Userfulldata);
+  }, [userdata?._id, isFocused]);
+
+  // Set media when singleShop changes
+  useEffect(() => {
+    if (shopData?.profile) {
+      setMedia(Array.isArray(shopData.profile) ? shopData.profile : []);
+    }
+  }, [shopData?.profile]);
+
+  const handleEditPress = useCallback(() => {
+    navigation.navigate(userRole === 'buyer' ? 'editProfile' : 'Sellerprofile');
+  }, [userRole]);
+
+  const handleRemovePhoto = useCallback(() => {
+    if (media.length > 0) {
+      setMedia(media.slice(1));
+    }
+    setModalVisible1(false);
+  }, [media]);
+
+  // Render functions
+  const renderProfileImage = useCallback(() => {
+    const source =
+      media.length > 0 && media[0]
+        ? {uri: media[0]}
+        : shopData?.profile?.length > 0
+        ? {uri: shopData.profile[0]}
+        : require('../assets/User-image.png');
+
+    return (
+      <Pressable onPress={() => setModalVisible(true)}>
+        <Image
+          source={source}
+          style={[
+            styles.profileImage,
+            {
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 1)'
+                : 'rgba(231, 231, 231, 1)',
+            },
+          ]}
+        />
+        {/* <Pressable onPress={() => setModalVisible1(true)} style={styles.editButton}>
+          <Image
+            source={require('../assets/edit.png')}
+            style={styles.editIcon}
+            resizeMode="contain"
+          />
+        </Pressable> */}
+      </Pressable>
+    );
+  }, [media, shopData?.profile, isDark]);
+
+  const renderUserInfo = useCallback(
+    () => (
+      <View style={styles.userInfoContainer}>
+        <Text style={[styles.userName, dynamicStyles.textColor]}>
+          {shopData?.name}
+        </Text>
+        <Text style={[styles.userEmail, dynamicStyles.textColor]}>
+          {shopData?.email}
+        </Text>
+      </View>
+    ),
+    [shopData, dynamicStyles],
+  );
 
   const formatDOB_DDMMYYYY = dateStr => {
     const date = new Date(dateStr);
@@ -69,356 +171,405 @@ export default function ProfileSettings({navigation, route}) {
       .padStart(2, '0')}/${date.getFullYear()}`;
   };
 
-  return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={[
-        styles.screen,
-        {backgroundColor: isDark ? '#000' : '#fff'},
-      ]}>
-      {/* <LocationPermission setLocation={setLocation} /> */}
-
-      <Header header={'Profile'} />
-
-      <View
-        style={[
-          styles.rectangle2,
-          {
-            overflow: 'hidden',
-            marginBottom: 10,
-          },
-        ]}>
-        {media && media.length > 0 && media[0] ? (
-          <>
-            <Image
-              source={{uri: media[0]}}
-              style={{
-                width: 120,
-                height: 120,
-                alignSelf: 'center',
-                overflow: 'hidden',
-                borderRadius: 100,
-                top: 10,
-                borderWidth: 5,
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 1)'
-                  : 'rgba(231, 231, 231, 1)',
-              }}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setMedia([])} // Properly reset media array
-            >
-              <Entypo name="cross" size={25} color="black" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Image
-            source={
-              Userfulldata?.profile && Userfulldata.profile.length > 0
-                ? {uri: Userfulldata.profile[0]}
-                : require('../assets/User-image.png')
-            }
-            style={{
-              width: 120,
-              height: 120,
-              alignSelf: 'center',
-              overflow: 'hidden',
-              borderRadius: 100,
-              marginTop: 20,
-              borderWidth: 5,
-              borderColor: 'rgba(0, 0, 0, 0.14)',
-            }}
-          />
-        )}
-
-        <View style={{alignSelf: 'center', marginTop: 30}}>
-          <Text
-            style={[
-              styles.recListText,
-              {
-                fontSize: 15,
-                width: 200,
-                fontWeight: 'bold',
-                color: isDark ? 'white' : 'black',
-                alignSelf: 'center',
-                textAlign: 'center',
-              },
-            ]}>
-            {Userfulldata?.name}
+  const renderShopInfoSection = useCallback(
+    () => (
+      <View style={[styles.shopInfoContainer, {}]}>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, dynamicStyles.textColor]}>
+            Details
           </Text>
-
-          <Text
-            style={[
-              styles.recListText,
-              {
-                color: isDark ? 'white' : 'rgba(23, 23, 23, 0.59)',
-                alignSelf: 'center',
-                textAlign: 'center',
-              },
-            ]}>
-            {Userfulldata?.email}
-          </Text>
-        </View>
-      </View>
-
-      <HelperText type="error" visible={!!errors.media} style={{color: 'red'}}>
-        {errors.media}
-      </HelperText>
-      <View
-        style={{
-          borderWidth: 1,
-          marginBottom: 60,
-          borderColor: 'rgb(108, 108, 108)',
-          borderRadius: 10,
-          width: Width * 0.9,
-          // padding: 20,
-          paddingTop: 20,
-        }}>
-        <View
-          style={{
-            alignSelf: 'center',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'row',
-          }}>
-          <Text
-            style={[
-              {
-                color: isDark ? '#fff' : '#000',
-                fontWeight: '400',
-                fontSize: 16,
-                marginBottom: 5,
-                alignSelf: 'flex-start',
-                width: '78%',
-              },
-            ]}>
-            Profile
-          </Text>
-
-          <Pressable onPress={() => navigation.navigate('editProfile')}>
+          <Pressable onPress={handleEditPress}>
             <Image
               source={
                 isDark
                   ? require('../assets/edit1-dark.png')
                   : require('../assets/edit1.png')
               }
-              style={{
-                width: 40,
-                height: isDark ? 25 : 18,
-
-                alignSelf: 'flex-end',
-              }}
+              style={styles.editProfileIcon}
               resizeMode="contain"
             />
           </Pressable>
         </View>
 
+        <View style={[styles.divider, dynamicStyles.borderColor]} />
+        <>
+          {renderInfoRow('Name', shopData?.name)}
+          {renderInfoRow('Contact', shopData?.phone)}
+          {renderInfoRow('Email Address', shopData?.email)}
+          {renderInfoRow('DOB', formatDOB_DDMMYYYY(Userfulldata?.dob))}
+          {renderInfoRow('Gender', shopData?.gender)}
+
+        </>
+      </View>
+    ),
+    [shopData, location, isDark, handleEditPress, dynamicStyles],
+  );
+
+  const renderBusinessDetailsSection = useCallback(
+    () => (
+      <View style={styles.businessDetailsContainer}>
+        {userdata?.roleId === 1 && (
+          <>
+            <View style={[styles.divider, dynamicStyles.borderColor]} />
+
+            <Text
+              style={[
+                styles.sectionTitle,
+                dynamicStyles.textColor,
+                {marginLeft: 15},
+              ]}>
+              Business Statutory Details
+            </Text>
+            <View style={[styles.divider, dynamicStyles.borderColor]} />
+            {renderInfoRow('Shop name', shopData?.name)}
+            {renderInfoRow('Owner name', shopData?.ownerName)} 
+
+            {renderInfoRow(
+              'Year of Establishment',
+              shopData?.establishmentYear,
+            )}
+            {renderInfoRow(
+              'Delivery Available',
+              shopData?.isDeliveryAvailable === 'true' ? 'Yes' : 'No',
+            )}
+            {renderInfoRow('Open at', shopData?.openTime)}
+            {renderInfoRow('Close at', shopData?.closeTime)}
+            {renderInfoRow('Social Media', shopData?.socialMedia)}
+            {renderInfoRow('Business Scale', shopData?.businessScale, true)}
+            {renderInfoRow('GSTIN', shopData?.gstin)}
+            {renderInfoRow(
+              'Categories',
+              shopData?.selectedCategories?.join(', '),
+              true,
+            )}
+            {renderInfoRow(
+              'Location',
+              `Lat: ${location.latitude}, Long: ${location.longitude}`,
+              true,
+            )}
+            {renderInfoRow('Shop About', shopData?.description, true)}
+          </>
+        )}
+      </View>
+    ),
+    [shopData, dynamicStyles],
+  );
+
+  const renderInfoRow = (label, value, multiline = false) => (
+    <View style={styles.infoRow}>
+      <Text style={[styles.infoLabel, dynamicStyles.textColor]}>{label}</Text>
+      <Text
+        style={styles.infoValue}
+        numberOfLines={multiline ? 2 : 1}
+        ellipsizeMode={multiline ? 'tail' : 'clip'}>
+        {value || 'Not provided'}
+      </Text>
+    </View>
+  );
+
+  const renderShopImages = useCallback(
+    () =>
+      media.length > 0 &&
+      userdata?.roleId === 1 && (
+        <>
+          <View style={[styles.divider, dynamicStyles.borderColor]} />
+
+          <Text style={[styles.shopImagesTitle, dynamicStyles.textColor]}>
+            Photos
+          </Text>
+          <View style={[styles.divider, dynamicStyles.borderColor]} />
+
+          <View style={styles.imageContainer}>
+            {media.slice(1, 8).map((item, index) => (
+              <View key={`image-${index}`} style={styles.mediaItem}>
+                <Image source={{uri: item}} style={styles.mediaPreview} />
+              </View>
+            ))}
+          </View>
+        </>
+      ),
+    [media, dynamicStyles],
+  );
+
+  const renderImageModal = useCallback(
+    () => (
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <Pressable
+            style={styles.modalBackground}
+            onPress={() => setModalVisible(false)}>
+            <Image
+              source={
+                media.length > 0 && media[0]
+                  ? {uri: media[0]}
+                  : Userfulldata?.profile?.length > 0
+                  ? {uri: Userfulldata.profile[0]}
+                  : require('../assets/User-image.png')
+              }
+              style={styles.fullScreenImage}
+              resizeMode="contain"
+            />
+          </Pressable>
+          <TouchableOpacity
+            style={styles.closeModalButton}
+            onPress={() => setModalVisible(false)}>
+            <Entypo name="cross" size={30} color="white" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    ),
+    [modalVisible, media, Userfulldata?.profile],
+  );
+
+  // const renderEditPhotoModal = useCallback(() => (
+  //   <Modal visible={modalVisible1} transparent={true}>
+  //     <Pressable
+  //       style={[
+  //         styles.modalOverlay,
+  //         {
+  //           backgroundColor: isDark
+  //             ? 'rgba(255, 255, 255, 0.19)'
+  //             : 'rgba(0, 0, 0, 0.3)',
+  //         },
+  //       ]}
+  //       onPress={() => setModalVisible1(false)}>
+  //       <View style={[styles.editModalContent, dynamicStyles.modalContent]}>
+  //         <View style={styles.modalHandle} />
+  //         <TouchableOpacity
+  //           style={[
+  //             styles.closeButton,
+  //             {backgroundColor: isDark ? 'rgba(36, 36, 36, 1)' : 'lightgrey'},
+  //           ]}
+  //           onPress={() => setModalVisible1(false)}>
+  //           <Entypo name="cross" size={22} color={isDark ? '#fff' : 'black'} />
+  //         </TouchableOpacity>
+
+  //         {renderModalOption('Take Photo', 'camera', requestCameraPermission)}
+  //         {renderModalOption('Choose from Gallery', 'image', selectMedia)}
+  //         {renderModalOption('Remove Current Photo', 'trash', handleRemovePhoto, true)}
+  //       </View>
+  //     </Pressable>
+  //   </Modal>
+  // ), [modalVisible1, isDark, dynamicStyles, handleRemovePhoto]);
+
+  const renderModalOption = (
+    text,
+    iconName,
+    onPress,
+    isDestructive = false,
+  ) => (
+    <TouchableOpacity
+      style={[styles.modalOption, dynamicStyles.borderColor]}
+      onPress={onPress}>
+      {iconName === 'image' ? (
+        <MaterialCommunityIcons
+          name={iconName}
+          size={28}
+          color={
+            isDestructive ? 'rgb(255, 0, 0)' : dynamicStyles.iconColor.color
+          }
+          style={styles.modalOptionIcon}
+        />
+      ) : (
+        <Entypo
+          name={iconName}
+          size={22}
+          color={
+            isDestructive ? 'rgb(255, 0, 0)' : dynamicStyles.iconColor.color
+          }
+          style={styles.modalOptionIcon}
+        />
+      )}
+      <Text
+        style={[
+          styles.modalOptionText,
+          isDestructive && {color: 'rgb(255, 0, 0)'},
+          !isDestructive && dynamicStyles.textColor,
+        ]}>
+        {text}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={[
+        styles.screen,
+        dynamicStyles.screen,
+        {height: userdata.roleId !== 1 && Height},
+      ]}>
+      {/* <Header header={'Profile'} /> */}
+
+      <View>
         <View
           style={{
-            borderWidth: 0.3,
-            borderColor: 'grey',
-            width: Width * 0.9,
-            marginTop: 10,
-            marginBottom: 10,
-          }}
-        />
-
-        <Text
-          style={[
-            {
-              color: 'grey',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-            },
-          ]}>
-          Name
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '400',
-              fontSize: 15,
-              marginLeft: 20,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-              marginBottom: 20,
-            },
-          ]}>
-          {Userfulldata?.name}
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: 'grey',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-            },
-          ]}>
-          Contact
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '400',
-              fontSize: 15,
-              marginLeft: 20,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              width: '50%',
-              marginBottom: 20,
-            },
-          ]}>
-          {Userfulldata?.phone}
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: 'grey',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-            },
-          ]}>
-          DOB
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-              marginBottom: 20,
-            },
-          ]}>
-          {formatDOB_DDMMYYYY(Userfulldata?.dob)}
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: 'grey',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-            },
-          ]}>
-          Email Id
-        </Text>
-
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#000',
-              fontWeight: '400',
-              fontSize: 15,
-              marginBottom: 5,
-              alignSelf: 'flex-start',
-              marginLeft: 20,
-              width: '50%',
-              marginBottom: 20,
-            },
-          ]}>
-          {Userfulldata?.email}
-        </Text>
+            alignItems: 'center',
+            width: Width,
+            flexDirection: 'row',
+            height: Height * 0.1,
+            justifyContent: 'flex-start',
+          }}>
+          <Entypo
+            onPress={() => navigation.navigate('Profilescreen')}
+            name="chevron-thin-left"
+            size={20}
+            color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
+            style={{marginLeft: 20, padding: 5}}
+          />
+          <Text
+            style={[
+              {
+                fontSize: 20,
+                fontWeight: 'bold',
+                alignSelf: 'center',
+                textAlign: 'center',
+                width: Width * 0.8,
+                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
+              },
+            ]}>
+            Profile
+          </Text>
+        </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.blueBotton}
-        onPress={() => navigation.navigate('editProfile')}
-        // onPress={() => handlePress()}
-      >
-        <Text
-          style={[
-            styles.smallText,
-            {color: '#fff', fontSize: 22, marginBottom: 0},
-          ]}>
-          Update
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.profileHeader}>
+        {renderProfileImage()}
+        {renderUserInfo()}
+      </View>
 
-      <DatePicker
-        modal
-        theme={isDark ? 'dark' : 'light'} // Set theme dynamically
-        open={open}
-        date={date}
-        mode="date"
-        textColor={isDark ? '#fff' : '#000'} // Adjust text color
-        androidVariant="iosClone" // Ensures better dark mode support on Android
-        minimumDate={new Date('1900-01-01')}
-        onConfirm={date => {
-          setOpen(false);
-          setDate(date);
-        }}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
+      <HelperText type="error" visible={!!errors.media} style={{color: 'red'}}>
+        {errors.media}
+      </HelperText>
+
+      <View style={styles.contentContainer}>
+        {renderShopInfoSection()}
+        {renderBusinessDetailsSection()}
+        {renderShopImages()}
+      </View>
+
+      {renderImageModal()}
+      {/* {renderEditPhotoModal()} */}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    // flex: 1,
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '500',
+  profileHeader: {
+    overflow: 'hidden',
+    marginBottom: 5,
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
     alignSelf: 'center',
-    marginBottom: 20,
+    overflow: 'hidden',
+    borderRadius: 100,
+    top: 10,
+    borderWidth: 5,
   },
-  closeButton: {
+  editButton: {
     position: 'absolute',
-    top: 14,
-    right: 50,
-    backgroundColor: 'rgb(255, 255, 255)',
-    borderRadius: 15,
-    padding: 1,
+    right: 0,
+    bottom: 0,
   },
-  mediaSelector: {
+  editIcon: {
+    width: 40,
+    height: 30,
+  },
+  userInfoContainer: {
+    alignSelf: 'center',
+    marginTop: 20,
+  },
+  userName: {
+    fontSize: 15,
+    width: 200,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
+  userEmail: {
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
+  contentContainer: {
+    borderWidth: 1,
+    marginBottom: 60,
+    borderColor: 'rgb(108, 108, 108)',
+    borderRadius: 10,
+    width: '90%',
+    paddingTop: 20,
+  },
+  sectionHeader: {
+    alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    width: Width * 0.85,
-    height: 150,
-    borderWidth: 3,
-    backgroundColor: 'rgba(250, 250, 250, 1)',
-    borderRadius: 20,
-    borderColor: 'rgba(6, 196, 217, 1)',
+    flexDirection: 'row',
+  },
+  sectionTitle: {
+    fontWeight: '400',
+    fontSize: 16,
+    marginBottom: 5,
+    alignSelf: 'flex-start',
+    width: '78%',
+  },
+  editProfileIcon: {
+    width: 40,
+    height: 18,
+    alignSelf: 'flex-end',
+  },
+  divider: {
+    borderWidth: 0.3,
+    width: '100%',
+    marginTop: 10,
     marginBottom: 10,
+  },
+  infoRow: {
+    marginBottom: 20,
+  },
+  infoLabel: {
+    fontWeight: '400',
+    fontSize: 15,
+    marginLeft: 20,
+    marginBottom: 5,
+  },
+  infoValue: {
+    color: 'grey',
+    fontWeight: '400',
+    fontSize: 15,
+    marginLeft: 20,
+  },
+  businessDetailsContainer: {
+    marginTop: 10,
+  },
+  shopImagesTitle: {
+    fontSize: 18,
+    textAlign: 'left',
+    fontWeight: '600',
+    marginLeft: '7%',
   },
   imageContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexWrap: 'wrap',
+    width: '95%',
     paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  mediaItem: {
+    width: '20%',
+    margin: '2%',
+    aspectRatio: 1,
+    borderRadius: 8,
   },
   mediaPreview: {
     width: '100%',
@@ -428,94 +579,72 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: '90%',
+    height: '90%',
+  },
+  closeModalButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 5,
+  },
+  modalOverlay: {
+    flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-
-  modalContent: {
-    width: Width,
-    height: Height * 0.28,
-    backgroundColor: '#fff',
+  editModalContent: {
+    width: '100%',
+    height: Height * 0.26,
     alignItems: 'center',
     justifyContent: 'center',
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
   },
-  closeButton2: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  modalHandle: {
+    height: 5,
+    backgroundColor: 'lightgrey',
+    width: 60,
+    position: 'absolute',
+    alignSelf: 'center',
+    borderRadius: 10,
+    top: 16,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 18,
+    right: 30,
     borderRadius: 15,
     padding: 1,
-    left: '40%',
-    top: '10%',
   },
-
-  phoneInput: {
+  modalOption: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    width: '100%',
     alignItems: 'center',
-    borderColor: '#A3A3A3',
-    width: '90%',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: 'rgba(231, 231, 231, 1)',
-    width: '90%',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  textInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    color: '#000',
-    width: '86%',
+    borderBottomWidth: 1,
     height: 50,
     padding: 10,
-    margin: 4,
   },
-  smallText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1D1E20',
-    textAlign: 'center',
-    width: 250,
-    marginBottom: 30,
-    fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
+  modalOptionIcon: {
+    marginRight: 15,
+    marginLeft: 20,
   },
-
-  bigText: {
-    fontSize: 30,
-    color: 'black',
-    textAlign: 'center',
-    marginTop: 40,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    fontFamily: 'Poppins-Bold',
-  },
-  blueBotton: {
-    backgroundColor: '#00AEEF',
-    width: '90%',
-    height: 50,
-    marginTop: 50,
-    borderRadius: 10,
-    marginBottom: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  whiteBotton: {
-    backgroundColor: '#fff',
-    width: '90%',
-    height: 56,
-    borderRadius: 10,
-    margin: 10,
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#A3A3A3',
-    alignItems: 'center',
-    justifyContent: 'center',
+  modalOptionText: {
+    fontSize: 16,
+    fontWeight: '400',
+    marginLeft: 6,
   },
 });

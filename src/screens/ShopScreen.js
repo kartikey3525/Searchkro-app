@@ -38,7 +38,7 @@ export default function ShopScreen({navigation, route}) {
   const [selectedRating, setSelectedRating] = useState(null);
 
   useEffect(() => {
-    // console.log('selectedRating=', filteredPosts[2]?.averageRating);
+    console.log('filteredPosts =', filteredPosts[1]?.categories);
     getFilteredPosts(route?.params?.selectedcategory, selectedRating);
 
     // const filteredData = filteredPosts

@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Modal, 
+  Modal,
+  ActivityIndicator, 
 } from 'react-native';
 import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -33,10 +34,11 @@ export default function ReportIssue({navigation}) {
   const [description, setdescription] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const {PostReportissue, PostsHistory} = useContext(AuthContext);
-  const {media,selectMedia, requestCameraPermission,setMedia} = useImagePicker();
+  const {media,selectMedia, requestCameraPermission,setMedia,isUploading} = useImagePicker();
+  {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
 
   useEffect(() => {
-    // console.log('get PostReportissue', PostsHistory[0]);
+    // console.log('get PostReportissue', media);
   }, [useIsFocused()]);
 
   const [errors, setErrors] = useState({
@@ -46,7 +48,7 @@ export default function ReportIssue({navigation}) {
 
   const validateInputs = () => {
     let valid = true;
-  
+
     if (media.length === 0) {
       setErrors(prevState => ({
         ...prevState,
@@ -54,7 +56,7 @@ export default function ReportIssue({navigation}) {
       }));
       valid = false;
     }
-  
+
     if (!description.trim()) {
       setErrors(prevState => ({
         ...prevState,
@@ -68,16 +70,15 @@ export default function ReportIssue({navigation}) {
       }));
       valid = false;
     }
-  
+
     return valid;
   };
-  
 
   const handlePress = async () => {
     setErrors({media: '', description: ''}); // Reset errors first
-  
+
     if (!validateInputs()) return; // Stop execution if validation fails
-  
+
     setIsLoading(true);
     try {
       await PostReportissue(media, description);
@@ -89,7 +90,7 @@ export default function ReportIssue({navigation}) {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <KeyboardAvoidingContainer>
       <ScrollView
@@ -210,24 +211,21 @@ export default function ReportIssue({navigation}) {
             <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
               {media.slice(1, 8).map((item, index) => (
                 <View key={index} style={styles.mediaItem}>
-                  {item.type.startsWith('image') ? (
-                    <>
-                      <Image
-                        source={{uri: item.uri}}
-                        style={styles.mediaPreview}
-                      />
-                      <TouchableOpacity
-                        style={[styles.closeButton2]}
-                        onPress={() => {
-                          // Remove the image from media array
-                          setMedia(media.filter((mediaItem, i) => i !== index));
-                        }}>
-                        <Entypo name="cross" size={18} color="black" />
-                      </TouchableOpacity>
-                    </>
-                  ) : item.type.startsWith('video') ? null : (
-                    <Text>{item.fileName}</Text>
-                  )}
+                  {/* {item.type.startsWith('image') ? ( */}
+                  <>
+                    <Image source={{uri: item}} style={styles.mediaPreview} />
+                    <TouchableOpacity
+                      style={[styles.closeButton2]}
+                      onPress={() => {
+                        // Remove the image from media array
+                        setMedia(media.filter((mediaItem, i) => i !== index));
+                      }}>
+                      <Entypo name="cross" size={18} color="black" />
+                    </TouchableOpacity>
+                  </>
+                  {/* ) : item.type.startsWith('video') ? null : ( */}
+                  <Text>{item.fileName}</Text>
+                  {/* )} */}
                 </View>
               ))}
 

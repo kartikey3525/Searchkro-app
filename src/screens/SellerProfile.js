@@ -10,97 +10,107 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Animated,
+  Pressable,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useContext} from 'react';
-import {HelperText} from 'react-native-paper';
-import {useState} from 'react';
-import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native';
+import React, { useContext, useState, useEffect } from 'react'; // Added useState and useEffect
+import { HelperText } from 'react-native-paper';
+import { AuthContext } from '../context/authcontext';
+import { Dimensions } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Dropdown from '../components/Dropdown';
-import {useRef} from 'react';
+import { useRef } from 'react';
 import PhoneInput from 'react-native-phone-number-input';
-import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {ThemeContext} from '../context/themeContext';
+import { ThemeContext } from '../context/themeContext';
 import Feather from 'react-native-vector-icons/Feather';
-
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import LocationPermission from '../hooks/uselocation';
 import useImagePicker from '../hooks/useImagePicker';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
+import * as ImagePicker from 'react-native-image-crop-picker';
+import DateTimePicker from '@react-native-community/datetimepicker'; // Added DateTimePicker
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
-export default function SellerProfile({navigation, route}) {
-  const {theme} = useContext(ThemeContext);
+export default function SellerProfile({ navigation, route }) {
+  const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [email, setEmail] = useState('');
-  const [description, setdescription] = useState('');
-  const [Socialmedia, setSocialmedia] = useState('');
-  const [businessAddress, setbusinessAddress] = useState('');
-  const [ownerName, setownerName] = useState('');
-  const [shopName, setshopName] = useState('');
-  const [openAt, setopenAt] = useState('');
-  const [closeAt, setcloseAt] = useState('');
-
-  const [phone, setphone] = useState('');
+  const [description, setDescription] = useState('');
+  const [socialMedia, setSocialMedia] = useState('');
+  const [businessAddress, setBusinessAddress] = useState('');
+  const [ownerName, setOwnerName] = useState('');
+  const [shopName, setShopName] = useState('');
+  const [openAt, setOpenAt] = useState('');
+  const [closeAt, setCloseAt] = useState('');
+  const [phone, setPhone] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedScale, setSelectedScale] = useState([]);
-  const [selectedAvailabity, setSelectedAvailabity] = useState([]);
-  // const [location, setLocation] = useState(null);
-
+  const [selectedAvailability, setSelectedAvailability] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const phoneInput = useRef(null);
   const isFocused = useIsFocused();
-  const [modalVisible, setModalVisible] = useState(false);
-  const {media, selectMedia, requestCameraPermission, setMedia} =
-    useImagePicker();
+  const [establishmentYear, setEstablishmentYear] = useState('');
+  const [gstin, setGstin] = useState('');
+  const [shopData, setShopData] = useState('');
+
+  // Added states for time picker modal
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [timeType, setTimeType] = useState(null); // 'open' or 'close'
+  const [tempTime, setTempTime] = useState(new Date()); // Temporary time for picker
+
+  const { media, selectMedia, uploadImage, setMedia, isUploading } = useImagePicker();
+  { isUploading && <ActivityIndicator size="large" color="#0000ff" /> }
 
   const handleCategoryChange = value => {
-    setSelectedCategories(value); // Update selected categories
+    setSelectedCategories(value);
   };
 
-  const handleAvailabityChange = value => {
-    setSelectedAvailabity(value); // Update selected categories
+  const handleAvailabilityChange = value => {
+    setSelectedAvailability(value);
   };
 
   const handleScaleChange = value => {
-    setSelectedScale(value); // Update selected categories
+    setSelectedScale(value);
   };
+
   const {
-    getCategories,
     fullCategorydata,
+    Userfulldata,
     userdata,
     getSingleShop,
     singleShop,
     location,
+    createSellerProfile,
   } = useContext(AuthContext);
 
   useEffect(() => {
-    getCategories();
-    getSingleShop(userdata._id);
-    console.log('singleShop', singleShop?.profile);
-    // setEmail(singleShop ? singleShop.email : '');
-    setdescription(singleShop ? singleShop?.description : '');
-    setSocialmedia(singleShop ? singleShop?.socialMedia : '');
-    setopenAt(singleShop ? singleShop?.openTime : '');
-    setcloseAt(singleShop ? singleShop?.closeTime : '');
-    setbusinessAddress(singleShop ? singleShop?.businessAddress : '');
-    setownerName(singleShop ? singleShop?.ownerName : '');
-    setshopName(singleShop ? singleShop?.shopName : '');
-    setphone(singleShop ? singleShop?.phone : '');
-    // setLocation(singleShop ? singleShop?.location : '');
-    setphone(singleShop ? singleShop?.phone : '');
-    setMedia(Array.isArray(singleShop?.profile) ? singleShop.profile : []);
-
-    setSelectedScale(singleShop ? [singleShop?.businessScale] : []);
-    setSelectedCategories(singleShop ? [singleShop?.categories] : []);
-    setSelectedAvailabity(singleShop ? [singleShop?.availability] : []);
+    if (userdata?._id) {
+      console.log('userdata._id', userdata._id);
+      setShopData(Userfulldata);
+    }
   }, [isFocused]);
+
+  useEffect(() => {
+    if (shopData) {
+      setDescription(shopData.description || '');
+      setSocialMedia(shopData.socialMedia || '');
+      setEstablishmentYear(shopData.establishmentYear || '');
+      setGstin(shopData.gstin || '');
+      setOpenAt(shopData.openTime || '');
+      setCloseAt(shopData.closeTime || '');
+      setBusinessAddress(shopData.businessAddress || '');
+      setOwnerName(shopData.ownerName || '');
+      setShopName(shopData.name || '');
+      setPhone(shopData.phone || '');
+      setMedia(Array.isArray(shopData.profile) ? shopData.profile : []);
+      setSelectedScale(shopData.businessScale || []);
+      setSelectedCategories(shopData.selectedCategories || []);
+      setSelectedAvailability(shopData.isDeliveryAvailable || []);
+    }
+  }, [shopData]);
 
   const [errors, setErrors] = useState({
     description: '',
@@ -109,178 +119,263 @@ export default function SellerProfile({navigation, route}) {
     media: '',
     selectedCategories: '',
     businessAddress: '',
-    Socialmedia: '',
+    socialMedia: '',
+    establishmentYear: '',
+    gstin: '',
     ownerName: '',
     shopName: '',
     openAt: '',
     closeAt: '',
     selectedScale: '',
-    selectedAvailabity: '',
+    selectedAvailability: '',
   });
 
   const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
-
     let valid = true;
-    let newErrors = {
+    const newErrors = {
       description: '',
       phone: '',
       location: '',
       media: '',
       selectedCategories: '',
       businessAddress: '',
-      Socialmedia: '',
+      socialMedia: '',
+      establishmentYear: '',
+      gstin: '',
       ownerName: '',
       shopName: '',
       openAt: '',
       closeAt: '',
       selectedScale: '',
-      selectedAvailabity: '',
+      selectedAvailability: '',
     };
 
-    // Validate Email or Phone Number
-    if (!selectedAvailabity.length === 0) {
-      newErrors.email = 'availability is required.';
-      valid = false;
-    }
-
-    // Validate Description
     if (!description.trim()) {
-      newErrors.description = 'Description is required.';
+      newErrors.description = 'Description is required';
       valid = false;
-    } else if (description.length < 6) {
-      newErrors.description = 'Description must be at least 6 characters long.';
+    } else if (description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters';
       valid = false;
     }
 
-    // Validate Phone Number
     if (!phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
+      newErrors.phone = 'Phone number is required';
       valid = false;
     } else if (!phoneInput.current?.isValidNumber(phone)) {
-      newErrors.phone = 'Enter a valid phone number.';
+      newErrors.phone = 'Please enter a valid phone number';
       valid = false;
     }
 
-    // Validate Category Selection
-    if (selectedCategories.length === 0) {
-      newErrors.selectedCategories = 'Please select at least one category.';
-      valid = false;
-    }
-    if (selectedScale.length === 0) {
-      newErrors.selectedScale = 'Please select at least one scale.';
-      valid = false;
-    }
-    // Validate Location
     if (!location) {
-      newErrors.location = 'Please allow location access.';
+      newErrors.location = 'Location is required';
+      valid = false;
+    }
+
+    if (media.length === 0) {
+      newErrors.media = 'At least one image is required';
+      valid = false;
+    }
+
+    if (selectedCategories.length === 0) {
+      newErrors.selectedCategories = 'At least one category is required';
       valid = false;
     }
 
     if (!businessAddress.trim()) {
-      newErrors.businessAddress = 'business Address is required.';
+      newErrors.businessAddress = 'Business address is required';
       valid = false;
-    } else if (businessAddress.length < 6) {
-      newErrors.businessAddress =
-        'business Address must be at least 6 characters long.';
+    } else if (businessAddress.length < 10) {
+      newErrors.businessAddress = 'Address must be at least 10 characters';
       valid = false;
     }
 
-    if (!Socialmedia.trim()) {
-      newErrors.Socialmedia = 'Social media is required.';
+    if (!socialMedia.trim()) {
+      newErrors.socialMedia = 'Social media link is required';
       valid = false;
-    } else if (Socialmedia.length < 6) {
-      newErrors.Socialmedia =
-        'Social media must be at least 6 characters long.';
+    } else if (!socialMedia.includes('http') && !socialMedia.includes('www')) {
+      newErrors.socialMedia = 'Please enter a valid URL';
+      valid = false;
+    }
+
+    if (!establishmentYear.trim()) {
+      newErrors.establishmentYear = 'Establishment year is required';
+      valid = false;
+    } else if (isNaN(establishmentYear) || establishmentYear.length !== 4) {
+      newErrors.establishmentYear = 'Please enter a valid year (YYYY)';
+      valid = false;
+    }
+
+    if (!gstin.trim()) {
+      newErrors.gstin = 'GSTIN is required';
+      valid = false;
+    } else if (gstin.length < 15) {
+      newErrors.gstin = 'GSTIN must be 15 characters';
+      valid = false;
+    }
+
+    if (!ownerName.trim()) {
+      newErrors.ownerName = 'Owner name is required';
+      valid = false;
+    } else if (ownerName.length < 3) {
+      newErrors.ownerName = 'Name must be at least 3 characters';
       valid = false;
     }
 
     if (!shopName.trim()) {
-      newErrors.shopName = 'Shop name is required.';
-    }
-    if (!ownerName.trim()) {
-      newErrors.ownerName = 'Owner name is required.';
+      newErrors.shopName = 'Shop name is required';
+      valid = false;
+    } else if (shopName.length < 3) {
+      newErrors.shopName = 'Shop name must be at least 3 characters';
+      valid = false;
     }
 
     if (!openAt.trim()) {
-      newErrors.openAt = 'opening time  is required.';
+      newErrors.openAt = 'Opening time is required';
+      valid = false;
     }
     if (!closeAt.trim()) {
-      newErrors.closeAt = 'closeing time is required.';
+      newErrors.closeAt = 'Closing time is required';
+      valid = false;
     }
+
+    if (selectedScale.length === 0) {
+      newErrors.selectedScale = 'Business scale is required';
+      valid = false;
+    }
+
+    if (selectedAvailability.length === 0) {
+      newErrors.selectedAvailability = 'Delivery availability is required';
+      valid = false;
+    }
+
     setErrors(newErrors);
     return valid;
   };
 
   const handlePress = async () => {
-    setErrors({
-      description: '',
-      phone: '',
-      location: '',
-      media: '',
-      selectedCategories: '',
-      businessAddress: '',
-      Socialmedia: '',
-      ownerName: '',
-      shopName: '',
-      openAt: '',
-      closeAt: '',
-      selectedScale: '',
-      selectedAvailabity: '',
-    });
-    if (!validateInputs()) return;
+    if (!validateInputs()) {
+      return;
+    }
 
     setIsLoading(true);
     try {
-      navigation.navigate('AddProducts', {
-        item: singleShop,
-        email: email,
-        description: description,
-        phone: phone,
-        location: location,
-        media: media,
-        selectedCategories: selectedCategories,
-        businessAddress: businessAddress,
-        Socialmedia: Socialmedia,
-        ownerName: ownerName,
-        shopName: shopName,
-        openAt: openAt,
-        closeAt: closeAt,
-        selectedScale: selectedScale,
-        selectedAvailabity: selectedAvailabity,
-      });
+      console.log(
+        'Response 787:',
+        description,
+        phone,
+        location,
+        media,
+        selectedCategories,
+        businessAddress,
+        socialMedia,
+        establishmentYear,
+        gstin,
+        ownerName,
+        shopName,
+        openAt,
+        closeAt,
+        selectedScale,
+        selectedAvailability,
+      );
+      await createSellerProfile(
+        description,
+        phone,
+        location,
+        media,
+        selectedCategories,
+        businessAddress,
+        socialMedia,
+        establishmentYear,
+        gstin,
+        ownerName,
+        shopName,
+        openAt,
+        closeAt,
+        selectedScale,
+        selectedAvailability,
+      );
     } catch (error) {
+      console.error('Error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const [keyboardHeight, setKeyboardHeight] = useState(new Animated.Value(0));
-
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', event => {
-      Animated.timing(keyboardHeight, {
-        toValue: event.endCoordinates.height,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    });
-
-    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-      Animated.timing(keyboardHeight, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
+  const handleProfileImageSelect = async () => {
+    const uploadImage = async (uri) => {
+      try {
+        const uploadedUrl = await new Promise(resolve => 
+          setTimeout(() => resolve(uri), 2000)
+        );
+        return uploadedUrl;
+      } catch (error) {
+        console.error('Upload error:', error);
+        Alert.alert('Upload Failed', 'Failed to upload image');
+        return null;
+      }
     };
-  }, []);
+
+    try {
+      const image = await ImagePicker.openPicker({
+        mediaType: 'photo',
+        cropping: true,
+        cropperCircleOverlay: false,
+        compressImageQuality: 0.8,
+        multiple: false,
+        forceJpg: true,
+      });
+
+      if (image) {
+        const newImageUri = image.path;
+        const uploadedUrl = await uploadImage(newImageUri);
+
+        if (uploadedUrl) {
+          setMedia(prevMedia => {
+            return [uploadedUrl, ...prevMedia.slice(1)];
+          });
+        }
+      }
+    } catch (error) {
+      if (error.message !== 'User cancelled image selection') {
+        console.error('Error updating profile image:', error);
+        Alert.alert('Error', 'Failed to select or crop image');
+      }
+    }
+  };
+
+  // Time picker handlers
+  const showTimePickerModal = (type) => {
+    setTimeType(type);
+    setShowTimePicker(true);
+    // Set initial time based on existing value or default to current time
+    const currentTime = new Date();
+    if (type === 'open' && openAt) {
+      const [hours, minutes] = openAt.split(':');
+      currentTime.setHours(parseInt(hours), parseInt(minutes.split(' ')[0]));
+    } else if (type === 'close' && closeAt) {
+      const [hours, minutes] = closeAt.split(':');
+      currentTime.setHours(parseInt(hours), parseInt(minutes.split(' ')[0]));
+    }
+    setTempTime(currentTime);
+  };
+
+  const onTimeChange = (event, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const formattedTime = selectedTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+      if (timeType === 'open') {
+        setOpenAt(formattedTime);
+      } else if (timeType === 'close') {
+        setCloseAt(formattedTime);
+      }
+    }
+    setTimeType(null);
+  };
 
   return (
     <KeyboardAvoidingContainer>
@@ -290,11 +385,8 @@ export default function SellerProfile({navigation, route}) {
           styles.screen,
           {
             backgroundColor: isDark ? '#000' : '#fff',
-            // paddingBottom: keyboardVisible ? 0 : 0,
-          }, // Add paddingBottom dynamically
+          },
         ]}>
-        {/* <LocationPermission setLocation={setLocation} /> */}
-
         <View
           style={{
             alignItems: 'center',
@@ -309,7 +401,7 @@ export default function SellerProfile({navigation, route}) {
             name="chevron-thin-left"
             size={20}
             color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-            style={{marginLeft: 20, padding: 5}}
+            style={{ marginLeft: 20, padding: 5 }}
           />
           <Text
             style={[
@@ -330,114 +422,75 @@ export default function SellerProfile({navigation, route}) {
               name="settings"
               size={20}
               color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-              style={{padding: 5}}
+              style={{ padding: 5 }}
             />
           </TouchableOpacity>
         </View>
 
-        <View>
-          <View>
-            {media.length > 0 && media[0] ? (
-              <>
-                <Image
-                  source={{uri: media[0]}}
-                  style={[styles.mediaSelector, {borderWidth: 0}]}
-                />
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setMedia(media.slice(1))}>
-                  <Entypo name="cross" size={25} color={'black'} />
-                </TouchableOpacity>
-              </>
-            ) : (
-              <TouchableOpacity onPress={selectMedia}>
-                <View
-                  style={[
-                    styles.mediaSelector,
-                    {
-                      backgroundColor: isDark
-                        ? '#1E1E1E'
-                        : 'rgba(250, 250, 250, 1)',
-                    },
-                  ]}>
-                  <MaterialIcons name="image" size={45} color="grey" />
-                  <Text
-                    style={{
-                      color: isDark ? '#BBB' : 'rgba(158, 158, 158, 1)',
-                      fontWeight: 'bold',
-                    }}>
-                    Select Media
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+        <View style={[styles.rectangle2, { marginBottom: 35 }]}>
+          {media.length > 0 && media[0] ? (
+            <Image
+              source={{ uri: media[0] }}
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: 'center',
+                overflow: 'hidden',
+                borderRadius: 100,
+                borderWidth: 5,
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 1)'
+                  : 'rgba(231, 231, 231, 1)',
+              }}
+            />
+          ) : (
+            <Image
+              source={require('../assets/User-image.png')}
+              style={{
+                width: 120,
+                height: 120,
+                alignSelf: 'center',
+                overflow: 'hidden',
+                borderRadius: 100,
+                borderWidth: 5,
+                borderColor: 'rgba(0, 0, 0, 0.14)',
+              }}
+            />
+          )}
 
-        {/* Uploaded Images */}
-        {media.length > 0 && (
-          <>
-            <Text
+          <Pressable onPress={handleProfileImageSelect}>
+            <Image
+              source={require('../assets/edit.png')}
+              style={{
+                width: 40,
+                height: 30,
+                right: 5,
+                bottom: 0,
+                position: 'absolute',
+              }}
+              resizeMode="contain"
+            />
+          </Pressable>
+
+          {media && media.length > 0 && media[0] && (
+            <TouchableOpacity
               style={[
+                styles.closeButton,
                 {
-                  color: isDark ? '#fff' : 'rgb(0, 0, 0)',
-                  fontSize: 18,
-                  textAlign: 'left',
-                  marginBottom: 10,
-                  fontWeight: '600',
-                  alignSelf: 'flex-start',
-                  marginLeft: '7%',
-                  marginTop: '5%',
+                  right: 10,
+                  top: 5,
+                  backgroundColor: isDark ? 'rgba(36, 36, 36, 1)' : 'lightgrey',
                 },
-              ]}>
-              Post images
-            </Text>
-
-            <View style={[styles.imageContainer, {flexWrap: 'wrap'}]}>
-              {media.slice(1, 8).map((item, index) => (
-                <View key={index} style={styles.mediaItem}>
-                  {/* {item.type.startsWith('image') ? ( */}
-                  <>
-                    <Image
-                      source={{uri: item.uri}}
-                      style={styles.mediaPreview}
-                    />
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={() => {
-                        setMedia(media.filter((_, i) => i !== index));
-                      }}>
-                      <Entypo name="cross" size={18} color={'black'} />
-                    </TouchableOpacity>
-                  </>
-                  {/* ) : null} */}
-                </View>
-              ))}
-
-              {media.length < 8 && (
-                <TouchableOpacity
-                  onPress={selectMedia}
-                  style={[
-                    styles.mediaItem,
-                    {
-                      backgroundColor: isDark
-                        ? '#1E1E1E'
-                        : 'rgb(255, 255, 255)',
-                      borderWidth: 1,
-                      borderColor: 'rgba(176, 176, 176, 1)',
-                      borderStyle: 'dashed',
-                    },
-                  ]}>
-                  <Entypo
-                    name="squared-plus"
-                    size={25}
-                    color="rgba(176, 176, 176, 1)"
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-          </>
-        )}
+              ]}
+              onPress={() => setMedia(media.slice(1))}>
+              <Entypo
+                name="cross"
+                size={22}
+                color={!isDark ? 'black' : 'white'}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View
           style={{
@@ -470,20 +523,22 @@ export default function SellerProfile({navigation, route}) {
           }}>
           <Dropdown
             item={[
-              {label: 'Yes', value: 'Yes'},
-              {label: 'No', value: 'No'},
+              { label: 'Yes', value: true },
+              { label: 'No', value: false },
             ]}
-            placeholder={'Select Availability'}
+            placeholder={
+              selectedAvailability === 'true' ? 'Yes' : 'No'
+            }
             single={true}
-            selectedValues={selectedAvailabity}
-            onChangeValue={handleAvailabityChange}
+            selectedValues={selectedAvailability}
+            onChangeValue={handleAvailabilityChange}
           />
         </View>
         <HelperText
           type="error"
-          style={{alignSelf: 'flex-start', marginLeft: 14}}
-          visible={!!errors.email}>
-          {errors.email}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
+          visible={!!errors.selectedAvailability}>
+          {errors.selectedAvailability}
         </HelperText>
 
         <View
@@ -498,8 +553,8 @@ export default function SellerProfile({navigation, route}) {
                 color: '#000',
                 fontWeight: '600',
                 fontSize: 15,
-                marginBottom: 5,
                 color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                marginBottom: 5,
                 alignSelf: 'flex-start',
                 width: Width * 0.5,
               },
@@ -510,7 +565,10 @@ export default function SellerProfile({navigation, route}) {
 
         <PhoneInput
           ref={phoneInput}
-          value={phone}
+          defaultValue={phone}
+          placeholder={
+            shopData?.phone?.length > 0 ? shopData?.phone : 'Enter phone number'
+          }
           containerStyle={{
             width: Width * 0.9,
             height: 60,
@@ -537,16 +595,17 @@ export default function SellerProfile({navigation, route}) {
             borderBottomLeftRadius: 10,
           }}
           textInputProps={{
-            selectionColor: isDark ? '#fff' : '#000', // Set cursor color
+            selectionColor: isDark ? '#fff' : '#000',
           }}
           defaultCode="IN"
           layout="second"
-          onChangeText={text => setphone(text)}
+          onChangeText={text => setPhone(text)}
+          onChangeFormattedText={text => setPhone(text)}
         />
         <HelperText
           type="error"
           visible={!!errors.phone}
-          style={{alignSelf: 'flex-start', marginLeft: 10}}>
+          style={{ alignSelf: 'flex-start', marginLeft: 10 }}>
           {errors.phone}
         </HelperText>
 
@@ -568,7 +627,7 @@ export default function SellerProfile({navigation, route}) {
                 width: Width * 0.48,
               },
             ]}>
-            OpenAt
+            Open At
           </Text>
 
           <Text
@@ -581,7 +640,7 @@ export default function SellerProfile({navigation, route}) {
                 alignSelf: 'flex-start',
               },
             ]}>
-            CloseAt
+            Close At
           </Text>
         </View>
 
@@ -593,16 +652,19 @@ export default function SellerProfile({navigation, route}) {
             width: Width,
             justifyContent: 'space-evenly',
           }}>
-          <View
+          <TouchableOpacity
             style={[
               styles.inputContainer,
               {
                 width: '42%',
-                borderColor: isDark
+                borderColor: errors.openAt
+                  ? 'red'
+                  : isDark
                   ? 'rgba(109, 109, 109, 0.43)'
                   : 'rgba(0, 0, 0, 1)',
               },
-            ]}>
+            ]}
+            onPress={() => showTimePickerModal('open')}>
             <TextInput
               value={openAt}
               style={[
@@ -612,25 +674,26 @@ export default function SellerProfile({navigation, route}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}
-              onChangeText={setopenAt}
-              placeholder="Opens At"
+              placeholder="09:00 AM"
               mode="outlined"
               placeholderTextColor={'grey'}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              editable={false} // Disable manual input
             />
-          </View>
+          </TouchableOpacity>
 
-          <View
+          <TouchableOpacity
             style={[
               styles.inputContainer,
               {
                 width: '42%',
-                borderColor: isDark
+                borderColor: errors.closeAt
+                  ? 'red'
+                  : isDark
                   ? 'rgba(109, 109, 109, 0.43)'
                   : 'rgba(0, 0, 0, 1)',
               },
-            ]}>
+            ]}
+            onPress={() => showTimePickerModal('close')}>
             <TextInput
               value={closeAt}
               style={[
@@ -640,32 +703,47 @@ export default function SellerProfile({navigation, route}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}
-              onChangeText={item => setcloseAt(item)}
-              placeholder="closing time"
+              placeholder="10:00 PM"
               mode="outlined"
               placeholderTextColor={'grey'}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              editable={false} // Disable manual input
             />
-          </View>
+          </TouchableOpacity>
         </View>
-        {errors.openAt ? (
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'center',
+            width: Width * 0.9,
+            justifyContent: 'space-between',
+          }}>
           <HelperText
             type="error"
-            style={{alignSelf: 'flex-start', marginLeft: 14}}
+            style={{ alignSelf: 'flex-start', marginLeft: 14 }}
             visible={!!errors.openAt}>
             {errors.openAt}
           </HelperText>
-        ) : null}
 
-        {errors.closeAt ? (
           <HelperText
             type="error"
-            style={{alignSelf: 'flex-start', marginLeft: 14}}
+            style={{ alignSelf: 'flex-start', marginLeft: 0 }}
             visible={!!errors.closeAt}>
             {errors.closeAt}
           </HelperText>
-        ) : null}
+        </View>
+
+        {/* Time Picker Modal */}
+        {showTimePicker && (
+          <DateTimePicker
+            value={tempTime}
+            mode="time"
+            is24Hour={false}
+            display="default"
+            onChange={onTimeChange}
+          />
+        )}
 
         <View
           style={{
@@ -676,44 +754,45 @@ export default function SellerProfile({navigation, route}) {
           <Text
             style={[
               {
-                color: '#000',
+                color: isDark ? '#fff' : '#000',
                 fontWeight: '600',
                 fontSize: 15,
-                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                 marginBottom: 5,
                 alignSelf: 'flex-start',
                 width: '50%',
               },
             ]}>
-            business scale
+            Location
           </Text>
         </View>
 
         <Dropdown
-          item={[
-            {label: 'Small Business (Local)', value: 'Small Business (Local)'},
-            {
-              label: 'Medium Business (City-wide)',
-              value: 'Medium Business (City-wide)',
-            },
-            {
-              label: 'Large Business (Multiple Cities/State-wide)',
-              value: 'Large Business (Multiple Cities/State-wide)',
-            },
-          ]}
-          placeholder={'Select Scale'}
-          half={false}
-          single={true}
-          selectedValues={selectedScale} // Ensure this state is properly set
-          onChangeValue={handleScaleChange} // Pass state setter function
+          style={styles.inputContainer}
+          placeholder={
+            location ? 'Selected current location' : 'Select Location'
+          }
         />
-
         <HelperText
           type="error"
-          visible={!!errors.selectedScale}
-          style={{alignSelf: 'flex-start', marginLeft: 10}}>
-          {errors.selectedScale}
+          visible={!!errors.location}
+          style={{ height: 10 }}>
+          {errors.location}
         </HelperText>
+
+        <Text
+          style={[
+            {
+              color: isDark ? '#fff' : '#000',
+              fontWeight: '600',
+              fontSize: 18,
+              marginBottom: 15,
+              marginTop: 5,
+              left: 25,
+              alignSelf: 'flex-start',
+            },
+          ]}>
+          Business statutory details
+        </Text>
 
         <View
           style={{
@@ -763,7 +842,9 @@ export default function SellerProfile({navigation, route}) {
               styles.inputContainer,
               {
                 width: '42%',
-                borderColor: isDark
+                borderColor: errors.shopName
+                  ? 'red'
+                  : isDark
                   ? 'rgba(109, 109, 109, 0.43)'
                   : 'rgba(0, 0, 0, 1)',
               },
@@ -777,12 +858,10 @@ export default function SellerProfile({navigation, route}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}
-              onChangeText={setshopName}
+              onChangeText={setShopName}
               placeholder="Shop name"
               mode="outlined"
               placeholderTextColor={'grey'}
-              keyboardType="email-address"
-              autoCapitalize="none"
             />
           </View>
 
@@ -791,7 +870,9 @@ export default function SellerProfile({navigation, route}) {
               styles.inputContainer,
               {
                 width: '42%',
-                borderColor: isDark
+                borderColor: errors.ownerName
+                  ? 'red'
+                  : isDark
                   ? 'rgba(109, 109, 109, 0.43)'
                   : 'rgba(0, 0, 0, 1)',
               },
@@ -805,32 +886,37 @@ export default function SellerProfile({navigation, route}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}
-              onChangeText={item => setownerName(item)}
+              onChangeText={setOwnerName}
               placeholder="Owner name"
               mode="outlined"
               placeholderTextColor={'grey'}
-              keyboardType="email-address"
-              autoCapitalize="none"
             />
           </View>
         </View>
-        {errors.shopName ? (
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'flex-start',
+            width: Width * 0.9,
+            justifyContent: 'space-between',
+          }}>
           <HelperText
             type="error"
-            style={{alignSelf: 'flex-start', marginLeft: 14}}
+            style={{ alignSelf: 'flex-start', marginLeft: 14 }}
             visible={!!errors.shopName}>
             {errors.shopName}
           </HelperText>
-        ) : null}
 
-        {errors.ownerName ? (
           <HelperText
             type="error"
-            style={{alignSelf: 'flex-start', marginLeft: 14}}
+            style={{ alignSelf: 'flex-start', marginLeft: 0 }}
             visible={!!errors.ownerName}>
             {errors.ownerName}
           </HelperText>
-        ) : null}
+        </View>
+
         <View
           style={{
             alignSelf: 'flex-start',
@@ -848,7 +934,7 @@ export default function SellerProfile({navigation, route}) {
                 width: '50%',
               },
             ]}>
-            business Address
+            Year of establishment
           </Text>
         </View>
 
@@ -856,13 +942,15 @@ export default function SellerProfile({navigation, route}) {
           style={[
             styles.inputContainer,
             {
-              borderColor: isDark
+              borderColor: errors.establishmentYear
+                ? 'red'
+                : isDark
                 ? 'rgba(109, 109, 109, 0.43)'
                 : 'rgba(0, 0, 0, 1)',
             },
           ]}>
           <TextInput
-            value={businessAddress}
+            value={establishmentYear}
             style={[
               styles.textInput,
               {
@@ -870,19 +958,19 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setbusinessAddress}
-            placeholder="business Address"
+            onChangeText={setEstablishmentYear}
+            placeholder="Year of establishment"
             mode="outlined"
-            placeholderTextColor={isDark ? '#ccc' : 'black'}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            placeholderTextColor={'grey'}
+            keyboardType="numeric"
+            maxLength={4}
           />
         </View>
         <HelperText
           type="error"
-          style={{alignSelf: 'flex-start', marginLeft: 14}}
-          visible={!!errors.businessAddress}>
-          {errors.businessAddress}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
+          visible={!!errors.establishmentYear}>
+          {errors.establishmentYear}
         </HelperText>
 
         <View
@@ -902,21 +990,93 @@ export default function SellerProfile({navigation, route}) {
                 width: '50%',
               },
             ]}>
-            Location
+            Business address
           </Text>
         </View>
-        {/* Location Validation */}
-        <Dropdown
-          style={styles.inputContainer}
-          placeholder={
-            location ? 'Selected current location' : 'Select Location'
-          }
-        />
+
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              borderColor: errors.businessAddress
+                ? 'red'
+                : isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
+          <TextInput
+            value={businessAddress}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
+            onChangeText={setBusinessAddress}
+            placeholder="Business Address"
+            mode="outlined"
+            placeholderTextColor={isDark ? '#ccc' : 'black'}
+            multiline={true}
+            numberOfLines={3}
+          />
+        </View>
         <HelperText
           type="error"
-          visible={!!errors.location}
-          style={{height: 10}}>
-          {errors.location}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
+          visible={!!errors.businessAddress}>
+          {errors.businessAddress}
+        </HelperText>
+
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            marginLeft: 25,
+            flexDirection: 'row',
+          }}>
+          <Text
+            style={[
+              {
+                color: '#000',
+                fontWeight: '600',
+                fontSize: 15,
+                color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
+                marginBottom: 5,
+                alignSelf: 'flex-start',
+                width: '50%',
+              },
+            ]}>
+            Business scale
+          </Text>
+        </View>
+
+        <Dropdown
+          item={[
+            { label: 'Small Business (Local)', value: 'Small Business (Local)' },
+            {
+              label: 'Medium Business (City-wide)',
+              value: 'Medium Business (City-wide)',
+            },
+            {
+              label: 'Large Business (Multiple Cities/State-wide)',
+              value: 'Large Business (Multiple Cities/State-wide)',
+            },
+          ]}
+          placeholder={
+            selectedScale.length > 0 ? selectedScale : 'Select Scale'
+          }
+          half={false}
+          single={true}
+          selectedValues={selectedScale}
+          onChangeValue={handleScaleChange}
+        />
+
+        <HelperText
+          type="error"
+          visible={!!errors.selectedScale}
+          style={{ alignSelf: 'flex-start', marginLeft: 10 }}>
+          {errors.selectedScale}
         </HelperText>
 
         <View
@@ -944,13 +1104,15 @@ export default function SellerProfile({navigation, route}) {
           style={[
             styles.inputContainer,
             {
-              borderColor: isDark
+              borderColor: errors.socialMedia
+                ? 'red'
+                : isDark
                 ? 'rgba(109, 109, 109, 0.43)'
                 : 'rgba(0, 0, 0, 1)',
             },
           ]}>
           <TextInput
-            value={Socialmedia}
+            value={socialMedia}
             style={[
               styles.textInput,
               {
@@ -958,19 +1120,17 @@ export default function SellerProfile({navigation, route}) {
                 color: isDark ? '#fff' : '#000',
               },
             ]}
-            onChangeText={setSocialmedia}
-            placeholder="Social media"
+            onChangeText={setSocialMedia}
+            placeholder="Social media link"
             mode="outlined"
             placeholderTextColor={'grey'}
-            keyboardType="email-address"
-            autoCapitalize="none"
           />
         </View>
         <HelperText
           type="error"
-          style={{alignSelf: 'flex-start', marginLeft: 14}}
-          visible={!!errors.Socialmedia}>
-          {errors.Socialmedia}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
+          visible={!!errors.socialMedia}>
+          {errors.socialMedia}
         </HelperText>
 
         <View
@@ -990,7 +1150,62 @@ export default function SellerProfile({navigation, route}) {
                 width: '50%',
               },
             ]}>
-            description
+            GSTIN
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              borderColor: errors.gstin
+                ? 'red'
+                : isDark
+                ? 'rgba(109, 109, 109, 0.43)'
+                : 'rgba(0, 0, 0, 1)',
+            },
+          ]}>
+          <TextInput
+            value={gstin}
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
+                color: isDark ? '#fff' : '#000',
+              },
+            ]}
+            onChangeText={setGstin}
+            placeholder="GST number"
+            mode="outlined"
+            placeholderTextColor={'grey'}
+            maxLength={15}
+          />
+        </View>
+        <HelperText
+          type="error"
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
+          visible={!!errors.gstin}>
+          {errors.gstin}
+        </HelperText>
+
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            marginLeft: 25,
+            flexDirection: 'row',
+          }}>
+          <Text
+            style={[
+              {
+                color: isDark ? '#fff' : '#000',
+                fontWeight: '600',
+                fontSize: 15,
+                marginBottom: 5,
+                alignSelf: 'flex-start',
+                width: '50%',
+              },
+            ]}>
+            Description
           </Text>
         </View>
 
@@ -1000,7 +1215,9 @@ export default function SellerProfile({navigation, route}) {
             {
               height: 100,
               alignItems: 'flex-start',
-              borderColor: isDark
+              borderColor: errors.description
+                ? 'red'
+                : isDark
                 ? 'rgba(109, 109, 109, 0.43)'
                 : 'rgba(0, 0, 0, 1)',
             },
@@ -1015,18 +1232,17 @@ export default function SellerProfile({navigation, route}) {
                 backgroundColor: isDark ? '#000' : 'rgb(255, 255, 255)',
               },
             ]}
-            onChangeText={setdescription}
+            onChangeText={setDescription}
             numberOfLines={5}
             multiline={true}
-            placeholder="Add a short description about your business, products, or services . . ."
+            placeholder="Add a short description about your business, products, or services..."
             mode="outlined"
             placeholderTextColor={'grey'}
-            autoCapitalize="none"
           />
         </View>
         <HelperText
           type="error"
-          style={{alignSelf: 'flex-start', marginLeft: 14}}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}
           visible={!!errors.description}>
           {errors.description}
         </HelperText>
@@ -1059,7 +1275,11 @@ export default function SellerProfile({navigation, route}) {
               value: category.name || '',
             })) || []
           }
-          placeholder={'Select Categories'}
+          placeholder={
+            selectedCategories.length > 0
+              ? selectedCategories.join(', ')
+              : 'Select Categories'
+          }
           selectedValues={selectedCategories}
           onChangeValue={handleCategoryChange}
         />
@@ -1067,157 +1287,86 @@ export default function SellerProfile({navigation, route}) {
         <HelperText
           type="error"
           visible={!!errors.selectedCategories}
-          style={{alignSelf: 'flex-start', marginLeft: 10}}>
+          style={{ alignSelf: 'flex-start', marginLeft: 10 }}>
           {errors.selectedCategories}
+        </HelperText>
+
+        <Text
+          style={[
+            {
+              color: isDark ? '#fff' : 'rgb(0, 0, 0)',
+              fontSize: 18,
+              textAlign: 'left',
+              marginBottom: 10,
+              fontWeight: '600',
+              alignSelf: 'flex-start',
+              marginLeft: '7%',
+              marginTop: '5%',
+            },
+          ]}>
+          Shop images
+        </Text>
+
+        <View style={[styles.imageContainer, { flexWrap: 'wrap' }]}>
+          {media.slice(1, 8).map((item, index) => (
+            <View key={index} style={styles.mediaItem}>
+              <Image source={{ uri: item }} style={styles.mediaPreview} />
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setMedia(media.filter((_, i) => i !== index + 1));
+                }}>
+                <Entypo name="cross" size={18} color={'black'} />
+              </TouchableOpacity>
+            </View>
+          ))}
+
+          {media.length < 8 && (
+            <TouchableOpacity
+              onPress={selectMedia}
+              style={[
+                styles.mediaItem,
+                {
+                  backgroundColor: isDark ? '#1E1E1E' : 'rgb(255, 255, 255)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(176, 176, 176, 1)',
+                  borderStyle: 'dashed',
+                },
+              ]}>
+              <Entypo
+                name="squared-plus"
+                size={25}
+                color="rgba(176, 176, 176, 1)"
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <HelperText
+          type="error"
+          visible={!!errors.media}
+          style={{ alignSelf: 'flex-start', marginLeft: 14 }}>
+          {errors.media}
         </HelperText>
 
         <TouchableOpacity
           style={styles.blueBotton}
-          // onPress={() => navigation.navigate('AddProducts')}
-          onPress={() => handlePress()}>
+          onPress={handlePress}
+          disabled={isLoading}>
           <Text
             style={[
               styles.smallText,
-              {color: '#fff', fontSize: 22, marginBottom: 0},
+              { color: '#fff', fontSize: 22, marginBottom: 0 },
             ]}>
-            Next
+            {isLoading
+              ? !shopData?.ownerName
+                ? 'Submitting...'
+                : 'Updating...'
+              : !shopData?.ownerName
+              ? 'Submit'
+              : 'Update'}
           </Text>
         </TouchableOpacity>
-
-        <Modal visible={modalVisible} transparent={true}>
-          <View
-            style={[
-              styles.modalContainer,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(255, 255, 255, 0.3)'
-                  : 'rgba(0, 0, 0, 0.3)',
-              },
-            ]}>
-            <View
-              style={[
-                styles.modalContent,
-                {backgroundColor: isDark ? '#000' : '#fff'},
-              ]}>
-              <View
-                style={{
-                  height: 5,
-                  backgroundColor: 'lightgrey',
-                  width: 60,
-                  position: 'absolute',
-                  alignSelf: 'center',
-                  borderRadius: 10,
-                  top: 16,
-                }}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.closeButton2,
-                  {backgroundColor: isDark ? '#fff' : 'lightgrey'},
-                ]}
-                onPress={() => {
-                  setModalVisible(false);
-                }}>
-                <Entypo name="cross" size={22} color={'black'} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  height: 60,
-                  marginTop: 30,
-                  width: Width,
-                  alignItems: 'center',
-                  borderBottomWidth: 1,
-                  padding: 10,
-                  borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.2)',
-                }}
-                onPress={() => requestCameraPermission()}>
-                <Entypo
-                  name={'camera'}
-                  size={25}
-                  color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-                  style={{marginRight: 15, marginLeft: 20}}
-                />
-
-                <Text
-                  style={[
-                    {
-                      fontSize: 18,
-                      fontWeight: '600',
-                      marginLeft: 6,
-                      color: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
-                    },
-                  ]}>
-                  Take Photo
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => selectMedia()}
-                style={{
-                  flexDirection: 'row',
-                  width: Width,
-                  alignItems: 'center',
-                  borderBottomWidth: 1,
-                  height: 60,
-                  padding: 10,
-                  borderBottomColor: isDark ? '#ccc' : 'rgba(0, 0, 0, 0.2)',
-                }}>
-                <MaterialCommunityIcons
-                  name={'image'}
-                  size={30}
-                  color={isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-                  style={{marginRight: 10, marginLeft: 18}}
-                />
-
-                <Text
-                  style={[
-                    {
-                      fontSize: 18,
-                      fontWeight: '600',
-                      marginLeft: 6,
-                      color: isDark ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)',
-                    },
-                  ]}>
-                  Choose from Gallery
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  if (media.length > 0) {
-                    // Remove the first image from the media array
-                    setMedia(media.slice(1));
-                  }
-                  setModalVisible(false); // Close the modal
-                }}
-                style={{
-                  flexDirection: 'row',
-                  width: Width,
-                  alignItems: 'center',
-                  padding: 10,
-                  height: 60,
-                }}>
-                <FontAwesome
-                  name={'trash'}
-                  size={25}
-                  color="rgb(255, 0, 0)"
-                  style={{marginRight: 15, marginLeft: 22}}
-                />
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: '600',
-                    marginLeft: 6,
-                    color: 'rgb(255, 0, 0)',
-                  }}>
-                  Remove Current Photo
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
     </KeyboardAvoidingContainer>
   );
@@ -1234,7 +1383,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-
   modalContent: {
     width: Width,
     height: Height * 0.28,
@@ -1269,10 +1417,11 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderColor: 'rgba(6, 196, 217, 1)',
     marginBottom: 10,
-  }, mediaItem: {
-    width: '20%', // Slight margin for spacing
+  },
+  mediaItem: {
+    width: '20%',
     margin: '2%',
-    aspectRatio: 1, // Keeps items square
+    aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
@@ -1282,10 +1431,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 8,
     resizeMode: 'cover',
-  },imageContainer: {
+  },
+  imageContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',marginBottom: 10,
+    width: '95%',
+    marginBottom: 10,
     paddingHorizontal: 10,
   },
   phoneInput: {
@@ -1324,11 +1475,10 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
-
   bigText: {
     fontSize: 30,
     color: 'black',
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 40,
     fontWeight: 'bold',
     marginBottom: 6,
@@ -1339,6 +1489,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 56,
     borderRadius: 10,
+    marginTop: 10,
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',

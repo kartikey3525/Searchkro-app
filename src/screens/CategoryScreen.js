@@ -1,14 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Pressable,
-} from 'react-native';
+import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Dimensions} from 'react-native';
 const Width = Dimensions.get('window').width;
@@ -25,37 +16,12 @@ export default function CategoryScreen({navigation, route}) {
   const isFocused = useIsFocused();
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  
-  const {getCategories, fullCategorydata, userRole, isposting} =
-  useContext(AuthContext);
-  
-  const [filteredLists, setFilteredLists] = useState(fullCategorydata);
-  
-  const [categoryIcons, setcategoryIcons] = useState([
-    {id: 1, title: 'Phone', img: require('../assets/phone.png')},
-    {id: 2, title: 'Laptop', img: require('../assets/Laptop.png')},
-    {id: 3, title: 'Medicine', img: require('../assets/medicine.png')},
-    {id: 4, title: 'Clothes', img: require('../assets/clothes.png')},
-    {id: 5, title: 'Groceries', img: require('../assets/groceries.png')},
-    {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
-    {id: 8, title: 'Food', img: require('../assets/food.png')},
-    {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {id: 9, title: 'Home service', img: require('../assets/home-service.png')},
-    {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
-    {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
-    {id: 12, title: 'See more', img: require('../assets/see-more.png')},
-  ]);
-  
-  useEffect(() => {
-    getCategories(); 
 
-    if (fullCategorydata && Array.isArray(fullCategorydata)) {
-      setFilteredLists(fullCategorydata);
-    } else {
-      console.error('fullCategorydata is not an array:', fullCategorydata);
-    }
- 
-  }, [isFocused]);
+  const {getCategories, fullCategorydata, userRole, isposting} =
+    useContext(AuthContext);
+
+  // State for the filtered list (search results)
+  const [filteredLists, setFilteredLists] = useState(fullCategorydata);
 
   const rendersquareList = ({item, index}) => {
     return (
@@ -77,14 +43,14 @@ export default function CategoryScreen({navigation, route}) {
           height: Height * 0.08,
           justifyContent: 'flex-start',
         }}
-        onPress={() => [
+        onPress={() =>
           navigation.navigate('Subcategory', {
             item: item.subCategories,
             isposting: isposting,
             selectedcategory: [item.name],
-          }),
-        ]}>
-        <View style={[styles.square]}>
+          })
+        }>
+        <View style={styles.square}>
           <Image
             source={{uri: item.image}}
             style={{
@@ -95,7 +61,6 @@ export default function CategoryScreen({navigation, route}) {
             resizeMode="contain"
           />
         </View>
-
         <Text
           style={{
             marginLeft: 10,
@@ -103,7 +68,7 @@ export default function CategoryScreen({navigation, route}) {
             width: Width * 0.64,
             color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
           }}>
-          {item.name}
+          {item.name || 'Unnamed Category'}
         </Text>
         <Entypo
           name="chevron-thin-right"
@@ -124,7 +89,6 @@ export default function CategoryScreen({navigation, route}) {
         },
       ]}>
       <Header header={'Categories'} />
-
       <View
         style={{
           width: Width,
@@ -133,21 +97,25 @@ export default function CategoryScreen({navigation, route}) {
         }}>
         <SearchBar
           placeholder={'Search Categories'}
-          lists={fullCategorydata}
+          lists={fullCategorydata || []} // Ensure lists is always an array
           setFilteredLists={setFilteredLists}
           searchKey="name"
         />
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{height: Height * 0.73, flexGrow: 1}}>
-          {filteredLists && filteredLists.length > 0 ? (
+          {filteredLists.length > 0 ? (
             filteredLists.map((item, index) => (
-              <View key={item.id}>{rendersquareList({item, index})}</View>
+              <View key={item.id || index}>
+                {rendersquareList({item, index})}
+              </View>
             ))
           ) : (
             <View
               style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-              <Text>No data available</Text>
+              <Text style={{color: isDark ? '#fff' : '#000'}}>
+                No categories found
+              </Text>
             </View>
           )}
         </ScrollView>
@@ -155,6 +123,7 @@ export default function CategoryScreen({navigation, route}) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     width: Width,
@@ -162,23 +131,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  inputContainer: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
+  square: {
+    justifyContent: 'center',
     alignItems: 'center',
-    width: Width * 0.9,
-    borderColor: 'rgb(0, 0, 0)',
-    borderWidth: 1,
-    borderRadius: 14,
-    height: 50,
-    padding: 1,
-  },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    height: 45,
-    left: 16,
   },
 });

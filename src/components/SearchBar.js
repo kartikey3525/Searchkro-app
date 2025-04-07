@@ -4,38 +4,52 @@ import { ThemeContext } from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 
-const SearchBar = ({ placeholder, lists = [], setFilteredLists, searchKey }) => {
-  const { theme } = useContext(ThemeContext);
+const SearchBar = ({placeholder, lists = [], setFilteredLists, searchKey}) => {
+  const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [searchText, setSearchText] = useState('');
 
-const searchFilterFunction = (text) => {
-  setSearchText(text);
+  const searchFilterFunction = text => {
+    setSearchText(text);
 
-  if (typeof setFilteredLists !== 'function') {
-    console.error('setFilteredLists is not a function. Check parent component.');
-    return;
-  }
+    if (typeof setFilteredLists !== 'function') {
+      console.error(
+        'setFilteredLists is not a function. Check parent component.',
+      );
+      return;
+    }
 
-  if (!Array.isArray(lists)) {
-    console.error('lists is not an array:', lists);
-    return;
-  }
+    if (!Array.isArray(lists)) {
+      console.error('lists must be an array:', lists);
+      return;
+    }
 
-  if (text.trim() === '') {
-    setFilteredLists(lists);
-    return;
-  }
+    if (text.trim() === '') {
+      setFilteredLists(lists); // Reset to original lists when search is empty
+      return;
+    }
 
-  const lowerCaseText = text.toLowerCase();
+    const lowerCaseText = text.toLowerCase();
 
-  const filteredResults = lists.filter(item =>
-    item?.[searchKey]?.toLowerCase().includes(lowerCaseText)
-  );
+    // Check if lists is a single array or an array of arrays
+    const isSingleList = !lists.every(item => Array.isArray(item));
 
-  setFilteredLists(filteredResults);
-};
-
+    if (isSingleList) {
+      // Handle single list (e.g., fullCategorydata in CategoryScreen)
+      const filteredResults = lists.filter(item =>
+        item?.[searchKey]?.toLowerCase().includes(lowerCaseText),
+      );
+      setFilteredLists(filteredResults);
+    } else {
+      // Handle multiple lists (e.g., [recentPosts, nearbyPosts] in HomeScreen)
+      const filteredResults = lists.map(list =>
+        list.filter(item =>
+          item?.[searchKey]?.toLowerCase().includes(lowerCaseText),
+        ),
+      );
+      setFilteredLists(filteredResults);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -53,7 +67,7 @@ const searchFilterFunction = (text) => {
           resizeMode="contain"
         />
         <TextInput
-          style={[styles.searchInput, { color: isDark ? '#fff' : '#000' }]}
+          style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
           placeholderTextColor={'rgba(94, 95, 96, 1)'}
           placeholder={placeholder}
           autoCapitalize="none"

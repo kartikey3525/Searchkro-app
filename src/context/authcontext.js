@@ -1,16 +1,20 @@
 import {createContext, useState, useEffect} from 'react';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import {Alert, AppState} from 'react-native';
+import {Alert, AppState, Linking} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
-// let apiURL = 'http://192.168.1.31:8080';
+// let apiURL = 'http://192.168.1.20:8080';
 let apiURL = 'https://service.kartikengitech.info';
-// let apiURL = 'https://cdg43pjp-8080.inc1.devtunnels.ms';
+// let apiURL = 'https://fgrd857c-8080.inc1.devtunnels.ms';
 
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import LocationPermission from '../hooks/uselocation';
+import io from 'socket.io-client';
+// Import at the top of your file
+// import notifee from '@notifee/react-native';
+import notifee, {EventType,AndroidImportance} from '@notifee/react-native';
 
 const AuthContext = createContext();
 
@@ -48,99 +52,261 @@ const AuthProvider = ({children}) => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isposting, setisposting] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    register: false,
+    login: false,
+    google: false
+  });
 
   const isFocused = useIsFocused(); // ✅ Correct way to use `useIsFocused()`
 
+  const [socket, setSocket] = useState(null);
+  const [appState, setAppState] = useState(AppState.currentState);
+  const [handleRemenberme, sethandleRemenberme] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [lastVisitedNotification, setLastVisitedNotification] = useState(null);
+
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        '872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com',
-      offlineAccess: true,
-      // forceCodeForRefreshToken: true,
-    });
-    <LocationPermission setLocation={setLocation} />;
-    getDeviceToken();
-    checkLoginStatus();
+    const handleDeepLink = (url) => {
+      if (!url || typeof url !== 'string') return; // Guard against null/undefined or non-string URLs
 
-    // ✅ Handle Initial Notification (App was killed & opened from notification)
-    const handleInitialNotification = async () => {
-      try {
-        const remoteMessage = await messaging().getInitialNotification();
-        console.log('📩 Initial Notification:', remoteMessage);
-
-        if (remoteMessage) {
-          navigation.navigate('Notification'); // ✅ Navigate to Notification screen
+      // Extract product ID if present
+      if (url.includes('/product/')) {
+        const productId = url.split('/product/')[1]?.split('?')[0]; // Remove query params if any
+        if (productId) {
+          navigation.navigate('ProductDetails', { productId });
+          return;
         }
-      } catch (error) {
-        console.error('❌ Error fetching initial notification:', error);
       }
+
+      // Extract shop ID if present
+      if (url.includes('/shop/')) {
+        const shopId = url.split('/shop/')[1]?.split('?')[0]; // Remove query params if any
+        if (shopId) {
+          navigation.navigate('ShopDetails', { shopId });
+          return;
+        }
+      }
+
+      // Optionally log unhandled URLs for debugging
+      console.log('Unhandled deep link:', url);
     };
 
-    handleInitialNotification();
+    // Handle initial URL when app is opened from a deep link
+    Linking.getInitialURL()
+      .then((url) => handleDeepLink(url))
+      .catch((err) => console.error('Error getting initial URL:', err));
 
-    // ✅ Handle Notification Click When App is in Background
-    const unsubscribeOnOpen = messaging().onNotificationOpenedApp(
-      remoteMessage => {
-        console.log('📬 Notification opened from background:', remoteMessage);
+    // Add listener for deep links when app is already running
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
 
-        if (remoteMessage) {
-          navigation.navigate('Notification'); // ✅ Navigate to Notification screen
-        } else {
-          console.log('⚠️ No remoteMessage found in onNotificationOpenedApp.');
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.remove();
+    };
+  }, [navigation]);
+
+  // Add this useEffect for app state handling
+  useEffect(() => {
+    const handleAppStateChange = nextAppState => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        // App came to foreground - reconnect socket
+        initializeSocket();
+        getUserData();
+      } else if (nextAppState.match(/inactive|background/)) {
+        // App went to background - disconnect socket
+        if (socket) {
+          socket.disconnect();
+          setSocket(null);
         }
-      },
+      }
+      setAppState(nextAppState);
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
     );
 
-    // ✅ Handle Foreground Notifications
-    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log('📥 Foreground Notification:', remoteMessage);
-
-      if (remoteMessage?.notification) {
-        Alert.alert(
-          remoteMessage.notification.title || 'Notification',
-          remoteMessage.notification.body || 'You have a new message',
-          [
-            {text: 'Open', onPress: () => navigation.navigate('Notification')}, // ✅ Navigate
-            {text: 'Cancel', style: 'cancel'},
-          ],
-        );
-      }
-    });
-
     return () => {
-      unsubscribeOnOpen();
-      unsubscribeOnMessage();
+      subscription.remove();
+      // Clean up socket on unmount
+      if (socket) {
+        socket.disconnect();
+      }
     };
-  }, []);
+  }, [appState, socket]);
 
-  const checkLoginStatus = async () => {
+  // Modified socket initialization function
+  const initializeSocket = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
-      const userData = await AsyncStorage.getItem('userData');
-      const userRole = await AsyncStorage.getItem('selectedUserRole'); // Retrieve stored role
+      if (!token) return;
 
-      if (token && userData) {
+      // Disconnect existing socket if any
+      if (socket) {
+        socket.disconnect();
+      }
+
+      const newSocket = io(`${apiURL}/chat`, {
+        transports: ['websocket'],
+        extraHeaders: {token},
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 3000,
+      });
+
+      newSocket.on('connect', () => {
+        console.log('✅ Socket connected!');
+        setSocket(newSocket);
+        initializeChat(newSocket);
+      });
+
+      newSocket.on('connect_error', error => {
+        console.error('🚨 Socket connection error:', error.message);
+      });
+
+      newSocket.on('disconnect', () => {
+        console.log('🔌 Socket disconnected');
+      });
+    } catch (error) {
+      console.error('Error initializing socket:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Initialize Google Signin
+    GoogleSignin.configure({
+      webClientId: '872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com',
+      offlineAccess: true,
+    });
+
+    // Request location permission
+    <LocationPermission setLocation={setLocation} />;
+    
+    // Get device token
+    getDeviceToken();
+    
+    // Check login status
+    checkLoginStatus();
+
+    // Notification handlers
+    const setupNotifications = async () => {
+      try {
+        // 1. Request notification permissions (required for iOS)
+        await messaging().requestPermission();
+        
+        // 2. Create notification channel (required for Android)
+        await notifee.createChannel({
+          id: 'default',
+          name: 'Default Channel',
+          importance: AndroidImportance.HIGH,
+        });
+
+        // 3. Handle initial notification (app opened from quit state)
+        const initialNotification = await messaging().getInitialNotification();
+        if (initialNotification) {
+          navigation.navigate('Notification', {
+            notificationData: initialNotification.data
+          });
+        }
+
+        // 4. Handle notification opened from background state
+        const unsubscribeOnOpen = messaging().onNotificationOpenedApp(remoteMessage => {
+          if (remoteMessage) {
+            navigation.navigate('Notification', {
+              notificationData: remoteMessage.data
+            });
+          }
+        });
+
+        // 5. Handle foreground notifications
+        const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+          console.log('Foreground Notification:', remoteMessage);
+          
+          if (remoteMessage?.notification) {
+            await notifee.displayNotification({
+              title: remoteMessage.notification.title || 'New Notification',
+              body: remoteMessage.notification.body || 'You have a new message',
+              android: {
+                channelId: 'default',
+                pressAction: {
+                  id: 'default',
+                },
+              },
+              ios: {
+                foregroundPresentationOptions: {
+                  badge: true,
+                  sound: true,
+                  banner: true,
+                  list: true,
+                },
+              },
+              data: remoteMessage.data || {},
+            });
+          }
+        });
+
+        // 6. Handle notification press (foreground)
+        const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+          if (type === EventType.PRESS) {
+            navigation.navigate('Notification', {
+              notificationData: detail.notification?.data,
+            });
+          }
+        });
+
+        return () => {
+          unsubscribeOnOpen();
+          unsubscribeOnMessage();
+          unsubscribeNotifee();
+        };
+      } catch (error) {
+        console.error('Notification setup error:', error);
+      }
+    };
+
+    setupNotifications();
+
+    // Other logic
+    if (userdata?._id) {
+      getSingleShop(userdata._id);
+    }
+  }, [navigation]);
+ 
+
+  // Update your checkLoginStatus to use initializeSocket
+  const checkLoginStatus = async () => {
+    try {
+      const rememberMe = await AsyncStorage.getItem('rememberMe');
+      const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+      const userRole = await AsyncStorage.getItem('selectedUserRole');
+
+      if (rememberMe === 'true' && token && userData) {
         const parsedUserData = JSON.parse(userData);
         setUserdata(parsedUserData);
 
+        // Initialize socket when user is logged in
+        initializeSocket();
+
         if (navigation.isReady()) {
-          // Navigate based on the stored user role
           if (userRole === 'buyer') {
             setUserRole(userRole);
-            navigation.navigate('BottomTabs'); // Adjust to the correct buyer screen
+            navigation.navigate('BottomTabs');
           } else if (userRole === 'seller') {
             setUserRole(userRole);
-            navigation.navigate('BottomTabs'); // Adjust to the correct seller screen
+            navigation.navigate('BottomTabs');
           } else {
-            navigation.navigate('BottomTabs'); // Default navigation if no role is found
+            navigation.navigate('BottomTabs');
           }
         }
+      } else if (token && userData) {
+        // User has credentials but didn't check "Remember Me"
+        await handleLogout(); // Clear their session
       }
-      // else {
-      //   if (navigation.isReady()) {
-      //     navigation.navigate('Login');
-      //   }
-      // }
     } catch (error) {
       console.error('❌ Error checking login status:', error);
     }
@@ -429,6 +595,8 @@ const AuthProvider = ({children}) => {
     }
   };
   const getSingleShop = async userId => {
+    setSingleShop([]);
+
     try {
       const headers = {
         Authorization: `Bearer ${userdata.token}`,
@@ -479,7 +647,7 @@ const AuthProvider = ({children}) => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
-          'Error fetching shop:',
+          'Error fetching Buyers List:',
           error.response?.data || 'No error response',
         );
       } else {
@@ -503,24 +671,10 @@ const AuthProvider = ({children}) => {
       // Log response to check structure
       // console.log('Rating API Response:', response.data);
       setShopRating(response.data);
-      //     console.log('Shop Rating:', ShopRating);
-      // If response contains 'data', set shop rating
-      // if (response.data && response.data.data) {
-      //   const ShopRating = response.data.data.find(shop => shop._id === shopId);
-
-      //   if (ShopRating) {
-      //     setShopRating(ShopRating);
-      //     console.log('Shop Rating:', ShopRating);
-      //   } else {
-      //     console.log('No shop found with the given shopId');
-      //   }
-      // } else {
-      //   console.log('Invalid API response structure');
-      // }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
-          'Error fetching shop:',
+          'Error fetching shop Rating:',
           error.response?.data || 'No error response',
         );
       } else {
@@ -536,18 +690,24 @@ const AuthProvider = ({children}) => {
         {
           headers: {
             Authorization: `Bearer ${userdata.token}`,
-            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
           },
         },
       );
-      const PostsHistory = response.data.data;
-      setPostsHistory(PostsHistory);
-      // console.log('PostsHistory:', response.data.data);
+
+      const allPosts = response.data.data;
+
+      // Filtering posts to only include those matching the current user's token
+      const filteredPosts = allPosts.filter(
+        post => post.userId === userdata._id,
+      );
+
+      setPostsHistory(filteredPosts);
+      console.log('Filtered Posts:', filteredPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // console.log('Error 107', error.response?.data || 'No error response');
+        console.error('Error:', error.response?.data || 'No error response');
       } else {
-        console.log('Error 109', 'Failed to load categories');
+        console.error('Error:', 'Failed to load categories');
       }
     }
   };
@@ -559,49 +719,99 @@ const AuthProvider = ({children}) => {
         {
           headers: {
             Authorization: `Bearer ${userdata.token}`,
-            // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc3OWFlOTMxNTNlNDAxNmM1ZWNhYTIiLCJyb2xlIjoic2VsbGVyIiwicm9sZUlkIjoxLCJpYXQiOjE3MzU5NjczNDh9.-zeNvyQJa0D5I1WXTczx1X4k70ht2bINI6nZBNbMW9M'}`,
           },
         },
       );
+
       const notificationList = response.data.data;
       setnotificationList(notificationList);
-      // console.log('notificationList:', response.data.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // console.log('Error 107', error.response?.data || 'No error response');
+
+      // Calculate unread count based on last visited time
+      if (lastVisitedNotification) {
+        const unread = notificationList.filter(
+          notif =>
+            new Date(notif.createdAt) > new Date(lastVisitedNotification),
+        );
+        setUnreadCount(unread.length);
       } else {
-        console.log('Error 109', 'Failed to load categories');
+        // If never visited, all notifications are unread
+        setUnreadCount(notificationList.length);
       }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
     }
   };
 
-  const PostReviewLikes = async (userId, postId, like) => {
-    // console.log('userId, postId', userId, postId, like);
+  // Add a function to mark notifications as read
+  const markNotificationsAsRead = async () => {
+    const now = new Date();
+    setLastVisitedNotification(now);
+    setUnreadCount(0);
+    await AsyncStorage.setItem('lastVisitedNotification', now.toISOString());
+  };
 
+  // Update your checkLoginStatus or initialization to load the last visited time
+  const loadLastVisitedTime = async () => {
     try {
+      const lastVisited = await AsyncStorage.getItem('lastVisitedNotification');
+      if (lastVisited) {
+        setLastVisitedNotification(new Date(lastVisited));
+      }
+    } catch (error) {
+      console.error('Error loading last visited time:', error);
+    }
+  };
+
+  // Call loadLastVisitedTime when your app initializes
+  useEffect(() => {
+    loadLastVisitedTime();
+  }, []);
+
+  const PostReviewLikes = async (userId, postId, like) => {
+    try {
+      // Validate required parameters
+      if (!userId || !postId || like === undefined) {
+        console.error('Missing required parameters:', {userId, postId, like});
+        throw new Error('Missing required parameters for like action');
+      }
+
       const payload = {
-        status: 'like', // Ensure `like` is defined before calling
+        status: like ? 'like' : 'unlike', // Convert boolean to status string
       };
 
       const headers = {
-        Authorization: `Bearer ${userdata.token}`,
+        Authorization: `Bearer ${userdata?.token}`,
       };
 
+      // Using template literals for cleaner URL construction
       const response = await axios.post(
-        `${apiURL}/api/rate/likeRating?postId=${postId}&userId=${userId}&status=${like}`,
-        payload, // Pass payload correctly
-        {headers}, // Move headers inside config
+        `${apiURL}/api/rate/likeRating`,
+        {
+          postId,
+          userId,
+          status: payload.status,
+        },
+        {headers},
       );
 
       const RatingLiked = response.data;
-      setRatingLiked(RatingLiked); // Ensure `setRatingLiked` is defined
-      // console.log('Success:', 'Rating Liked!', response.data);
+      setRatingLiked(RatingLiked);
+      return RatingLiked; // Return the result for further processing
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log('Error 107', error.response?.data || 'No error response');
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          'Failed to process like action';
+        console.error('API Error:', errorMessage, error.response?.status);
+
+        // You might want to show this to the user
+        Alert.alert('Error', errorMessage);
       } else {
-        console.log('Error 109', 'Failed to load likes');
+        console.error('Unexpected Error:', error);
+        Alert.alert('Error', 'An unexpected error occurred');
       }
+      throw error; // Re-throw to allow calling code to handle
     }
   };
 
@@ -632,8 +842,9 @@ const AuthProvider = ({children}) => {
       // console.log('Response:', response.data.data);
 
       console.log('Success', ' Report Post successful!');
+      Alert.alert('Success', 'Report submitted successfully!');
 
-      // navigation.navigate('BottomTabs');
+      navigation.navigate('BottomTabs');
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // console.log('Error 107', error.response?.data || 'No error response');
@@ -644,10 +855,6 @@ const AuthProvider = ({children}) => {
   };
 
   const PostRating = async (postId, rating, media, description) => {
-    // const formattedMedia = Array.isArray(media)
-    //   ? media.map(item => item.uri || item)
-    //   : [];
-    // console.log('formattedMedia',formattedMedia)
     try {
       const payload = {
         rate: rating, // User-selected rating
@@ -679,6 +886,7 @@ const AuthProvider = ({children}) => {
   };
 
   const createPost = async (
+    name,
     selectedCategories,
     description,
     phone,
@@ -688,6 +896,7 @@ const AuthProvider = ({children}) => {
   ) => {
     console.log(
       'first',
+      name,
       selectedCategories,
       description,
       phone,
@@ -697,6 +906,7 @@ const AuthProvider = ({children}) => {
     );
     try {
       const payload = {
+        productName: name,
         categories: selectedCategories,
         images: media,
         description: description,
@@ -706,19 +916,6 @@ const AuthProvider = ({children}) => {
         latitude: location.latitude,
         longitude: location.longitude,
         locationUrl: 'https://maps.google.com/?q=New+York',
-        // categories: ['Electronics', 'Smartphones'],
-        // images: [
-        //   'https://example.com/image1.jpg',
-        //   'https://example.com/image2.jpg',
-        // ],
-        // description:
-        //   'Looking for a smartphone with good battery life and under $500.',
-        // contactNumber: '1234567890',
-        // contactEmail: 'buyer@example.com',
-        // location: 'New York, NY',
-        // latitude: '',
-        // longitude: '',
-        // locationUrl: 'https://maps.google.com/?q=New+York',
       };
 
       const headers = {
@@ -734,7 +931,7 @@ const AuthProvider = ({children}) => {
       );
 
       console.log('Response 171:', response.data);
-      // Alert.alert('Success', 'Post created successfully!');
+      Alert.alert('Success', 'Post created successfully!');
       navigation.navigate('BottomTabs');
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
@@ -760,6 +957,7 @@ const AuthProvider = ({children}) => {
       console.log('Deleted Post Response:', response.data);
 
       // Update local state by filtering out the deleted post
+      await getPostsHistory();
       setPostsHistory(prevPosts => prevPosts.filter(post => post._id !== id));
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -838,60 +1036,127 @@ const AuthProvider = ({children}) => {
     }
   };
 
+  const deleteProduct = async id => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+      };
+
+      const response = await axios.delete(
+        `${apiURL}/api/post/deletes?id=${id}`, // Passing id as a query param
+        {headers},
+      );
+
+      console.log('Deleted product Response:', response.data);
+
+      // Update local state by filtering out the deleted post
+      // setPostsHistory(prevPosts => prevPosts.filter(post => post._id !== id));
+      console.log('product deleted');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(
+          'Error deleting product:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.log('Error:', error);
+      }
+    }
+  };
+
   const createSellerProfile = async (
-    email,
     description,
     phone,
     location,
     profile,
     selectedCategories,
-    bussinessAddress,
+    businessAddress,
     Socialmedia,
+    establishmentYear,
+    gstin,
     ownerName,
     shopName,
     openAt,
     closeAt,
     selectedScale,
     selectedAvailabity,
-    products,
   ) => {
+    // console.log(
+    //   'Response 787:',
+    //   // description,
+    //   // phone,
+    //   // location,
+    //   // profile,
+    //   // selectedCategories,
+    //   // businessAddress,
+    //   // Socialmedia,
+    //   // establishmentYear,
+    //   // gstin,
+    //   // ownerName,
+    //   // shopName,
+    //   // openAt,
+    //   // closeAt,
+    //   // selectedScale,
+    //   // selectedAvailabity,
+    //   // products,
+    // );
+    console.log('Response 1011:', selectedAvailabity);
+
+    try {
+      const payload = {
+        description: description,
+        phone: phone,
+        location: location,
+        profile: profile,
+        selectedCategories: selectedCategories,
+        businessAddress: businessAddress,
+        socialMedia: Socialmedia,
+        establishmentYear: establishmentYear,
+        gstin: gstin,
+        ownerName: ownerName,
+        name: shopName,
+        businessScale: selectedScale,
+        isDeliveryAvailable: selectedAvailabity,
+        openTime: openAt,
+        closeTime: closeAt,
+        // categoriesPost: products,
+        fcmToken: fcmToken,
+      };
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+
+        // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.put(
+        `${apiURL}/api/user/updateProfile`,
+        payload,
+        {headers},
+      );
+
+      console.log('Response 171:', response.data);
+      await getUserData();
+      navigation.navigate('BottomTabs');
+      Alert.alert('Success', 'Profile created / updated successfully!');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log('Error 107:', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109:', error.message || 'Failed to load categories');
+      }
+    }
+  };
+
+  const createSellerProducts = async products => {
     console.log(
       'Response 787:',
-      // email,
-      // description,
-      // phone,
-      // location,
-      profile,
-      selectedCategories,
-      // bussinessAddress,
-      // Socialmedia,
-      // ownerName,
-      // shopName,
-      // openAt,
-      // closeAt,
-      // selectedScale,
-      // selectedAvailabity,
+
       products,
     );
 
     try {
       const payload = {
-        name: shopName,
-        email: email,
-        description: description,
-        phone: phone,
-        location: location,
-        googleData: {},
-        profile: profile,
-        selectedCategories: selectedCategories,
-        bussinessAddress: bussinessAddress,
-        Socialmedia: Socialmedia,
-        ownerName: ownerName,
-        selectedScale: selectedScale,
-        selectedAvailabity: selectedAvailabity,
-        fcmToken: fcmToken,
-        openTime: openAt,
-        closeTime: closeAt,
         categoriesPost: products,
       };
 
@@ -908,7 +1173,7 @@ const AuthProvider = ({children}) => {
       );
 
       console.log('Response 171:', response.data);
-      Alert.alert('Success', 'Profile updated successfully!');
+      Alert.alert('Success', 'product created successfully!');
       // navigation.goBack();
       // Alert.alert('Success', 'Post created successfully!');
       navigation.navigate('BottomTabs');
@@ -933,7 +1198,7 @@ const AuthProvider = ({children}) => {
         name: name,
         dob: date,
         phone: value,
-        gender: gender[0],
+        gender: gender,
         profile: imageUrl,
         fcmToken: fcmToken,
       };
@@ -951,7 +1216,47 @@ const AuthProvider = ({children}) => {
       );
 
       console.log('Response 171:', response.data);
-      // Alert.alert('Success', 'Post created successfully!');
+      await getUserData();
+      Alert.alert('Success', 'Profile updated successfully!');
+      navigation.navigate('profilesettings');
+      // console.log('NearbyPosts:', NearbyPosts);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log('Error 107:', error.response?.data || 'No error response');
+      } else {
+        console.log('Error 109:', error.message || 'Failed to load categories');
+      }
+    }
+  };
+
+  const updateProduct = async (data, title, images, categories) => {
+    // const formattedMedia = Array.isArray(media)
+    //   ? media.map(item => item.uri || item)
+    //   : [];
+
+    console.log('data', title, images, categories);
+    try {
+      const payload = {
+        title: title,
+        categories: categories,
+        images: images,
+        fcmToken: fcmToken,
+      };
+
+      const headers = {
+        Authorization: `Bearer ${userdata.token}`,
+
+        // Authorization: `Bearer ${'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzg4ZjVmMzczMmEzMWIzMWI5NzViMGUiLCJyb2xlIjoiYnV5ZXIiLCJyb2xlSWQiOjAsImlhdCI6MTczNzE4MDEyMH0.UsHVlk7CXbgl_3XtHpH0kQymaEErvFHyNSXj4T8LgqM'}`,
+      };
+
+      const response = await axios.put(
+        `${apiURL}/api/post/update?id=${data._id}`,
+        payload,
+        {headers},
+      );
+
+      console.log('Response 171:', response.data);
+      Alert.alert('Success', 'Product Updated successfully!');
       navigation.navigate('BottomTabs');
       // console.log('NearbyPosts:', NearbyPosts);
     } catch (error) {
@@ -1011,13 +1316,13 @@ const AuthProvider = ({children}) => {
       const response = await axios.get(`${apiURL}/api/user/getProfile`, {
         headers,
       });
-      // console.log('userdata731', response.data);
+      // console.log('userdata1226', response.data.data.isDeliveryAvailable);
 
       setUserfulldata(response.data.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
-          'Error fetching shop:',
+          'Error fetching UserData:',
           error.response?.data || 'No error response',
         );
       } else {
@@ -1026,71 +1331,219 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const handleRegister = async (email, password, name) => {
+ const handleRegister = async (email, password, name, rememberMe) => {
+  setIsLoading(prev => ({...prev, register: true}));
+  try {
+    const response = await axios.post(`${apiURL}/api/user/sendOTP`, {
+      emailPhone: email,
+      password,
+      userName: name,
+      isAcceptTermConditions: true,
+      roleId: userRole === 'buyer' ? 0 : 1,
+      fcmToken: fcmToken,
+    });
+
+    await AsyncStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
+    
+    navigation.navigate('OTPScreen', {
+      emailPhone: email,
+      password: password,
+    });
+  } catch (error) {
+    let errorMessage = 'An unexpected error occurred.';
+    if (axios.isAxiosError(error)) {
+      console.error('Registration error:', error.response?.data);
+      errorMessage = error.response?.data?.body || 'Email already exists.';
+    }
+    Alert.alert('Registration Failed', errorMessage);
+  } finally {
+    setIsLoading(prev => ({...prev, register: false}));
+  }
+};
+
+const handleLogin = async (email, password, rememberMe) => {
+  setIsLoading(prev => ({...prev, login: true}));
+  try {
+    const response = await axios.post(`${apiURL}/api/user/login`, {
+      emailPhone: email,
+      password,
+      isAcceptTermConditions: true,
+      roleId: userRole === 'buyer' ? 0 : 1,
+      fcmToken: fcmToken,
+    });
+
+    const user = response.data;
+    setUserdata(user);
+
+    await AsyncStorage.multiSet([
+      ['userToken', user.token],
+      ['userData', JSON.stringify(user)],
+      ['selectedUserRole', userRole],
+      ['rememberMe', rememberMe ? 'true' : 'false'],
+    ]);
+
+    navigation.navigate('BottomTabs');
+  } catch (error) {
+    let errorMessage = 'Login failed. Please try again.';
+    if (axios.isAxiosError(error)) {
+      console.error('Login error:', error.response?.data);
+      errorMessage = error.response?.data?.body || 'Invalid credentials.';
+    }
+    Alert.alert('Login Failed', errorMessage);
+  } finally {
+    setIsLoading(prev => ({...prev, login: false}));
+  }
+};
+
+const signInWithGoogle = async () => {
+  setIsLoading(prev => ({...prev, google: true}));
+  
+  try {
+    // 1. Check Google Play Services
     try {
-      const response = await axios.post(`${apiURL}/api/user/sendOTP`, {
-        emailPhone: email,
-        password,
-        name,
-        isAcceptTermConditions: true,
-        roleId: userRole === 'buyer' ? 0 : 1,
-        fcmToken: fcmToken,
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true
       });
-      const user = response.data;
-      navigation.navigate('OTPScreen', {
-        emailPhone: email,
-        password: password,
-        username: name,
-      });
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error(
-          'Error fetching shop:',
-          error.response?.data || 'No error response',
-        );
-        Alert.alert(
-          'Error',
-          error.response?.data?.body || 'Something went wrong.',
-        );
+    } catch (playServicesError) {
+      console.warn('Google Play Services error:', playServicesError);
+      throw new Error('Google Play Services are required or need to be updated.');
+    }
+
+    // 2. Sign in with Google
+    let signInResult, idToken;
+    try {
+      signInResult = await GoogleSignin.signIn();
+      idToken = signInResult.data.idToken || signInResult.user?.idToken;
+      
+      if (!idToken) {
+        throw new Error('No ID token received from Google');
+      }
+    } catch (googleSignInError) {
+      console.warn('Google Sign-In error:', googleSignInError);
+      throw new Error('Failed to sign in with Google. Please try again.');
+    }
+
+    // 3. Firebase authentication
+    let userCredential;
+    try {
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      userCredential = await auth().signInWithCredential(googleCredential);
+      
+      if (!userCredential?.user?.email) {
+        throw new Error('Could not retrieve user information from Firebase');
+      }
+    } catch (firebaseError) {
+      console.warn('Firebase authentication error:', firebaseError);
+      throw new Error('Failed to authenticate with Firebase.');
+    }
+
+    // 4. Get existing user data safely
+    let storedUserData = null;
+    try {
+      const data = await AsyncStorage.getItem('userData');
+      storedUserData = data ? JSON.parse(data) : null;
+    } catch (storageError) {
+      console.warn('AsyncStorage error:', storageError);
+      // Continue with null storedUserData
+    }
+
+    const profileImage = Userfulldata?.profile || 
+                        storedUserData?.profile || 
+                        userCredential.user.photoURL;
+
+    // 5. Google login API call with additional error handling
+    let response;
+    try {
+      const headers = {Authorization: `Bearer ${idToken}`};
+      response = await axios.post(
+        `${apiURL}/api/user/googleLogin`,
+        {
+          email: userCredential.user.email,
+          name: userCredential.user.displayName,
+          profile: profileImage,
+          roleId: userRole === 'buyer' ? 0 : 1,
+          fcmToken: fcmToken,
+          idToken: idToken,
+        },
+        {
+          headers,
+          timeout: 10000 // 10 seconds timeout
+        }
+      );
+
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+    } catch (apiError) {
+      console.warn('API error:', apiError);
+      
+      // Handle specific axios errors
+      if (apiError.response) {
+
+        // The request was made and the server responded with a status code
+        const status = apiError.response.status;
+        let backendErrorMessage = apiError.response.data?.message || 
+                                apiError.response.data?.error || 
+                                'Request failed';
+        
+        // For 400 errors, check if there's validation message
+        if (status === 400 && apiError.response.data?.errors) {
+          backendErrorMessage = Object.values(apiError.response.data.errors).join('\n');
+        }
+        
+        throw new Error(backendErrorMessage);
+      } else if (apiError.request) {
+        // The request was made but no response was received
+        throw new Error('Network error. Please check your connection.');
       } else {
-        Alert.alert(
-          'Error',
-          error.response?.data?.body || 'Something went wrong.',
-        );
+        // Something happened in setting up the request
+        throw new Error('Request setup error. Please try again.');
       }
     }
-  };
 
-  const handleLogin = async (email, password) => {
+    // 6. Merge and store user data
     try {
-      const response = await axios.post(`${apiURL}/api/user/login`, {
-        emailPhone: email,
-        password,
-        // username,
-        isAcceptTermConditions: true,
-        roleId: userRole === 'buyer' ? 0 : 1,
-        fcmToken: fcmToken,
-      });
+      const mergedUserData = {
+        ...(storedUserData || {}),
+        ...response.data,
+        profile: profileImage,
+        token: response.data.token,
+      };
 
-      const user = response.data;
-      setUserdata(user);
+      setUserdata(mergedUserData);
+      
+      await AsyncStorage.multiSet([
+        ['userToken', mergedUserData.token],
+        ['userData', JSON.stringify(mergedUserData)],
+        ['selectedUserRole', userRole],
+        ['rememberMe', 'true'],
+      ]);
 
-      await AsyncStorage.setItem('userToken', user.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(user));
-      await AsyncStorage.setItem('selectedUserRole', userRole);
-      navigation.navigate('BottomTabs'); // Redirect to home
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error  :', error.response?.data || 'No error response');
-        Alert.alert(
-          'Error',
-          error.response?.data?.body || 'Something went wrong.',
-        );
-      } else {
-        console.error('Failed to load Login data');
-      }
+      navigation.navigate('AddressScreen');
+    } catch (storageError) {
+      console.warn('Data storage error:', storageError);
+      throw new Error('Failed to save user data.');
     }
-  };
+
+  } catch (error) {
+    console.error('Google Sign-In Error:', error);
+    
+    let errorMessage = 'Google sign-in failed. Please try again.';
+    if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // Show alert with the error message
+    Alert.alert(
+      'Sign-in Failed',
+      errorMessage,
+      [{ text: 'OK' }],
+      { cancelable: false }
+    );
+  } finally {
+    setIsLoading(prev => ({...prev, google: false}));
+  }
+};
 
   const VerifyOTP = async (email, otp) => {
     // console.log('user', email);
@@ -1133,20 +1586,39 @@ const AuthProvider = ({children}) => {
 
   const handleLogout = async () => {
     try {
-      // Sign out from Google Sign-In
+      // Disconnect socket first
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
+
+      // Get current profile before clearing data
+      const currentProfile = Userfulldata?.profile;
+      const currentUserData = await AsyncStorage.getItem('userData').then(
+        data => (data ? JSON.parse(data) : null),
+      );
+
       await GoogleSignin.signOut();
 
-      // Clear local storage
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
+      // Clear all auth-related data but keep the rememberMe preference
+      const rememberMe = await AsyncStorage.getItem('rememberMe');
 
-      // Clear user session
-      setUserdata(null);
+      await AsyncStorage.multiSet([
+        ['userToken', ''],
+        [
+          'userData',
+          JSON.stringify({
+            ...(currentUserData || {}),
+            profile: currentProfile,
+            token: null,
+          }),
+        ],
+        ['rememberMe', 'false'], // Explicitly set rememberMe to false on logout
+      ]);
+
+      setUserfulldata(null);
       setIsLoggedIn(false);
 
-      console.log('User logged out successfully!');
-
-      // Reset navigation and go to Login screen
       navigation.reset({
         index: 0,
         routes: [{name: 'commonscreen'}],
@@ -1157,23 +1629,23 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const handleResetPassword = async email => {
+  const handleForgetPassword = async email => {
     try {
-      if (!email.trim()) {
-        Alert.alert('Error', 'Please provide a valid email address.');
-        return;
-      }
-      await api.post('api/reset-password', {
-        email,
-      });
-      Alert.alert(
-        'Reset Email Sent',
-        'A password reset email has been sent to your email address.',
+      const response = await axios.post(
+        `${apiURL}/api/user/sendForgotPasswordOTP`,
+        {
+          email,
+        },
       );
+
+      console.log('res', response.data);
+      navigation.navigate('OTPScreen', {
+        emailPhone: email,
+      });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
-          'Error fetching shop:',
+          'Error fetching Reset Password:',
           error.response?.data || 'No error response',
         );
       } else {
@@ -1182,81 +1654,51 @@ const AuthProvider = ({children}) => {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const handleVerifyPasswordOtp = async (email, otp) => {
     try {
-      // Check if Google Play Services is available
-      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-
-      // Sign in with Google
-      const signInResult = await GoogleSignin.signIn();
-
-      // Extract the ID token from the sign-in result
-      let idToken = signInResult.data?.idToken || signInResult.user?.idToken;
-      if (!idToken) {
-        throw new Error('No ID token found');
-      }
-
-      // Create a Google credential with the token
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-      // Sign in the user with the credential
-      const userCredential = await auth().signInWithCredential(
-        googleCredential,
+      const response = await axios.post(
+        `${apiURL}/api/user/verifyForgotPasswordOTP`,
+        {
+          email,
+          otp,
+        },
       );
 
-      // Prepare request headers
-      const headers = {
-        Authorization: `Bearer ${idToken}`,
-      };
-
-      const response = await axios.post(`${apiURL}/api/user/googleLogin`, {
-        email: userCredential.user.email,
-        name: userCredential.user.displayName,
-        profile: userCredential.user.photoURL,
-        roleId: userRole === 'buyer' ? 0 : 1,
-        fcmToken: fcmToken,
-        idToken: idToken,
+      console.log('res', response.data);
+      navigation.navigate('NewPassword', {
+        email: email,
       });
-
-      const user = response.data;
-      setUserdata(user);
-
-      // console.log('User:', user);
-
-      // ✅ Save user token & data
-      await AsyncStorage.setItem('userToken', user.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(user));
-      await AsyncStorage.setItem('selectedUserRole', userRole);
-
-      // Navigate to the next screen
-      navigation.navigate('AddressScreen');
     } catch (error) {
-      console.error('Google Sign-In Error:', error);
-
-      let errorMessage = 'An unknown error occurred. Please try again.';
-
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        errorMessage = 'You cancelled the sign-in process.';
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        errorMessage = 'Sign-in is already in progress. Please wait.';
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        errorMessage = 'Google Play Services is not available or outdated.';
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching Reset Password:',
+          error.response?.data || 'No error response',
+        );
       } else {
-        errorMessage = error.message || 'Google Sign-In failed.';
+        console.error('Failed to load ResetPassword data');
       }
-
-      // Show alert with error message
-      Alert.alert('Google Sign-In Error', errorMessage);
     }
   };
 
-  const signOut = async () => {
+  const handleNewPassword = async (email, newPassword) => {
     try {
-      await GoogleSignin.signOut();
-      await auth().signOut();
-      Alert.alert('Signed Out', 'You have been logged out!');
+      const response = await axios.post(`${apiURL}/api/user/resetPassword`, {
+        email,
+        newPassword,
+      });
+      console.log('res', response.data);
+      navigation.navigate('Login', {
+        //  email: email
+      });
     } catch (error) {
-      console.error(error);
+      if (axios.isAxiosError(error)) {
+        console.error(
+          'Error fetching Reset Password:',
+          error.response?.data || 'No error response',
+        );
+      } else {
+        console.error('Failed to load ResetPassword data');
+      }
     }
   };
 
@@ -1270,7 +1712,7 @@ const AuthProvider = ({children}) => {
         handleRegister,
         handleLogin,
         handleLogout,
-        handleResetPassword,
+        handleForgetPassword,
         VerifyOTP,
         getCategories,
         categorydata,
@@ -1294,7 +1736,6 @@ const AuthProvider = ({children}) => {
         PostReportissue,
         fcmToken,
         signInWithGoogle,
-        signOut,
         PostRating,
         createSellerProfile,
         getFAQs,
@@ -1320,6 +1761,16 @@ const AuthProvider = ({children}) => {
         setLocation,
         getBuyersList,
         buyerList,
+        createSellerProducts,
+        updateProduct,
+        deleteProduct,
+        handleRemenberme,
+        sethandleRemenberme,
+        unreadCount,
+        markNotificationsAsRead,
+        initializeSocket,
+        handleVerifyPasswordOtp,
+        handleNewPassword,
       }}>
       {children}
     </AuthContext.Provider>

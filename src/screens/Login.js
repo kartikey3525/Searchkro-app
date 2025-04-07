@@ -1,3 +1,4 @@
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,131 +8,226 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
 } from 'react-native';
-import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native';
-const Width = Dimensions.get('window').width;
-const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext';
 
+const {width: Width, height: Height} = Dimensions.get('window');
+
 export default function Login({navigation}) {
-  const [email, setEmail] = useState('');
-  const [username, setusername] = useState('');
-  const [password, setPassword] = useState('');
-  const [handleRemenberme, sethandleRemenberme] = useState(false);
-  const [isnew, setIsnew] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // State management
+  const [formData, setFormData] = useState({
+    email: '',
+    username: '',
+    password: '',
+    handleRemenberme: true,
+  });
+  const [isNew, setIsNew] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: '',
     password: '',
     username: '',
   });
-  const {signInWithGoogle, handleLogin, handleResetPassword, handleRegister} =
-    useContext(AuthContext);
+  const [loading, setLoading] = useState({
+    login: false,
+    register: false,
+    google: false,
+    forgotPassword: false,
+  });
 
+  // Context hooks
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const {
+    signInWithGoogle,
+    handleLogin,
+    handleResetPassword,
+    handleRegister,
+  } = useContext(AuthContext);
 
+  // Input validation helpers
+  const containsEmojis = (text) => /[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu.test(text);
+  const hasLeadingOrTrailingSpace = (text) => text !== text.trim();
+  const hasConsecutiveSpaces = (text) => text.includes('  ');
+
+  // Input handlers
+  const handleInputChange = (field, value) => {
+    // Validation based on field type
+    if (containsEmojis(value)) {
+      setErrors(prev => ({...prev, [field]: 'Emojis are not allowed'}));
+      return;
+    }
+
+    if (field === 'password' && value.includes(' ')) {
+      setErrors(prev => ({...prev, password: 'Spaces are not allowed'}));
+      return;
+    }
+
+    if ((field === 'username' || field === 'email') && hasLeadingOrTrailingSpace(value)) {
+      setErrors(prev => ({...prev, [field]: 'No leading/trailing spaces'}));
+      return;
+    }
+
+    if (field === 'username' && hasConsecutiveSpaces(value)) {
+      setErrors(prev => ({...prev, username: 'Only single spaces allowed'}));
+      return;
+    }
+
+    setFormData(prev => ({...prev, [field]: value}));
+    setErrors(prev => ({...prev, [field]: ''}));
+  };
+
+  // Form validation
   const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /^\d{10}$/;
+    const newErrors = {email: '', password: '', username: ''};
+    let isValid = true;
 
-    if (!email && !password) {
-      setErrors(prevState => ({
-        ...prevState,
-        email: 'Email or phone number is required.',
-      }));
-      return false;
+    // Email/phone validation
+    if (!formData.email) {
+      newErrors.email = 'Email or phone is required';
+      isValid = false;
+    } else if (!phoneRegex.test(formData.email) && !emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+      isValid = false;
     }
 
-    if (email && phoneRegex.test(email)) {
-      // phone number is valid
-    } else if (email && emailRegex.test(email)) {
-      // email is valid
-    } else {
-      setErrors(prevState => ({
-        ...prevState,
-        email: 'Please enter a valid email address or phone number.',
-      }));
-      return false;
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+      isValid = false;
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Minimum 6 characters';
+      isValid = false;
     }
 
-    if (!password.trim()) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password is required.',
-      }));
-      return false;
-    }
-
-    if (password.length < 6) {
-      setErrors(prevState => ({
-        ...prevState,
-        password: 'Password must be at least 6 characters long.',
-      }));
-      return false;
-    }
-    if (isnew) {
-      if (!username.trim()) {
-        setErrors(prevState => ({
-          ...prevState,
-          username: 'username is required.',
-        }));
-        return false;
+    // Username validation (only for registration)
+    if (isNew) {
+      if (!formData.username) {
+        newErrors.username = 'Username is required';
+        isValid = false;
+      } else if (formData.username.length < 3) {
+        newErrors.username = 'Minimum 3 characters';
+        isValid = false;
       }
     }
 
-    setErrors({email: '', password: '', username: ''});
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
-  const handlePress = async () => {
-    setErrors({email: '', password: '', username: ''});
+  // Auth handlers
+  const handleAuthPress = async () => {
     if (!validateInputs()) return;
 
-    setIsLoading(true);
+    const loadingType = isNew ? 'register' : 'login';
+    setLoading(prev => ({...prev, [loadingType]: true}));
+
     try {
-      isnew
-        ? await handleRegister(email, password, username)
-        : await handleLogin(email, password);
-      // console.log('Success', 'Login successful!');
+      if (isNew) {
+        await handleRegister(
+          formData.email,
+          formData.password,
+          formData.username,
+          formData.handleRemenberme
+        );
+      } else {
+        await handleLogin(
+          formData.email,
+          formData.password,
+          formData.handleRemenberme
+        );
+      }
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(prev => ({...prev, [loadingType]: false}));
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(prev => ({...prev, google: true}));
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Google sign-in failed');
+    } finally {
+      setLoading(prev => ({...prev, google: false}));
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      Alert.alert(
-        'Invalid Email',
-        'Please enter your email to reset password.',
-      );
+    if (!formData.email.trim()) {
+      Alert.alert('Invalid Email', 'Please enter your email to reset password.');
       return;
     }
 
-    setIsLoading(true);
+    setLoading(prev => ({...prev, forgotPassword: true}));
     try {
-      await handleResetPassword(email);
-      Alert.alert(
-        'Success',
-        'A password reset link has been sent to your email.',
-      );
+      await handleResetPassword(formData.email);
+      Alert.alert('Success', 'Password reset link sent to your email');
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Unable to send reset email. Please check your email and try again.',
-      );
+      Alert.alert('Error', error.message || 'Failed to send reset email');
     } finally {
-      setIsLoading(false);
+      setLoading(prev => ({...prev, forgotPassword: false}));
     }
   };
+
+  // Render methods
+  const renderAuthButton = () => {
+    const isLoading = isNew ? loading.register : loading.login;
+    
+    return (
+      <TouchableOpacity
+        style={[styles.blueBotton, isLoading && styles.disabledButton]}
+        onPress={handleAuthPress}
+        disabled={isLoading}>
+        {isLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>
+            {isNew ? 'Send OTP' : 'Login'}
+          </Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  const renderGoogleButton = () => (
+    <TouchableOpacity
+      style={[
+        styles.whiteBotton,
+        {backgroundColor: isDark ? '#000' : '#fff'},
+        loading.google && styles.disabledButton,
+      ]}
+      onPress={handleGoogleSignIn}
+      disabled={loading.google}>
+      {loading.google ? (
+        <ActivityIndicator color={isDark ? '#fff' : '#000'} />
+      ) : (
+        <>
+          <Image
+            source={require('../assets/Google.png')}
+            style={styles.socialIcon}
+            resizeMode="contain"
+          />
+          <Text style={[
+            styles.socialButtonText,
+            {color: isDark ? '#fff' : '#1D1E20'}
+          ]}>
+            Login with Google
+          </Text>
+        </>
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <ScrollView
@@ -140,45 +236,30 @@ export default function Login({navigation}) {
         styles.screen,
         {backgroundColor: isDark ? 'black' : 'white'},
       ]}>
+      {/* Logo */}
       <Image
         source={require('../assets/logo.png')}
-        style={{width: 100, height: 100, alignSelf: 'center', top: 30}}
+        style={styles.logo}
         resizeMode="contain"
       />
 
-      {!isnew ? (
-        <>
-          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
-            Welcome Back
-          </Text>
-          <Text style={[styles.smallText, {color: isDark ? '#ccc' : '#000'}]}>
-            Log in to your account using email or social networks
-          </Text>
-        </>
-      ) : (
-        <>
-          <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
-            Create an account
-          </Text>
-          <Text
-            style={[
-              styles.smallText,
-              {marginBottom: 20, color: isDark ? '#fff' : '#000'},
-            ]}>
-            create your account using email or social networks
-          </Text>
-        </>
-      )}
+      {/* Title */}
+      <Text style={[styles.bigText, {color: isDark ? '#fff' : '#000'}]}>
+        {isNew ? 'Create an account' : 'Welcome Back'}
+      </Text>
+      <Text style={[styles.smallText, {marginBottom: 30, color: isDark ? '#ccc' : '#000'}]}>
+        {isNew ? 'Create your account using email or social networks' : 'Log in to your account using email or social networks'}
+      </Text>
 
-      {isnew ? (
+      {/* Username Field (only for registration) */}
+      {isNew && (
         <>
-          <View
-            style={[
-              styles.inputContainer,
-              {backgroundColor: isDark ? '#000' : '#fff'},
-            ]}>
+          <View style={[
+            styles.inputContainer,
+            {backgroundColor: isDark ? '#000' : '#fff'},
+          ]}>
             <TextInput
-              value={username}
+              value={formData.username}
               style={[
                 styles.textInput,
                 {
@@ -186,26 +267,22 @@ export default function Login({navigation}) {
                   color: isDark ? '#fff' : '#000',
                 },
               ]}
-              onChangeText={setusername}
+              onChangeText={(text) => handleInputChange('username', text)}
               placeholder="Username"
-              mode="outlined"
               placeholderTextColor={isDark ? 'white' : 'black'}
-              keyboardType="default"
               autoCapitalize="none"
             />
           </View>
-          <HelperText
-            type="error"
-            style={{alignSelf: 'flex-start', marginLeft: 14}}
-            visible={!!errors.username}>
+          <HelperText type="error" visible={!!errors.username}>
             {errors.username}
           </HelperText>
         </>
-      ) : null}
+      )}
 
+      {/* Email Field */}
       <View style={styles.inputContainer}>
         <TextInput
-          value={email}
+          value={formData.email}
           style={[
             styles.textInput,
             {
@@ -213,25 +290,21 @@ export default function Login({navigation}) {
               color: isDark ? '#fff' : '#000',
             },
           ]}
-          onChangeText={setEmail}
-          placeholder="Email or phone number"
-          mode="outlined"
+          onChangeText={(text) => handleInputChange('email', text)}
+          placeholder="Email"
           placeholderTextColor={isDark ? 'white' : 'black'}
           keyboardType="email-address"
           autoCapitalize="none"
         />
       </View>
-
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
+      <HelperText type="error" visible={!!errors.email}>
         {errors.email}
       </HelperText>
 
+      {/* Password Field */}
       <View style={styles.inputContainer}>
         <TextInput
-          value={password}
+          value={formData.password}
           style={[
             styles.textInput,
             {
@@ -239,12 +312,10 @@ export default function Login({navigation}) {
               color: isDark ? '#fff' : '#000',
             },
           ]}
-          onChangeText={setPassword}
+          onChangeText={(text) => handleInputChange('password', text)}
           placeholder="Password"
-          mode="outlined"
           secureTextEntry={!showPassword}
           placeholderTextColor={isDark ? 'white' : 'black'}
-          keyboardType="password"
           autoCapitalize="none"
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -256,147 +327,61 @@ export default function Login({navigation}) {
           />
         </TouchableOpacity>
       </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.password}>
+      <HelperText type="error" visible={!!errors.password}>
         {errors.password}
       </HelperText>
 
+      {/* Remember Me & Forgot Password */}
       <Pressable
-        onPress={() => sethandleRemenberme(!handleRemenberme)}
-        style={{
-          alignItems: 'flex-start',
-          flexDirection: 'row',
-          width: '90%',
-        }}>
-        <Ionicons
-          name="checkmark-circle-outline"
-          size={24}
-          color={handleRemenberme ? '#43E2F3' : '#949090'}
-          style={{marginRight: 6}}
-        />
-        <Text
-          style={[
-            styles.smallText,
-            {textAlign: 'left', color: '#B2BACD', width: Width * 0.48},
-          ]}>
-          Remember me{' '}
-        </Text>
+  onPress={() => handleInputChange('handleRemenberme', !formData.handleRemenberme)}
+  style={styles.rememberMeContainer}>
+  
+  <Ionicons
+    name={formData.handleRemenberme ? 'checkmark-circle' : 'ellipse-outline'}
+    size={24}
+    color={formData.handleRemenberme ? '#43E2F3' : '#949090'}
+    style={{marginRight: 6}}
+  />
 
-        {!isnew ? (
-          <Text
-            onPress={() => navigation.navigate('forgetpassword')}
-            style={[styles.smallText, {textAlign: 'left', color: '#43E2F3'}]}>
-            Forget Password?
-          </Text>
-        ) : null}
-      </Pressable>
+  <Text style={[styles.rememberMeText, {color: isDark ? '#fff' : '#B2BACD'}]}>
+    Remember me
+  </Text>
 
-      <TouchableOpacity
-        style={styles.blueBotton}
-        // onPress={() => navigation.navigate('OTPScreen')}
-        onPress={() => handlePress()}>
-        <Text
-          style={[
-            styles.smallText,
-            {color: '#fff', fontSize: 22, marginBottom: 0},
-          ]}>
-          {isnew ? 'Sent OTP' : 'Login'}
-        </Text>
-      </TouchableOpacity>
+  {!isNew && (
+    <Text
+      onPress={handleForgotPassword}
+      style={[styles.forgotPasswordText, {color: '#43E2F3'}]}>
+      Forgot Password?
+    </Text>
+  )}
+</Pressable>
 
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
-        <Text style={[{textAlign: 'left', color: '#9DA49E', margin: 10}]}>
-          OR
-        </Text>
-        <View style={{width: '40%', height: 2, backgroundColor: '#A3A3A3'}} />
+
+      {/* Auth Button */}
+      {renderAuthButton()}
+
+      {/* Divider */}
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>OR</Text>
+        <View style={styles.dividerLine} />
       </View>
-      <TouchableOpacity
-        style={[
-          styles.whiteBotton,
-          {backgroundColor: isDark ? '#000' : '#fff'},
-        ]}
-        // onPress={() => navigation.navigate('BottomTabs')}
-        onPress={() => signInWithGoogle()}>
-        <Image
-          source={require('../assets/Google.png')}
-          style={{
-            width: 40,
-            height: 40,
-            alignSelf: 'center',
-          }}
-          resizeMode="contain"
-        />
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#1D1E20',
-              fontSize: 16,
-              textAlign: 'center',
-              marginBottom: 0,
-              fontWeight: '400',
-              alignSelf: 'center',
-              marginLeft: 10,
-            },
-          ]}>
-          Login with Google
-        </Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[
-          styles.whiteBotton,
-          {backgroundColor: isDark ? '#000' : '#fff'},
-        ]}
-        onPress={() => signInWithGoogle()}>
-        <Image
-          source={require('../assets/Facebook.png')}
-          style={{
-            width: 40,
-            height: 40,
-            alignSelf: 'center',
-          }}
-          resizeMode="contain"
-        />
-        <Text
-          style={[
-            {
-              color: isDark ? '#fff' : '#1D1E20',
-              fontSize: 16,
-              textAlign: 'center',
-              marginBottom: 0,
-              fontWeight: '400',
-              alignSelf: 'center',
-              marginLeft: 10,
-            },
-          ]}>
-          Login with Facebook
-        </Text>
-      </TouchableOpacity>
+      {/* Google Sign-In */}
+      {renderGoogleButton()}
 
-      <Text
-        style={[
-          styles.smallText,
-          {
-            width: 350,
-            margin: 10,
-            marginBottom: 0,
-            color: isDark ? '#B2BACD' : '#1D1E20',
-          },
-        ]}>
-        {isnew ? '' : ' Dont'} have an account ?
-        <Text onPress={() => setIsnew(!isnew)} style={{color: '#43E2F3'}}>
-          {isnew ? ' Login' : ' Sign up'}
+      {/* Toggle between Login/Register */}
+      <Text style={[styles.toggleAuthText, {color: isDark ? '#B2BACD' : '#1D1E20'}]}>
+        {isNew ? "Already have an account?" : "Don't have an account?"}
+        <Text 
+          onPress={() => setIsNew(!isNew)} 
+          style={{color: '#43E2F3'}}>
+          {isNew ? ' Login' : ' Sign up'}
         </Text>
       </Text>
 
-      <Text
-        style={[
-          styles.smallText,
-          {width: 350, margin: 20, color: isDark ? '#B2BACD' : '#1D1E20'},
-        ]}>
+      {/* Terms & Conditions */}
+      <Text style={[styles.termsText, {color: isDark ? '#B2BACD' : '#1D1E20'}]}>
         By signing up you agree to our
         <Text style={{color: '#43E2F3'}}> Terms & Conditions </Text>
         and
@@ -411,7 +396,13 @@ const styles = StyleSheet.create({
     height: Height,
     width: Width,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    paddingTop: '15%',
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -421,34 +412,26 @@ const styles = StyleSheet.create({
     width: '90%',
     borderWidth: 1,
     borderRadius: 8,
+    marginBottom: 5,
   },
   textInput: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    color: '#000',
     width: '86%',
     height: Height * 0.06,
     padding: 10,
-    // margin: 4,
   },
   smallText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#1D1E20',
     textAlign: 'center',
     width: 250,
     marginBottom: 10,
-    fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
   },
-
   bigText: {
     fontSize: 30,
-    color: 'black',
     textAlign: 'center',
-    marginTop: 30,
     fontWeight: 'bold',
-    // marginBottom: 6,
-    fontFamily: 'Poppins-Bold',
+    marginBottom: 10,
   },
   blueBotton: {
     backgroundColor: '#00AEEF',
@@ -456,12 +439,10 @@ const styles = StyleSheet.create({
     height: Height * 0.06,
     borderRadius: 10,
     margin: 5,
-    // marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   whiteBotton: {
-    backgroundColor: '#fff',
     width: '90%',
     height: Height * 0.06,
     borderRadius: 10,
@@ -471,5 +452,59 @@ const styles = StyleSheet.create({
     borderColor: '#A3A3A3',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '500',
+  },
+  socialIcon: {
+    width: 40,
+    height: 40,
+  },
+  socialButtonText: {
+    fontSize: 16,
+    marginLeft: 10,
+    fontWeight: '400',
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    marginBottom: 15,
+  },
+  rememberMeText: {
+    fontSize: 15,
+    width: Width * 0.48,
+  },
+  forgotPasswordText: {
+    fontSize: 15,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
+    marginVertical: 15,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#A3A3A3',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#9DA49E',
+  },
+  toggleAuthText: {
+    fontSize: 15,
+    marginVertical: 10,
+  },
+  termsText: {
+    fontSize: 15,
+    margin: 20,
+    textAlign: 'center',
   },
 });

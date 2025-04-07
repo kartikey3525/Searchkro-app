@@ -4,7 +4,8 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView, 
+  ScrollView,
+  ActivityIndicator, 
 } from 'react-native';
 import React, {useContext} from 'react';
 import {HelperText} from 'react-native-paper';
@@ -30,8 +31,9 @@ export default function UploadImage({navigation, route}) {
     password: '',
   });
   const {handleRegister, handleLogin, createPost} = useContext(AuthContext);
-  const {media, selectMedia, requestCameraPermission, setMedia} =
+  const {media, selectMedia, requestCameraPermission, setMedia,isUploading} =
     useImagePicker();
+  {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
 
   const validateInputs = () => {
     if (media.length === 0) {
@@ -50,6 +52,7 @@ export default function UploadImage({navigation, route}) {
     console.log('media', media);
     try {
       await createPost(
+        route.params.name,
         route.params.selectedCategories,
         route.params.description,
         route.params.phone,

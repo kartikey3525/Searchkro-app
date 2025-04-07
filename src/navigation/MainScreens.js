@@ -43,6 +43,8 @@ import SellerProfile from '../screens/SellerProfile';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileSettings from '../screens/ProfileSettings';
 import AddProducts from '../screens/AddProducts';
+import ProductsList from '../screens/ProductsList';
+import NewPassword from '../screens/NewPassword';
 
 const Stack = createStackNavigator();
 
@@ -233,9 +235,9 @@ const MainScreens = () => {
       />
 
       <Stack.Screen
-        name="Sellerproductdetails"
+        name="sellerProductDetail"
         component={SellerProductDetails}
-        options={{title: 'Sellerproductdetails', headerShown: false}}
+        options={{title: 'sellerProductDetail', headerShown: false}}
       />
       <Stack.Screen
         name="Sellerprofile"
@@ -252,12 +254,21 @@ const MainScreens = () => {
         component={ProfileSettings}
         options={{title: 'profilesettings', headerShown: false}}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="AddProducts"
         component={AddProducts}
         options={{title: 'AddProducts', headerShown: false}}
       />
-      
+       <Stack.Screen
+        name="ProductsList"
+        component={ProductsList}
+        options={{title: 'ProductsList', headerShown: false}}
+      />
+       <Stack.Screen
+        name="NewPassword"
+        component={NewPassword}
+        options={{title: 'NewPassword', headerShown: false}}
+      />
     </Stack.Navigator>
   );
 };

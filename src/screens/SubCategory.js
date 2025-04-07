@@ -80,7 +80,7 @@ const [filteredLists, setFilteredLists] = useState(route.params.item);
             width: Width * 0.74,
             color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
           }}>
-          {item.name}
+           {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
         </Text>
         <Entypo
           name="chevron-thin-right"

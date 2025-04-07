@@ -6,10 +6,10 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  ActivityIndicator, // Add this import
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useIsFocused} from '@react-navigation/native';
-
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
@@ -19,39 +19,22 @@ import {ThemeContext} from '../context/themeContext';
 export default function Preferences({navigation, route}) {
   const [numColumns, setNumColumns] = useState(4);
   const isFocused = useIsFocused();
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const {userRole, getPosts, fullCategorydata, posts, isposting} =
     useContext(AuthContext);
 
   useEffect(() => {
     if (isFocused) {
-      // console.log('Filtered screen is focused');
-      getPosts(route.params?.category);
+      setIsLoading(true); // Set loading to true when starting to fetch
+      getPosts(route.params?.category)
+        .finally(() => {
+          setIsLoading(false); // Set loading to false when done
+        });
     }
   }, [isFocused, route.params?.category]);
 
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
-
-  const [recentPostList, setrecentPostList] = useState([
-    {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
-    {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
-    {id: 3, title: 'Medicine', img: require('../assets/packagedfood.png')},
-    {id: 4, title: 'packaged food', img: require('../assets/clothes.png')},
-    {id: 5, title: 'Groceries', img: require('../assets/groceries.png')},
-    {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
-    {id: 8, title: 'Food', img: require('../assets/food.png')},
-    {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {
-      id: 9,
-      title: 'Home service',
-      img: require('../assets/home-service.png'),
-    },
-    {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
-    {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
-    {id: 12, title: 'See more', img: require('../assets/see-more.png')},
-  ]);
-
-  const flatListKey = `flat-list-${numColumns}`;
 
   const renderRectangleList = ({item}) => {
     return (
@@ -100,7 +83,7 @@ export default function Preferences({navigation, route}) {
           width: Width * 0.5,
         }}
         onPress={() =>
-          navigation.navigate('Sellerproductdetails', {item: item})
+          navigation.navigate('sellerProductDetail', {item:item})
         }>
         <View
           style={[
@@ -122,7 +105,7 @@ export default function Preferences({navigation, route}) {
             styles.recListText2,
             {fontSize: 15, color: isDark ? '#fff' : '#000'},
           ]}>
-          {item.description}
+          {item.productName || 'No Name'}
         </Text>
         {/* <Text
           numberOfLines={2}
@@ -132,6 +115,20 @@ export default function Preferences({navigation, route}) {
       </TouchableOpacity>
     );
   };
+  
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+        <ActivityIndicator 
+          size="large" 
+          color={isDark ? '#fff' : '#000'} 
+        />
+        <Text style={{color: isDark ? '#fff' : '#000', marginTop: 10}}>
+          Loading...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{flex: 1}}>
@@ -177,24 +174,45 @@ export default function Preferences({navigation, route}) {
             </Text>
           </View>
 
-          <FlatList
-            style={{
-              marginTop: '2%',
-              height: Height * 0.9,
-            }}
-            key={flatListKey}
-            horizontal={false}
-            numColumns={2}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={userRole === 'buyer' ? fullCategorydata : posts}
-            keyExtractor={item => (userRole === 'buyer' ? item.id : item._id)} // Ensure unique key as a string
-            renderItem={
-              userRole === 'buyer'
-                ? renderRectangleList
-                : renderSellerRectangleList
-            }
-          />
+          {userRole === 'buyer' && fullCategorydata.length === 0 ? (
+            <View style={styles.noDataContainer}>
+              <Text style={{color: isDark ? '#fff' : '#000'}}>
+                No categories found
+              </Text>
+            </View>
+          ) : userRole !== 'buyer' && posts.length === 0 ? (
+            <View style={styles.noDataContainer}>
+              <Text style={{color: isDark ? '#fff' : '#000'}}>
+                No posts found
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              style={{
+                marginTop: '2%',
+                height: Height * 0.9,
+              }}
+              // key={flatListKey}
+              horizontal={false}
+              numColumns={2}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              data={userRole === 'buyer' ? fullCategorydata : posts}
+              keyExtractor={item => (userRole === 'buyer' ? item.id : item._id)}
+              renderItem={
+                userRole === 'buyer'
+                  ? renderRectangleList
+                  : renderSellerRectangleList
+              }
+              ListEmptyComponent={
+                <View style={styles.noDataContainer}>
+                  <Text style={{color: isDark ? '#fff' : '#000'}}>
+                    No data available
+                  </Text>
+                </View>
+              }
+            />
+          )}
         </View>
       </View>
     </View>
@@ -282,5 +300,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 6,
     fontFamily: 'Poppins-Bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: Height * 0.7,
   },
 });

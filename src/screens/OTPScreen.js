@@ -33,7 +33,8 @@ export default function OTPScreen({navigation, route}) {
   const [errors, setErrors] = useState({
     otp: '',
   });
-  const {VerifyOTP, handleLogin, handleResetPassword} = useContext(AuthContext);
+  const {VerifyOTP, handleRegister, handleVerifyPasswordOtp} =
+    useContext(AuthContext);
 
   useEffect(() => {
     let intervalId = setInterval(() => {
@@ -53,7 +54,7 @@ export default function OTPScreen({navigation, route}) {
 
     setIsLoading(true);
     try {
-      await VerifyOTP(route?.params?.emailPhone, otp);
+      await route?.params?.password?VerifyOTP(route?.params?.emailPhone, otp) : handleVerifyPasswordOtp(route?.params?.emailPhone, otp);
     } catch (error) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -64,7 +65,11 @@ export default function OTPScreen({navigation, route}) {
   const handleResend = async () => {
     setIsLoading(true);
     try {
-      await handleLogin(route?.params?.emailPhone, route?.params?.password);
+      await handleRegister(
+        route?.params?.emailPhone,
+        route?.params?.password,
+        route?.params?.name,
+      );
       Alert.alert('Success', 'resend successful!');
       setCountdown(600);
       setResendDisabled(true);
@@ -74,6 +79,7 @@ export default function OTPScreen({navigation, route}) {
       setIsLoading(false);
     }
   };
+
   const validateInputs = () => {
     if (!otp) {
       setErrors(prevState => ({
@@ -199,7 +205,11 @@ export default function OTPScreen({navigation, route}) {
           onPress={handleResend}
           style={[
             styles.smallText,
-            {color: isDark ? '#ccc' : '#000', width: 100},
+            {
+              color: isDark ? '#ccc' : '#000',
+              width: 100,
+              textDecorationLine: 'underline', // Add underline here
+            },
           ]}>
           Resend code
         </Text>
@@ -215,7 +225,7 @@ export default function OTPScreen({navigation, route}) {
           <Text>
             {countdown > 0
               ? `${Math.floor(countdown / 60)}:${countdown % 60}`
-              : 'Resend code'}
+              : '00:00'}
           </Text>
         </Text>
       </View>

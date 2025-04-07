@@ -9,6 +9,7 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import {ThemeContext} from '../context/themeContext';
 import {Text} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Import for custom arrows
 
 const Width = Dimensions.get('window').width;
 
@@ -29,8 +30,8 @@ const Dropdown = ({
   return (
     <TouchableWithoutFeedback
       onPress={() => {
-        Keyboard.dismiss(); // Dismiss keyboard if open
-        setOpen(false); // Close dropdown on outside tap
+        Keyboard.dismiss();
+        setOpen(false);
       }}>
       <DropDownPicker
         style={[
@@ -66,33 +67,40 @@ const Dropdown = ({
         onChangeValue={selected => {
           setValue(selected);
           onChangeValue(selected);
-
           if (single) {
-            setTimeout(() => setOpen(false), 200); // ✅ Close dropdown after selection
+            setTimeout(() => setOpen(false), 200);
           }
         }}
         textStyle={{color: isDark ? '#FFF' : '#000'}}
-        ArrowDownIconStyle={{tintColor: isDark ? '#FFF' : '#000'}}
-        ArrowUpIconStyle={{tintColor: isDark ? '#FFF' : '#000'}}
-        tickIconStyle={{tintColor: isDark ? '#FFF' : '#000'}} // ✅ Tick color updates
+        // Custom arrow icons for better control
+        ArrowDownIconComponent={() => (
+          <MaterialIcons
+            name="keyboard-arrow-down"
+            size={20}
+            color={isDark ? '#FFF' : '#000'}
+          />
+        )}
+        ArrowUpIconComponent={() => (
+          <MaterialIcons
+            name="keyboard-arrow-up"
+            size={20}
+            color={isDark ? '#FFF' : '#000'}
+          />
+        )}
+        tickIconStyle={{tintColor: isDark ? '#FFF' : '#000'}}
         badgeStyle={{
           borderRadius: 6,
           padding: 5,
           borderWidth: 1,
-          borderColor: isDark ? '#888' : '#000', // ✅ Border adjusts based on theme
+          borderColor: isDark ? '#888' : '#000',
         }}
         badgeTextStyle={{
-          color: isDark ? '#000' : '#333', // 🔥 Explicitly set contrasting text color
+          color: isDark ? '#000' : '#333',
           fontWeight: 'bold',
-          backgroundColor: isDark ? 'transparent' : 'transparent', // ✅ Ensure no override
+          backgroundColor: 'transparent',
         }}
         listItemLabelStyle={{color: isDark ? '#DDD' : '#222'}}
       />
-      {/* <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setOpen(false)}>
-        <Text style={styles.closeText}>✕</Text>
-      </TouchableOpacity> */}
     </TouchableWithoutFeedback>
   );
 };
@@ -141,7 +149,7 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2000, // Ensures button is always visible
+    zIndex: 2000,
   },
   closeText: {
     color: '#000',

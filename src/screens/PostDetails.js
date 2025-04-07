@@ -3,57 +3,63 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  TouchableOpacity, 
+  TouchableOpacity,
+  Alert,
+  Platform,
+  Linking,
+  KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {HelperText} from 'react-native-paper';
-import {useState} from 'react';
 import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native'; 
+import {Dimensions} from 'react-native';
 import Dropdown from '../components/Dropdown';
 import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
-import {useEffect} from 'react';
-import {useIsFocused} from '@react-navigation/native'; 
-const Width = Dimensions.get('window').width;
-const Height = Dimensions.get('window').height;
+import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import LocationPermission from '../hooks/uselocation';
+import {PermissionsAndroid} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
-export default function PostDetails({navigation, route}) {
+const Width = Dimensions.get('window').width;
+const Height = Dimensions.get('window').height;
+
+export default function PostDetails({ navigation, route }) {
+  const [name, setname] = useState('');
   const [email, setEmail] = useState('');
-  const [description, setdescription] = useState('');
+  const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [phone, setphone] = useState('');
-  const [formattedphone, setFormattedphone] = useState('');
+  const [phone, setPhone] = useState('');
+  const [formattedPhone, setFormattedPhone] = useState('');
   const phoneInput = useRef(null);
   const isFocused = useIsFocused();
   const [selectedCategories, setSelectedCategories] = useState([]);
   // const [location, setLocation] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const handleCategoryChange = value => {
-    setSelectedCategories(value); // Update selected categories
-  };
-
-  const {getCategories, fullCategorydata, location, setisposting} =
-    useContext(AuthContext);
+  const {getCategories, fullCategorydata,location,setLocation,Userfulldata} = useContext(AuthContext);
 
   useEffect(() => {
     getCategories();
-    setisposting(false);
-    setSelectedCategories(route?.params?.selectedcategory); // Set the selected category by ID
+    if (route?.params?.selectedcategory) {
+      setSelectedCategories(route.params.selectedcategory);
+    }
+    setPhone(Userfulldata.phone || '');
+    setEmail(Userfulldata.email || '');
   }, [isFocused]);
 
   const [errors, setErrors] = useState({
+    name:'',
+
     email: '',
     description: '',
     phone: '',
-    selectedCategories: '',
+    category: '',
     location: '',
   });
 
@@ -63,6 +69,7 @@ export default function PostDetails({navigation, route}) {
 
     let valid = true;
     let newErrors = {
+      name: '',
       email: '',
       description: '',
       phone: '',
@@ -70,40 +77,51 @@ export default function PostDetails({navigation, route}) {
       location: '',
     };
 
-    // Validate Email or Phone Number
-    if (!email.trim()) {
-      newErrors.email = 'Email is required.';
-      valid = false;
-    } else if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-      newErrors.email = 'Enter a valid email address .';
-      valid = false;
-    }
+    // // Email validation
+    // if (!email.trim()) {
+    //   newErrors.email = 'Email is required.';
+    //   valid = false;
+    // } else if (!emailRegex.test(email)) {
+    //   newErrors.email = 'Enter a valid email address.';
+    //   valid = false;
+    // }
 
-    // Validate Description
+    if (!name.trim()) {
+      newErrors.name = 'name is required.';
+      valid = false;
+    } else if (name.length < 2) {
+      newErrors.name = 'name must be at least 2 characters long.';
+      valid = false;
+    }  
+
+    // Description validation
     if (!description.trim()) {
       newErrors.description = 'Description is required.';
       valid = false;
     } else if (description.length < 6) {
       newErrors.description = 'Description must be at least 6 characters long.';
       valid = false;
-    }
-
-    // Validate Phone Number
-    if (!phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
-      valid = false;
-    } else if (!phoneInput.current?.isValidNumber(phone)) {
-      newErrors.phone = 'Enter a valid phone number.';
+    } else if (description.length > 200) {
+      newErrors.description = 'Description must not exceed 200 characters.';
       valid = false;
     }
 
-    // Validate Category Selection
+    // Phone validation
+    // if (!phone.trim()) {
+    //   newErrors.phone = 'Phone number is required.';
+    //   valid = false;
+    // } else if (!phoneInput.current?.isValidNumber(phone)) {
+    //   newErrors.phone = 'Enter a valid phone number.';
+    //   valid = false;
+    // }
+
+    // Category validation
     if (selectedCategories.length === 0) {
       newErrors.category = 'Please select at least one category.';
       valid = false;
     }
 
-    // Validate Location
+    // Location validation
     if (!location) {
       newErrors.location = 'Please allow location access.';
       valid = false;
@@ -112,280 +130,421 @@ export default function PostDetails({navigation, route}) {
     setErrors(newErrors);
     return valid;
   };
+  // const requestLocationPermission = async () => {
+  //   try {
+  //     if (Platform.OS === 'android') {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: 'Location Access Required',
+  //           message: 'This app needs to access your location.',
+  //         },
+  //       );
+
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //         getLocation();
+  //         return true;
+  //       } else {
+  //         setErrors(prev => ({
+  //           ...prev,
+  //           location: 'Location permission denied.',
+  //         }));
+  //         return false;
+  //       }
+  //     } else {
+  //       // iOS
+  //       getLocation();
+  //       return true;
+  //     }
+  //   } catch (err) {
+  //     console.warn('Permission error:', err);
+  //     return false;
+  //   }
+  // };
+
+  // const getLocation = () => {
+  //   Geolocation.getCurrentPosition(
+  //     position => {
+  //       const {latitude, longitude} = position.coords;
+  //       setLocation({latitude, longitude});
+  //       setErrors(prev => ({...prev, location: ''}));
+  //     },
+  //     error => {
+  //       console.error('Location error:', error);
+  //       setErrors(prev => ({...prev, location: 'Unable to fetch location.'}));
+  //     },
+  //     {enableHighAccuracy: true, timeout: 10000, maximumAge: 0},
+  //   );
+  // };
+
+  const handleCategoryChange = value => {
+    setSelectedCategories(value);
+    if (value.length > 0) {
+      setErrors(prev => ({...prev, category: ''}));
+    }
+  };
 
   const handlePress = async () => {
+    // Clear previous errors
     setErrors({
+      name:'',
       email: '',
       description: '',
       phone: '',
-      selectedCategories: '',
+      category: '',
       location: '',
     });
-    if (!validateInputs()) return;
 
+    if (!validateInputs()) {
+      if (errors.location) {
+        Alert.alert(
+          'Location Required',
+          'This app needs location access to proceed. Please grant permission.',
+          [
+            {text: 'Cancel', style: 'cancel'},
+            {
+              text: 'Grant Permission',
+              onPress: async () => {
+                const permissionGranted = await requestLocationPermission();
+                if (permissionGranted && location) {
+                  if (validateInputs()) {
+                    proceedToNextPage();
+                  }
+                }
+              },
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+      return;
+    }
+
+    proceedToNextPage();
+  };
+
+  const proceedToNextPage = () => {
     setIsLoading(true);
     try {
       navigation.navigate('uploadimage', {
-        email: email,
-        description: description,
-        phone: phone,
-        selectedCategories: selectedCategories,
-        location: location,
+        name,
+        email,
+        description,
+        phone,
+        selectedCategories,
+        location,
       });
     } catch (error) {
-      // Alert.alert('Error', 'Something went wrong. Please try again.');
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    // <KeyboardAvoidingContainer>
-    <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      {/* <LocationPermission setLocation={setLocation} /> */}
+    <KeyboardAvoidingContainer>
+      <ScrollView
+        contentContainerStyle={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+        <LocationPermission setLocation={setLocation} />
+        <Header header={'Post Details'} />
 
-      <Header header={'Post Details'} />
-
-      <Dropdown
-        item={
-          fullCategorydata?.map(category => ({
-            label: category.name || 'Unnamed',
-            value: category.name || '',
-          })) || []
-        }
-        placeholder={
-          selectedCategories.length > 0
-            ? selectedCategories
-                .map(
-                  name =>
-                    fullCategorydata.find(cat => cat.name === name)?.name || '',
-                )
-                .join(', ')
-            : 'Select Categories'
-        }
-        selectedValues={selectedCategories} // Pass the selected categories to the dropdown
-        onChangeValue={handleCategoryChange} // Handle category selection changes
-      />
-
-      <HelperText type="error" visible={!!errors.category} style={{height: 10}}>
-        {errors.category}
-      </HelperText>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: isDark ? '#000' : '#fff',
-            borderColor: isDark
-              ? 'rgba(173, 173, 173, 0.31)'
-              : 'rgba(173, 173, 173, 0.31)',
-          },
-        ]}>
-        <TextInput
-          value={email}
-          style={[
-            styles.textInput,
-            {
-              color: isDark ? '#fff' : '#000',
-              backgroundColor: isDark ? '#000' : '#fff',
-            },
-          ]}
-          onChangeText={setEmail}
-          placeholder="Email"
-          mode="outlined"
-          placeholderTextColor={isDark ? '#fff' : 'black'}
-          keyboardType="email-address"
-          autoCapitalize="none"
+        {/* Categories Dropdown */}
+        <Dropdown
+          item={
+            fullCategorydata?.map(category => ({
+              label: category.name || 'Unnamed',
+              value: category.name || '',
+            })) || []
+          }
+          placeholder={
+            selectedCategories.length > 0
+              ? selectedCategories.join(', ')
+              : 'Select Categories'
+          }
+          selectedValues={selectedCategories}
+          onChangeValue={handleCategoryChange}
         />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.email}>
-        {errors.email}
-      </HelperText>
+        <HelperText
+          type="error"
+          visible={!!errors.category}
+          style={styles.errorText}>
+          {errors.category}
+        </HelperText>
 
-      <PhoneInput
-        ref={phoneInput}
-        value={phone}
-        containerStyle={{
-          width: Width * 0.9,
-          height: 60,
-          borderWidth: 1,
-          backgroundColor: isDark ? '#000' : '#fff',
-          borderColor: errors.phone
-            ? 'red'
-            : isDark
-            ? '#333'
-            : 'rgba(231, 231, 231, 1)',
-          marginBottom: 5,
-          borderRadius: 10,
-        }}
-        textContainerStyle={{
-          backgroundColor: isDark ? '#000' : '#fff',
-        }}
-        textInputStyle={{
-          height: 50,
-          backgroundColor: isDark ? '#000' : '#fff',
-          color: isDark ? '#fff' : '#000',
-          fontSize: 16,
-        }}
-        codeTextStyle={{
-          color: isDark ? '#fff' : '#000',
-        }}
-        flagButtonStyle={{
-          backgroundColor: isDark ? '#000' : '#fff',
-          borderTopLeftRadius: 10,
-          borderBottomLeftRadius: 10,
-        }}
-        defaultCode="IN"
-        layout="second"
-        onChangeText={text => setphone(text)}
-        onChangeFormattedText={text => setFormattedphone(text)}
-        textInputProps={{
-          selectionColor: isDark ? '#fff' : '#000', // Set cursor color
-        }}
-      />
-
-      <HelperText type="error" visible={!!errors.phone} style={{height: 10}}>
-        {errors.phone}
-      </HelperText>
-
-      {/* Location Validation */}
-      <Dropdown
-        style={styles.inputContainer}
-        placeholder={location ? 'Selected current location' : 'Select Location'}
-      />
-      <HelperText type="error" visible={!!errors.location} style={{height: 10}}>
-        {errors.location}
-      </HelperText>
-
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            height: 100,
-            alignItems: 'flex-start',
-            borderColor: isDark
-              ? 'rgba(173, 173, 173, 0.31)'
-              : 'rgba(173, 173, 173, 0.31)',
-          },
-        ]}>
-        <TextInput
-          value={description}
+        <View
           style={[
-            styles.textInput,
+            styles.inputContainer,
             {
-              height: 93,
-              color: isDark ? '#fff' : 'black',
               backgroundColor: isDark ? '#000' : '#fff',
+              borderColor: errors.name
+                ? 'red'
+                : isDark
+                ? 'rgba(173, 173, 173, 0.31)'
+                : 'rgba(173, 173, 173, 0.31)',
             },
-          ]}
-          onChangeText={setdescription}
-          numberOfLines={5}
-          multiline={true}
-          placeholder="Product description"
-          mode="outlined"
-          placeholderTextColor={isDark ? '#fff' : 'black'}
-          autoCapitalize="none"
-        />
-      </View>
-      <HelperText
-        type="error"
-        style={{alignSelf: 'flex-start', marginLeft: 14}}
-        visible={!!errors.description}>
-        {errors.description}
-      </HelperText>
-      <TouchableOpacity
-        style={styles.blueBotton}
-        // onPress={() => navigation.navigate('uploadimage')}
-        onPress={() => handlePress()}>
-        <Text
-          style={[
-            styles.smallText,
-            {color: '#fff', fontSize: 22, marginBottom: 0},
           ]}>
-          Next
-        </Text>
-      </TouchableOpacity>
-    </View>
-    // </KeyboardAvoidingContainer>
+          <TextInput
+            value={name}
+            style={[
+              styles.textInput,
+              {
+                color: isDark ? '#fff' : '#000',
+                backgroundColor: isDark ? '#000' : '#fff',
+              },
+            ]}
+            onChangeText={text => {
+              setname(text);
+              if (text.trim()) setErrors(prev => ({...prev, name: ''}));
+            }}
+            placeholder="Product name"
+            placeholderTextColor={isDark ? '#fff' : 'black'}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+        <HelperText
+          type="error"
+          visible={!!errors.name}
+          style={styles.errorText}>
+          {errors.name}
+        </HelperText>
+
+        {/* Email Input */}
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? '#000' : '#fff',
+              borderColor: errors.email
+                ? 'red'
+                : isDark
+                ? 'rgba(173, 173, 173, 0.31)'
+                : 'rgba(173, 173, 173, 0.31)',
+            },
+          ]}>
+          <TextInput
+            value={email}
+            style={[
+              styles.textInput,
+              {
+                color: isDark ? '#fff' : '#000',
+                backgroundColor: isDark ? '#000' : '#fff',
+              },
+            ]}
+            onChangeText={text => {
+              setEmail(text);
+              if (text.trim()) setErrors(prev => ({...prev, email: ''}));
+            }}
+            placeholder="Email"
+            placeholderTextColor={isDark ? '#fff' : 'black'}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+        <HelperText
+          type="error"
+          visible={!!errors.email}
+          style={styles.errorText}>
+          {errors.email}
+        </HelperText>
+
+        {/* Phone Input */}
+        <PhoneInput
+          ref={phoneInput}
+          value={phone}
+          containerStyle={{
+            width: Width * 0.9,
+            height: 60,
+            borderWidth: 1,
+            backgroundColor: isDark ? '#000' : '#fff',
+            borderColor: errors.phone
+              ? 'red'
+              : isDark
+              ? '#333'
+              : 'rgba(231, 231, 231, 1)',
+            marginBottom: 5,
+            borderRadius: 10,
+          }}
+          placeholder={
+            Userfulldata?.phone?.length > 0 ? Userfulldata?.phone : 'Enter phone number'
+          }
+          textContainerStyle={{
+            backgroundColor: isDark ? '#000' : '#fff',
+          }}
+          textInputStyle={{
+            height: 50,
+            backgroundColor: isDark ? '#000' : '#fff',
+            color: isDark ? '#fff' : '#000',
+            fontSize: 16,
+          }}
+          codeTextStyle={{
+            color: isDark ? '#fff' : '#000',
+          }}
+          flagButtonStyle={{
+            backgroundColor: isDark ? '#000' : '#fff',
+            borderTopLeftRadius: 10,
+            borderBottomLeftRadius: 10,
+          }}
+          defaultCode="IN"
+          layout="second"
+          onChangeText={text => setPhone(text)}
+          onChangeFormattedText={text => setFormattedPhone(text)}
+          textInputProps={{
+            selectionColor: isDark ? '#fff' : '#000',
+          }}
+        />
+        <HelperText
+          type="error"
+          visible={!!errors.phone}
+          style={styles.errorText}>
+          {errors.phone}
+        </HelperText>
+
+        {/* Location */}
+        <View
+          style={[
+            styles.locationContainer,
+            {
+              borderColor: errors.location
+                ? 'red'
+                : isDark
+                ? 'rgba(173, 173, 173, 0.31)'
+                : 'rgba(173, 173, 173, 0.31)',
+            },
+          ]}>
+          <Text
+            style={[styles.locationText, {color: isDark ? '#fff' : '#000'}]}>
+            {location ? 'Current location selected' : 'Select Location'}
+          </Text>
+        </View>
+        <HelperText
+          type="error"
+          visible={!!errors.location}
+          style={styles.errorText}>
+          {errors.location}
+        </HelperText>
+
+        {/* Description */}
+        <View
+          style={[
+            styles.descriptionContainer,
+            {
+              borderColor: errors.description
+                ? 'red'
+                : isDark
+                ? 'rgba(173, 173, 173, 0.31)'
+                : 'rgba(173, 173, 173, 0.31)',
+            },
+          ]}>
+          <TextInput
+            value={description}
+            style={[
+              styles.descriptionInput,
+              {
+                color: isDark ? '#fff' : '#000',
+                backgroundColor: isDark ? '#000' : '#fff',
+              },
+            ]}
+            onChangeText={text => {
+              setDescription(text);
+              if (text.trim()) setErrors(prev => ({...prev, description: ''}));
+            }}
+            placeholder="Product description"
+            placeholderTextColor={isDark ? '#fff' : 'black'}
+            multiline
+            numberOfLines={8}
+          />
+        </View>
+        <HelperText
+          type="error"
+          visible={!!errors.description}
+          style={styles.errorText}>
+          {errors.description}
+        </HelperText>
+
+        {/* Next Button */}
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={handlePress}
+          disabled={isLoading}>
+          <Text style={styles.nextButtonText}>
+            {isLoading ? 'Processing...' : 'Next'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingContainer>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    width: Width,
     height: Height,
+    width: Width,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  phoneInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: '#A3A3A3',
-    width: '90%',
-    borderWidth: 1,
-    borderRadius: 8,
+    // paddingHorizontal: 20,
+    paddingTop: 20,
   },
   inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: 'rgba(231, 231, 231, 0.49)',
-    width: '90%',
+    width:Width*0.9,
     borderWidth: 1,
     borderRadius: 8,
+    marginBottom: 5,
+    paddingHorizontal: 10,
   },
   textInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    color: '#000',
-    width: Width * 0.8,
+    width: '100%',
     height: 50,
-    padding: 10,
-    margin: 4,
   },
-  smallText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1D1E20',
-    textAlign: 'center',
-    width: 250,
-    marginBottom: 30,
-    fontFamily: 'NunitoSans-VariableFont_YTLC,opsz,wdth,wght',
-  },
-
-  bigText: {
-    fontSize: 30,
-    color: 'black',
-    textAlign: 'center',
-    marginTop: 40,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    fontFamily: 'Poppins-Bold',
-  },
-  blueBotton: {
-    backgroundColor: '#00AEEF',
-    width: '90%',
-    height: 56,
-    borderRadius: 10,
-    marginTop: '20%',
-    marginBottom: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  whiteBotton: {
-    backgroundColor: '#fff',
-    width: '90%',
-    height: 56,
-    borderRadius: 10,
-    margin: 10,
-    flexDirection: 'row',
+  phoneContainer: {
+    width: Width*0.9,
+    height: 60,
     borderWidth: 1,
-    borderColor: '#A3A3A3',
-    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 5,
+  },
+  locationContainer: {
+    width:Width*0.9,
+    height: 50,
+    borderWidth: 1,
+    borderRadius: 8,
     justifyContent: 'center',
+    paddingHorizontal: 10,
+    marginBottom: 5,
+  },
+  locationText: {
+    fontSize: 16,
+  },
+  descriptionContainer: {
+    width: Width*0.9,
+    height: 150,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 5,
+    // padding: 10,
+  },
+  descriptionInput: {
+    width: '100%',
+    height: '100%',
+    textAlignVertical: 'top',
+  },
+  nextButton: {
+    width: Width*0.9,
+    height: 56,
+    backgroundColor: '#00AEEF',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  nextButtonText: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '500',
+  },
+  errorText: {
+    width: Width*0.95,
+    textAlign: 'left',
+    marginBottom: 1,
   },
 });

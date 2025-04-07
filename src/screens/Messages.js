@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,16 @@ import {
   Pressable,
   Image,
   Dimensions,
+  Linking,
+  Alert,
 } from 'react-native';
 import {ThemeContext} from '../context/themeContext';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import {AuthContext} from '../context/authcontext';
 import {useIsFocused} from '@react-navigation/native';
+import {io} from 'socket.io-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
@@ -27,23 +31,22 @@ export default function Messages({navigation, route}) {
     Userfulldata,
     getBuyersList,
     userRole,
+    userdata,
     buyerList,
+    apiURL,
   } = useContext(AuthContext);
   const [filteredLists, setFilteredLists] = useState(
     userRole === 'buyer' ? filteredPosts : buyerList,
   );
 
-  const isFocused = useIsFocused(); // ✅ Get boolean value
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (isFocused) {
-      // ✅ Use the boolean value
       getUserData();
-
       userRole === 'buyer' ? getFilteredPosts() : getBuyersList();
     }
-    //  console.log('first', buyerList[0].isOnline);
-  }, [isFocused]); // ✅ Correct dependency
+  }, [isFocused]);
 
   useEffect(() => {
     if (userRole === 'buyer') {
@@ -53,87 +56,40 @@ export default function Messages({navigation, route}) {
     }
   }, [filteredPosts, buyerList, userRole]);
 
-  const [recentPostList, setRecentPostList] = useState([
-    {
-      id: 1,
-      title: 'aindsey Culhane requested a payment of $780.2',
-      img: require('../assets/User-image.png'),
-      time: '9:00 am',
-      status: 'Active',
-    },
-    {
-      id: 2,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 3,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 4,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 5,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 6,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 7,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 8,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 9,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-    {
-      id: 10,
-      title: 'Lindsey Culhane requested a payment of $780.1',
-      img: require('../assets/User-image.png'),
-      status: 'Active',
-      time: '9:00 am',
-    },
-  ]);
+  const [chatList, setChatList] = useState([]);
+  const socketRef = useRef(null);
+
+  const openWhatsApp = async phoneNumber => {
+    try {
+      // Remove all non-digit characters
+      const cleanedNumber = phoneNumber.replace(/\D/g, '');
+
+      // Check if WhatsApp is installed
+      const url = `whatsapp://send?phone=${cleanedNumber}`;
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        // If WhatsApp isn't installed, open browser version
+        const webUrl = `https://wa.me/${cleanedNumber}`;
+        await Linking.openURL(webUrl);
+      }
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+      Alert.alert('Error', 'Could not open WhatsApp');
+    }
+  };
 
   const render2RectangleList = (item, index) => (
     <Pressable
-      onPress={() =>
-        navigation.navigate('Chatscreen', {
-          item: item,
-          userId: Userfulldata._id,
-        })
-      }
+      onPress={() => {
+        if (item.phone) {
+          openWhatsApp(item.phone);
+        } else {
+          Alert.alert('Error', 'No phone number available for this contact');
+        }
+      }}
       key={index}
       style={{
         justifyContent: 'center',
@@ -151,12 +107,12 @@ export default function Messages({navigation, route}) {
           },
         ]}>
         <Image
-          // source={recentPostList[0].img}
           source={{uri: item.profile[0]}}
           style={{
             width: 66,
             height: 66,
             marginRight: 20,
+            borderRadius: 66,
           }}
           resizeMode="contain"
         />
@@ -172,7 +128,8 @@ export default function Messages({navigation, route}) {
               bottom: 0,
               marginBottom: 10,
               backgroundColor: 'rgba(75, 203, 27, 1)',
-            }}></View>
+            }}
+          />
         ) : null}
         <View style={{flex: 1}}>
           <Text
@@ -193,7 +150,6 @@ export default function Messages({navigation, route}) {
             style={[
               styles.recListText,
               {
-                color: 'rgba(0, 0, 0, 0.37)',
                 fontWeight: '500',
                 fontSize: 14,
                 width: 180,
@@ -213,23 +169,19 @@ export default function Messages({navigation, route}) {
               bottom: 0,
               marginBottom: 15,
               backgroundColor: 'rgba(6, 196, 217, 1)',
-            }}></View>
+            }}
+          />
         </View>
-        {/* <Feather
-          name="camera"
-          size={24}
-          color={isDark ? '#fff' : 'rgba(75, 77, 77, 0.44)'}
-        /> */}
       </View>
     </Pressable>
   );
 
   return (
     <View style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-      <Header header={'New message'} />
+      <Header header={'Messages'} />
       <View style={{padding: 10}}>
         <SearchBar
-          placeholder={'Search '}
+          placeholder={'Search'}
           lists={userRole === 'buyer' ? filteredPosts : buyerList}
           setFilteredLists={setFilteredLists}
           searchKey="name"
@@ -247,22 +199,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    margin: 5,
-    marginLeft: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: Height * 0.1,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: '26%',
-  },
   rectangle2: {
     backgroundColor: '#fff',
     width: Width * 0.95,
@@ -274,73 +210,5 @@ const styles = StyleSheet.create({
   },
   recListText: {
     color: '#1d1e20',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.36)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: '12%',
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: 'rgba(217, 217, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
-  },
-  deleteButton: {
-    backgroundColor: 'rgba(6, 196, 217, 1)',
-    padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 46,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '500',
-    fontSize: 18,
-  },
-  inputContainer: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: Width * 0.9,
-    borderColor: 'rgb(0, 0, 0)',
-    borderWidth: 1,
-    borderRadius: 14,
-    height: 50,
-    padding: 1,
-  },
-  searchInput: {
-    width: '68%',
-    alignSelf: 'center',
-    fontSize: 17,
-    fontWeight: '500',
-    height: 45,
-    left: 16,
   },
 });
