@@ -4,8 +4,8 @@ import {Alert, AppState, Linking} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 // let apiURL = 'http://192.168.1.20:8080';
-let apiURL = 'https://service.kartikengitech.info';
-// let apiURL = 'https://fgrd857c-8080.inc1.devtunnels.ms';
+// let apiURL = 'https://service.kartikengitech.info';
+let apiURL = 'https://fgrd857c-8080.inc1.devtunnels.ms';
 
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -226,7 +226,7 @@ const AuthProvider = ({children}) => {
         const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
           console.log('Foreground Notification:', remoteMessage);
           
-          if (remoteMessage?.notification) {
+          if (remoteMessage) {
             await notifee.displayNotification({
               title: remoteMessage.notification.title || 'New Notification',
               body: remoteMessage.notification.body || 'You have a new message',
@@ -246,6 +246,7 @@ const AuthProvider = ({children}) => {
               },
               data: remoteMessage.data || {},
             });
+            getNotification();
           }
         });
 
@@ -1770,7 +1771,7 @@ const signInWithGoogle = async () => {
         markNotificationsAsRead,
         initializeSocket,
         handleVerifyPasswordOtp,
-        handleNewPassword,
+        handleNewPassword,socket,
       }}>
       {children}
     </AuthContext.Provider>

@@ -242,7 +242,7 @@ export default function PostDetails({ navigation, route }) {
   };
 
   return (
-    <KeyboardAvoidingContainer>
+    // <KeyboardAvoidingContainer>
       <ScrollView
         contentContainerStyle={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
         <LocationPermission setLocation={setLocation} />
@@ -472,13 +472,13 @@ export default function PostDetails({ navigation, route }) {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    </KeyboardAvoidingContainer>
+    // </KeyboardAvoidingContainer>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    height: Height,
+    // height: Height,
     width: Width,
     alignItems: 'center',
     // paddingHorizontal: 20,
@@ -493,18 +493,18 @@ const styles = StyleSheet.create({
   },
   textInput: {
     width: '100%',
-    height: 50,
+    height: Height * 0.06,
   },
   phoneContainer: {
     width: Width*0.9,
-    height: 60,
+    height: Height * 0.06,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 5,
   },
   locationContainer: {
     width:Width*0.9,
-    height: 50,
+    height: Height * 0.06,
     borderWidth: 1,
     borderRadius: 8,
     justifyContent: 'center',
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     width: Width*0.9,
-    height: 150,
+    height: Height * 0.2,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 5,
@@ -529,13 +529,13 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     width: Width*0.9,
-    height: 56,
+    height: Height * 0.06,
     backgroundColor: '#00AEEF',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: '20%',
   },
   nextButtonText: {
     color: '#fff',

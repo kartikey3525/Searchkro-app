@@ -46,8 +46,7 @@ export default function Login({navigation}) {
   const isDark = theme === 'dark';
   const {
     signInWithGoogle,
-    handleLogin,
-    handleResetPassword,
+    handleLogin, 
     handleRegister,
   } = useContext(AuthContext);
 
@@ -160,23 +159,6 @@ export default function Login({navigation}) {
       Alert.alert('Error', error.message || 'Google sign-in failed');
     } finally {
       setLoading(prev => ({...prev, google: false}));
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!formData.email.trim()) {
-      Alert.alert('Invalid Email', 'Please enter your email to reset password.');
-      return;
-    }
-
-    setLoading(prev => ({...prev, forgotPassword: true}));
-    try {
-      await handleResetPassword(formData.email);
-      Alert.alert('Success', 'Password reset link sent to your email');
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to send reset email');
-    } finally {
-      setLoading(prev => ({...prev, forgotPassword: false}));
     }
   };
 
@@ -297,7 +279,7 @@ export default function Login({navigation}) {
           autoCapitalize="none"
         />
       </View>
-      <HelperText type="error" visible={!!errors.email}>
+      <HelperText type="error" visible={!!errors.email}style={styles.errorText}>
         {errors.email}
       </HelperText>
 
@@ -327,8 +309,9 @@ export default function Login({navigation}) {
           />
         </TouchableOpacity>
       </View>
-      <HelperText type="error" visible={!!errors.password}>
+      <HelperText type="error" visible={!!errors.password}style={styles.errorText}>
         {errors.password}
+        
       </HelperText>
 
       {/* Remember Me & Forgot Password */}
@@ -349,7 +332,7 @@ export default function Login({navigation}) {
 
   {!isNew && (
     <Text
-      onPress={handleForgotPassword}
+    onPress={() => navigation.navigate('forgetpassword')}
       style={[styles.forgotPasswordText, {color: '#43E2F3'}]}>
       Forgot Password?
     </Text>
@@ -397,6 +380,11 @@ const styles = StyleSheet.create({
     width: Width,
     alignItems: 'center',
     paddingTop: '15%',
+  },
+  errorText: {
+    width: Width*0.95,
+    textAlign: 'left',
+    marginBottom: 1,
   },
   logo: {
     width: 100,

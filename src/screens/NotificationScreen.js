@@ -77,7 +77,7 @@ export default function NotificationScreen({ navigation ,route}) {
         borderColor: isDark ? '#ccc' : '#fff',
         borderBottomWidth: 1,
       }}
-      onPress={() => [userRole==='buyer'?navigation.navigate('shopdetails', {item}):navigation.navigate('sellerProductDetail', {item})]}
+      onPress={() => [userRole==='buyer'?navigation.navigate('shopdetails', {item:item.data.userId}):navigation.navigate('sellerProductDetail', {item:item.data})]}
       onLongPress={() => handleLongPress(item)}>
       <View
         style={[
@@ -88,12 +88,17 @@ export default function NotificationScreen({ navigation ,route}) {
           },
         ]}>
         <Image
-          source={require('../assets/User-image.png')} // Replace with dynamic image if available
-          // source={{uri:  item?.images[0]||require('../assets/User-image.png')}}
+          // source={require('../assets/User-image.png')} // Replace with dynamic image if available
+          source={
+            item?.data?.images?.[0] 
+              ? { uri: item.data.images[0] } 
+              : require('../assets/User-image.png')
+          }
           style={{
             width: 66,
             height: 66,
             marginRight: 20,
+            borderRadius: 80,
           }}
           resizeMode="contain"
         />

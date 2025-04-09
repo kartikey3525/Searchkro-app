@@ -10,6 +10,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {ThemeContext} from '../context/themeContext';
 import {Text} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Import for custom arrows
+const Height = Dimensions.get('window').height;
 
 const Width = Dimensions.get('window').width;
 
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     width: '90%',
     marginLeft: 20,
-    height: 60,
+    height: Height * 0.06,
     borderWidth: 1,
     borderRadius: 8,
   },
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     width: '43%',
     marginLeft: 20,
-    height: 60,
+    height: Height * 0.06,
     borderWidth: 1,
     borderRadius: 8,
   },
