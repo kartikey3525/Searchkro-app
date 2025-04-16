@@ -6,22 +6,18 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
-  Linking,
-  KeyboardAvoidingView,
   ScrollView,
+  PermissionsAndroid,
 } from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
-import {HelperText} from 'react-native-paper';
-import {AuthContext} from '../context/authcontext';
-import {Dimensions} from 'react-native';
+import React, { useContext, useEffect, useState, useRef } from 'react';
+import { HelperText } from 'react-native-paper';
+import { AuthContext } from '../context/authcontext';
+import { Dimensions } from 'react-native';
 import Dropdown from '../components/Dropdown';
-import {useRef} from 'react';
 import PhoneInput from 'react-native-phone-number-input';
-import {useIsFocused} from '@react-navigation/native';
-import {ThemeContext} from '../context/themeContext';
+import { useIsFocused } from '@react-navigation/native';
+import { ThemeContext } from '../context/themeContext';
 import Header from '../components/Header';
-import LocationPermission from '../hooks/uselocation';
-import {PermissionsAndroid} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
@@ -29,33 +25,53 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 
 export default function PostDetails({ navigation, route }) {
-  const [name, setname] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState('');
   const [formattedPhone, setFormattedPhone] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const phoneInput = useRef(null);
   const isFocused = useIsFocused();
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  // const [location, setLocation] = useState(null);
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const {getCategories, fullCategorydata,location,setLocation,Userfulldata} = useContext(AuthContext);
+  const { getCategories, fullCategorydata, location, setLocation, Userfulldata } = useContext(AuthContext);
+
+  const post = route?.params?.item || null;
+  const isEditMode = !!post;
 
   useEffect(() => {
     getCategories();
-    if (route?.params?.selectedcategory) {
-      setSelectedCategories(route.params.selectedcategory);
+
+    if (isEditMode) {
+      // Populate fields with existing post data
+      setName(post.productName || '');
+      setEmail(post.contactEmail || '');
+      setDescription(post.description || '');
+      setPhone(post.contactNumber || ''); // Fallback to empty string
+      setFormattedPhone(post.contactNumber || ''); // Sync formattedPhone
+      setSelectedCategories(post.categories || []);
+      setLocation({
+        latitude: post.latitude || '',
+        longitude: post.longitude || '',
+      });
+    } else {
+      // Default behavior for creating a new post
+      if (route?.params?.selectedcategory) {
+        setSelectedCategories(route.params.selectedcategory);
+      }
+      setPhone(Userfulldata?.phone || ''); // Fallback to empty string
+      setFormattedPhone(Userfulldata?.phone || '');
+      setEmail(Userfulldata?.email || '');
+      // setLocation(null);
+      // requestLocationPermission();
     }
-    setPhone(Userfulldata.phone || '');
-    setEmail(Userfulldata.email || '');
-  }, [isFocused]);
+  }, [isFocused, post]);
 
   const [errors, setErrors] = useState({
-    name:'',
-
+    name: '',
     email: '',
     description: '',
     phone: '',
@@ -63,10 +79,61 @@ export default function PostDetails({ navigation, route }) {
     location: '',
   });
 
-  const validateInputs = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
+  // const requestLocationPermission = async () => {
+  //   try {
+  //     if (Platform.OS === 'android') {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: 'Location Access Required',
+  //           message: 'This app needs to access your location to proceed.',
+  //           buttonPositive: 'OK',
+  //         },
+  //       );
 
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //         getLocation();
+  //         return true;
+  //       } else {
+  //         setErrors((prev) => ({
+  //           ...prev,
+  //           location: 'Location permission denied.',
+  //         }));
+  //         return false;
+  //       }
+  //     } else {
+  //       getLocation();
+  //       return true;
+  //     }
+  //   } catch (err) {
+  //     console.warn('Permission error:', err);
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       location: 'Unable to request location permission.',
+  //     }));
+  //     return false;
+  //   }
+  // };
+
+  // const getLocation = () => {
+  //   Geolocation.getCurrentPosition(
+  //     (position) => {
+  //       const { latitude, longitude } = position.coords;
+  //       setLocation({ latitude, longitude });
+  //       setErrors((prev) => ({ ...prev, location: '' }));
+  //     },
+  //     (error) => {
+  //       console.error('Location error:', error);
+  //       setErrors((prev) => ({
+  //         ...prev,
+  //         location: 'Unable to fetch location. Please try again.',
+  //       }));
+  //     },
+  //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+  //   );
+  // };
+
+  const validateInputs = () => {
     let valid = true;
     let newErrors = {
       name: '',
@@ -77,24 +144,14 @@ export default function PostDetails({ navigation, route }) {
       location: '',
     };
 
-    // // Email validation
-    // if (!email.trim()) {
-    //   newErrors.email = 'Email is required.';
-    //   valid = false;
-    // } else if (!emailRegex.test(email)) {
-    //   newErrors.email = 'Enter a valid email address.';
-    //   valid = false;
-    // }
-
     if (!name.trim()) {
-      newErrors.name = 'name is required.';
+      newErrors.name = 'Name is required.';
       valid = false;
     } else if (name.length < 2) {
-      newErrors.name = 'name must be at least 2 characters long.';
+      newErrors.name = 'Name must be at least 2 characters long.';
       valid = false;
-    }  
+    }
 
-    // Description validation
     if (!description.trim()) {
       newErrors.description = 'Description is required.';
       valid = false;
@@ -106,23 +163,12 @@ export default function PostDetails({ navigation, route }) {
       valid = false;
     }
 
-    // Phone validation
-    // if (!phone.trim()) {
-    //   newErrors.phone = 'Phone number is required.';
-    //   valid = false;
-    // } else if (!phoneInput.current?.isValidNumber(phone)) {
-    //   newErrors.phone = 'Enter a valid phone number.';
-    //   valid = false;
-    // }
-
-    // Category validation
     if (selectedCategories.length === 0) {
       newErrors.category = 'Please select at least one category.';
       valid = false;
     }
 
-    // Location validation
-    if (!location) {
+    if (!location && !isEditMode) {
       newErrors.location = 'Please allow location access.';
       valid = false;
     }
@@ -130,64 +176,17 @@ export default function PostDetails({ navigation, route }) {
     setErrors(newErrors);
     return valid;
   };
-  // const requestLocationPermission = async () => {
-  //   try {
-  //     if (Platform.OS === 'android') {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  //         {
-  //           title: 'Location Access Required',
-  //           message: 'This app needs to access your location.',
-  //         },
-  //       );
 
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         getLocation();
-  //         return true;
-  //       } else {
-  //         setErrors(prev => ({
-  //           ...prev,
-  //           location: 'Location permission denied.',
-  //         }));
-  //         return false;
-  //       }
-  //     } else {
-  //       // iOS
-  //       getLocation();
-  //       return true;
-  //     }
-  //   } catch (err) {
-  //     console.warn('Permission error:', err);
-  //     return false;
-  //   }
-  // };
-
-  // const getLocation = () => {
-  //   Geolocation.getCurrentPosition(
-  //     position => {
-  //       const {latitude, longitude} = position.coords;
-  //       setLocation({latitude, longitude});
-  //       setErrors(prev => ({...prev, location: ''}));
-  //     },
-  //     error => {
-  //       console.error('Location error:', error);
-  //       setErrors(prev => ({...prev, location: 'Unable to fetch location.'}));
-  //     },
-  //     {enableHighAccuracy: true, timeout: 10000, maximumAge: 0},
-  //   );
-  // };
-
-  const handleCategoryChange = value => {
+  const handleCategoryChange = (value) => {
     setSelectedCategories(value);
     if (value.length > 0) {
-      setErrors(prev => ({...prev, category: ''}));
+      setErrors((prev) => ({ ...prev, category: '' }));
     }
   };
 
-  const handlePress = async () => {
-    // Clear previous errors
+  const handlePress = () => {
     setErrors({
-      name:'',
+      name: '',
       email: '',
       description: '',
       phone: '',
@@ -196,25 +195,23 @@ export default function PostDetails({ navigation, route }) {
     });
 
     if (!validateInputs()) {
-      if (errors.location) {
+      if (errors.location && !isEditMode) {
         Alert.alert(
           'Location Required',
           'This app needs location access to proceed. Please grant permission.',
           [
-            {text: 'Cancel', style: 'cancel'},
+            { text: 'Cancel', style: 'cancel' },
             {
               text: 'Grant Permission',
               onPress: async () => {
                 const permissionGranted = await requestLocationPermission();
-                if (permissionGranted && location) {
-                  if (validateInputs()) {
-                    proceedToNextPage();
-                  }
+                if (permissionGranted && location && validateInputs()) {
+                  proceedToNextPage();
                 }
               },
             },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
       }
       return;
@@ -226,15 +223,21 @@ export default function PostDetails({ navigation, route }) {
   const proceedToNextPage = () => {
     setIsLoading(true);
     try {
-      navigation.navigate('uploadimage', {
+      const postData = {
         name,
         email,
         description,
-        phone,
+        phone: formattedPhone || phone,
         selectedCategories,
         location,
+      };
+console.log('first', postData);
+      navigation.navigate('uploadimage', {
+        postData,
+        ...(isEditMode && { postId: post._id, item: post }),
       });
     } catch (error) {
+      console.error('Navigation error:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
@@ -242,16 +245,16 @@ export default function PostDetails({ navigation, route }) {
   };
 
   return (
-    // <KeyboardAvoidingContainer>
+    <KeyboardAvoidingContainer>
       <ScrollView
-        contentContainerStyle={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
-        <LocationPermission setLocation={setLocation} />
-        <Header header={'Post Details'} />
+        contentContainerStyle={[styles.screen, { backgroundColor: isDark ? '#000' : '#fff' }]}
+      >
+        <Header header={isEditMode ? 'Edit Post Details' : 'Post Details'} />
 
         {/* Categories Dropdown */}
         <Dropdown
           item={
-            fullCategorydata?.map(category => ({
+            fullCategorydata?.map((category) => ({
               label: category.name || 'Unnamed',
               value: category.name || '',
             })) || []
@@ -264,13 +267,11 @@ export default function PostDetails({ navigation, route }) {
           selectedValues={selectedCategories}
           onChangeValue={handleCategoryChange}
         />
-        <HelperText
-          type="error"
-          visible={!!errors.category}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.category} style={styles.errorText}>
           {errors.category}
         </HelperText>
 
+        {/* Product Name Input */}
         <View
           style={[
             styles.inputContainer,
@@ -282,7 +283,8 @@ export default function PostDetails({ navigation, route }) {
                 ? 'rgba(173, 173, 173, 0.31)'
                 : 'rgba(173, 173, 173, 0.31)',
             },
-          ]}>
+          ]}
+        >
           <TextInput
             value={name}
             style={[
@@ -292,20 +294,16 @@ export default function PostDetails({ navigation, route }) {
                 backgroundColor: isDark ? '#000' : '#fff',
               },
             ]}
-            onChangeText={text => {
-              setname(text);
-              if (text.trim()) setErrors(prev => ({...prev, name: ''}));
+            onChangeText={(text) => {
+              setName(text);
+              if (text.trim()) setErrors((prev) => ({ ...prev, name: '' }));
             }}
             placeholder="Product name"
             placeholderTextColor={isDark ? '#fff' : 'black'}
-            keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
-        <HelperText
-          type="error"
-          visible={!!errors.name}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.name} style={styles.errorText}>
           {errors.name}
         </HelperText>
 
@@ -321,7 +319,8 @@ export default function PostDetails({ navigation, route }) {
                 ? 'rgba(173, 173, 173, 0.31)'
                 : 'rgba(173, 173, 173, 0.31)',
             },
-          ]}>
+          ]}
+        >
           <TextInput
             value={email}
             style={[
@@ -331,9 +330,9 @@ export default function PostDetails({ navigation, route }) {
                 backgroundColor: isDark ? '#000' : '#fff',
               },
             ]}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setEmail(text);
-              if (text.trim()) setErrors(prev => ({...prev, email: ''}));
+              if (text.trim()) setErrors((prev) => ({ ...prev, email: '' }));
             }}
             placeholder="Email"
             placeholderTextColor={isDark ? '#fff' : 'black'}
@@ -341,10 +340,7 @@ export default function PostDetails({ navigation, route }) {
             autoCapitalize="none"
           />
         </View>
-        <HelperText
-          type="error"
-          visible={!!errors.email}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.email} style={styles.errorText}>
           {errors.email}
         </HelperText>
 
@@ -352,6 +348,7 @@ export default function PostDetails({ navigation, route }) {
         <PhoneInput
           ref={phoneInput}
           value={phone}
+          defaultValue={phone}
           containerStyle={{
             width: Width * 0.9,
             height: 60,
@@ -365,9 +362,6 @@ export default function PostDetails({ navigation, route }) {
             marginBottom: 5,
             borderRadius: 10,
           }}
-          placeholder={
-            Userfulldata?.phone?.length > 0 ? Userfulldata?.phone : 'Enter phone number'
-          }
           textContainerStyle={{
             backgroundColor: isDark ? '#000' : '#fff',
           }}
@@ -387,16 +381,13 @@ export default function PostDetails({ navigation, route }) {
           }}
           defaultCode="IN"
           layout="second"
-          onChangeText={text => setPhone(text)}
-          onChangeFormattedText={text => setFormattedPhone(text)}
+          onChangeText={(text) => setPhone(text || '')}
+          onChangeFormattedText={(text) => setFormattedPhone(text || '')}
           textInputProps={{
             selectionColor: isDark ? '#fff' : '#000',
           }}
         />
-        <HelperText
-          type="error"
-          visible={!!errors.phone}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.phone} style={styles.errorText}>
           {errors.phone}
         </HelperText>
 
@@ -411,16 +402,25 @@ export default function PostDetails({ navigation, route }) {
                 ? 'rgba(173, 173, 173, 0.31)'
                 : 'rgba(173, 173, 173, 0.31)',
             },
-          ]}>
-          <Text
-            style={[styles.locationText, {color: isDark ? '#fff' : '#000'}]}>
-            {location ? 'Current location selected' : 'Select Location'}
+          ]}
+        >
+          <Text style={[styles.locationText, { color: isDark ? '#fff' : '#000' }]}>
+            {location
+              ? isEditMode
+                ? `${post.location || 'Unknown'} (Lat: ${location.latitude}, Lon: ${location.longitude})`
+                : `Current location (Lat: ${location.latitude}, Lon: ${location.longitude})`
+              : 'Select Location'}
           </Text>
+          {/* {!isEditMode && (
+            <TouchableOpacity
+              onPress={requestLocationPermission}
+              style={styles.locationButton}
+            >
+              <Text style={styles.locationButtonText}>Get Location</Text>
+            </TouchableOpacity>
+          )} */}
         </View>
-        <HelperText
-          type="error"
-          visible={!!errors.location}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.location} style={styles.errorText}>
           {errors.location}
         </HelperText>
 
@@ -435,7 +435,8 @@ export default function PostDetails({ navigation, route }) {
                 ? 'rgba(173, 173, 173, 0.31)'
                 : 'rgba(173, 173, 173, 0.31)',
             },
-          ]}>
+          ]}
+        >
           <TextInput
             value={description}
             style={[
@@ -445,9 +446,9 @@ export default function PostDetails({ navigation, route }) {
                 backgroundColor: isDark ? '#000' : '#fff',
               },
             ]}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setDescription(text);
-              if (text.trim()) setErrors(prev => ({...prev, description: ''}));
+              if (text.trim()) setErrors((prev) => ({ ...prev, description: '' }));
             }}
             placeholder="Product description"
             placeholderTextColor={isDark ? '#fff' : 'black'}
@@ -455,10 +456,7 @@ export default function PostDetails({ navigation, route }) {
             numberOfLines={8}
           />
         </View>
-        <HelperText
-          type="error"
-          visible={!!errors.description}
-          style={styles.errorText}>
+        <HelperText type="error" visible={!!errors.description} style={styles.errorText}>
           {errors.description}
         </HelperText>
 
@@ -466,26 +464,26 @@ export default function PostDetails({ navigation, route }) {
         <TouchableOpacity
           style={styles.nextButton}
           onPress={handlePress}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           <Text style={styles.nextButtonText}>
-            {isLoading ? 'Processing...' : 'Next'}
+            {isLoading ? 'Processing...' :  'Next'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    // </KeyboardAvoidingContainer>
+    </KeyboardAvoidingContainer>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    // height: Height,
     width: Width,
     alignItems: 'center',
-    // paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 30,
   },
   inputContainer: {
-    width:Width*0.9,
+    width: Width * 0.9,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 5,
@@ -495,40 +493,45 @@ const styles = StyleSheet.create({
     width: '100%',
     height: Height * 0.06,
   },
-  phoneContainer: {
-    width: Width*0.9,
-    height: Height * 0.06,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 5,
-  },
   locationContainer: {
-    width:Width*0.9,
-    height: Height * 0.06,
+    width: Width * 0.9,
     borderWidth: 1,
     borderRadius: 8,
-    justifyContent: 'center',
     paddingHorizontal: 10,
+    paddingVertical: 10,
     marginBottom: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   locationText: {
     fontSize: 16,
   },
+  locationButton: {
+    backgroundColor: '#00AEEF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+  },
+  locationButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
   descriptionContainer: {
-    width: Width*0.9,
+    width: Width * 0.9,
     height: Height * 0.2,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 5,
-    // padding: 10,
   },
   descriptionInput: {
     width: '100%',
     height: '100%',
     textAlignVertical: 'top',
+    padding: 10,
   },
   nextButton: {
-    width: Width*0.9,
+    width: Width * 0.9,
     height: Height * 0.06,
     backgroundColor: '#00AEEF',
     borderRadius: 10,
@@ -543,7 +546,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   errorText: {
-    width: Width*0.95,
+    width: Width * 0.95,
     textAlign: 'left',
     marginBottom: 1,
   },

@@ -40,14 +40,47 @@ export default function AddProducts({navigation, route}) {
   const [dropdownKey, setDropdownKey] = useState(0);
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const {getCategories, fullCategorydata, createSellerProducts, updateProduct} =
-    useContext(AuthContext);
+  const {
+    getCategories,
+    fullCategorydata,
+    createSellerProducts,
+    updateProduct,
+    Userfulldata,
+  } = useContext(AuthContext);
   const {media, selectMedia, setMedia, isLoading} = useImagePicker1();
-  {
-    isLoading && <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
   const isFocused = useIsFocused();
+
+  const filteredResults = fullCategorydata.filter(item =>
+    Userfulldata?.selectedCategories?.map(c => c).includes(item?.name),
+  );
+  // Check for shopName on screen focus
+  useEffect(() => {
+    if (isFocused) {
+      // console.log('Userfulldata', Userfulldata?.selectedCategories)
+
+      // const filteredResults = fullCategorydata.filter(
+      //   item =>
+      //     Userfulldata?.selectedCategories?.map(c => c).includes(
+      //       item?.name
+      //     )
+      // );
+
+      // console.log('filteredResults',filteredResults[0].subCategories[0].name)
+      if (!Userfulldata?.shopName) {
+        Alert.alert(
+          'Shop Details Required',
+          'Please fill your shop details first , before adding a product.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Sellerprofile'),
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+    }
+  }, [isFocused, Userfulldata, navigation]);
 
   useEffect(() => {
     getCategories();
@@ -83,7 +116,10 @@ export default function AddProducts({navigation, route}) {
     }
 
     const newErrors = {
-      products: products.length === 0 ? 'Please add at least one product.' : '',
+      products:
+        products.length === 0
+          ? 'Please add at least one product before submitting.'
+          : '',
     };
 
     setErrors(newErrors);
@@ -313,12 +349,16 @@ export default function AddProducts({navigation, route}) {
       </View>
       <Dropdown
         key={`dropdown-${dropdownKey}`}
-        item={
-          fullCategorydata?.map(category => ({
-            label: category.name || 'Unnamed',
-            value: category.name || '',
-          })) || []
-        }
+        item={filteredResults
+          .flatMap(result => result.subCategories || []) // Flatten all subCategories arrays
+          .map(category => ({
+            label:
+              category.name.charAt(0).toUpperCase() + category.name.slice(1) ||
+              'Unnamed',
+            value:
+              category.name.charAt(0).toUpperCase() + category.name.slice(1) ||
+              '',
+          }))}
         placeholder={
           selectedCategories.length > 0
             ? selectedCategories.join(', ')
@@ -341,13 +381,16 @@ export default function AddProducts({navigation, route}) {
             zIndex: 1,
             alignSelf: 'flex-end',
             marginRight: '5%',
-            
           }}>
           <TouchableOpacity
-            style={[
-              // styles.blueButton, 
-              {width: Width * 0.15,borderRadius: 20,borderColor: 'rgba(6, 196, 217, 1)',borderWidth: 1,alignItems: 'center', paddingVertical: 4},
-            ]}
+            style={{
+              width: Width * 0.15,
+              borderRadius: 20,
+              borderColor: 'rgba(6, 196, 217, 1)',
+              borderWidth: 1,
+              alignItems: 'center',
+              paddingVertical: 4,
+            }}
             onPress={handleAddProduct}>
             <Text
               style={[

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   TextInput,
@@ -13,62 +13,103 @@ import {
 import Octicons from 'react-native-vector-icons/Octicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {ThemeContext} from '../context/themeContext';
-
-import {Dimensions} from 'react-native';
+import { ThemeContext } from '../context/themeContext';
+import { Dimensions } from 'react-native';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-
-import {ScrollView} from 'react-native-gesture-handler';
-import {Slider} from '@miblanchard/react-native-slider';
+import { ScrollView } from 'react-native-gesture-handler';
+import { Slider } from '@miblanchard/react-native-slider';
 import RatingButtons from '../components/RatingButtons';
-import {useIsFocused} from '@react-navigation/native';
-import {AuthContext} from '../context/authcontext';
+import { useIsFocused } from '@react-navigation/native';
+import { AuthContext } from '../context/authcontext';
 import RatingTest from '../components/RatingTest';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 
-export default function ShopScreen({navigation, route}) {
-  const {theme} = useContext(ThemeContext);
+export default function ShopScreen({ navigation, route }) {
+  const { theme } = useContext(ThemeContext);
+  const { getFilteredPosts, filteredPosts } = useContext(AuthContext);
   const isFocused = useIsFocused();
 
   const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState([0, 2]);
-  const {getFilteredPosts, filteredPosts} = useContext(AuthContext);
   const [selectedRating, setSelectedRating] = useState(null);
-
-  useEffect(() => {
-    console.log('filteredPosts =', filteredPosts[1]?.categories);
-    getFilteredPosts(route?.params?.selectedcategory, selectedRating);
-
-    // const filteredData = filteredPosts
-    // ? data.filter(item => item.rating >= parseFloat(selectedRating))
-    // : data;
-  }, [isFocused]);
-
   const [filteredLists, setFilteredLists] = useState([]);
+  const [searchText, setSearchText] = useState('');
 
-  const [recentPostList, setrecentPostList] = useState([
-    {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
-    {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
-    {id: 3, title: 'Medicine', img: require('../assets/packagedfood.png')},
-    {id: 4, title: 'packaged food', img: require('../assets/clothes.png')},
-    {id: 5, title: 'Groceries', img: require('../assets/groceries.png')},
-    {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
-    {id: 8, title: 'Food', img: require('../assets/food.png')},
-    {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {id: 9, title: 'Home service', img: require('../assets/home-service.png')},
-    {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
-    {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
-    {id: 12, title: 'See more', img: require('../assets/see-more.png')},
+  // Consolidated useEffect for fetching and filtering posts
+  useEffect(() => {
+    if (!isFocused) return;
+
+    const selectedCategory = route?.params?.selectedcategory;
+
+    // Fetch filtered posts
+    getFilteredPosts(selectedCategory, selectedRating);
+
+    // Filter posts based on selectedCategory
+    if (Array.isArray(filteredPosts)) {
+      const filteredList = filteredPosts.filter(item =>
+        item.selectedCategories?.includes(selectedCategory)
+      );
+      setFilteredLists(filteredList);
+      console.log('Filtered Posts:', filteredList, 'Selected Category:', selectedCategory);
+    } else {
+      console.error('filteredPosts is not an array:', filteredPosts);
+    }
+  }, [isFocused, filteredPosts, route?.params?.selectedcategory, selectedRating, getFilteredPosts]);
+
+  // Search filter function
+  const searchFilterFunction = text => {
+    setSearchText(text);
+
+    if (text.trim() === '') {
+      // Reset to filtered list based on category
+      if (Array.isArray(filteredPosts)) {
+        const filteredList = filteredPosts.filter(item =>
+          item.selectedCategories?.includes(route?.params?.selectedcategory)
+        );
+        setFilteredLists(filteredList);
+      }
+      return;
+    }
+
+    const lowerCaseText = text.toLowerCase();
+
+    if (!Array.isArray(filteredPosts)) {
+      console.error('filteredPosts is not an array:', filteredPosts);
+      return;
+    }
+
+    const filteredResults = filteredPosts.filter(
+      item =>
+        item.selectedCategories?.includes(route?.params?.selectedcategory) &&
+        item?.name?.toLowerCase().includes(lowerCaseText)
+    );
+
+    setFilteredLists(filteredResults);
+  };
+
+  const [recentPostList] = useState([
+    { id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png') },
+    { id: 2, title: 'smart watch', img: require('../assets/watch.png') },
+    { id: 3, title: 'Medicine', img: require('../assets/packagedfood.png') },
+    { id: 4, title: 'packaged food', img: require('../assets/clothes.png') },
+    { id: 5, title: 'Groceries', img: require('../assets/groceries.png') },
+    { id: 6, title: 'Furniture', img: require('../assets/furniture.png') },
+    { id: 8, title: 'Food', img: require('../assets/food.png') },
+    { id: 7, title: 'Shoes', img: require('../assets/shoes.png') },
+    { id: 9, title: 'Home service', img: require('../assets/home-service.png') },
+    { id: 10, title: 'Hospital', img: require('../assets/hospital.png') },
+    { id: 11, title: 'Jwellery', img: require('../assets/jwelery.png') },
+    { id: 12, title: 'See more', img: require('../assets/see-more.png') },
   ]);
 
   const formatDate = timestamp => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString(); // Returns only the date
+    return date.toLocaleDateString();
   };
 
-  const render2RectangleList = ({item, index}) => {
+  const render2RectangleList = ({ item, index }) => {
     return (
       <Pressable
         style={{
@@ -76,7 +117,8 @@ export default function ShopScreen({navigation, route}) {
           marginBottom: 15,
           alignItems: 'center',
         }}
-        onPress={() => navigation.navigate('shopdetails', {item: item})}>
+        onPress={() => navigation.navigate('shopdetails', { item })}
+      >
         <View
           style={[
             styles.rectangle2,
@@ -85,10 +127,10 @@ export default function ShopScreen({navigation, route}) {
               overflow: 'hidden',
               flexDirection: 'row',
             },
-          ]}>
+          ]}
+        >
           <Image
-            // source={item.img}
-            source={{uri: item.profile[0]}}
+            source={{ uri: item.profile?.[0] }}
             style={{
               width: '30%',
               height: '90%',
@@ -98,8 +140,7 @@ export default function ShopScreen({navigation, route}) {
               margin: 8,
             }}
           />
-
-          <View style={{alignSelf: 'flex-start'}}>
+          <View style={{ alignSelf: 'flex-start' }}>
             <Text
               numberOfLines={2}
               style={[
@@ -113,14 +154,11 @@ export default function ShopScreen({navigation, route}) {
                   marginLeft: 0,
                   width: Width * 0.56,
                 },
-              ]}>
-              {item.name}
+              ]}
+            >
+              {item?.shopName || item?.name}
             </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: 2,
-              }}>
+            <View style={{ flexDirection: 'row', marginTop: 2 }}>
               <Text
                 numberOfLines={1}
                 style={[
@@ -132,19 +170,20 @@ export default function ShopScreen({navigation, route}) {
                     fontSize: 13,
                     color: isDark ? '#fff' : '#000',
                   },
-                ]}>
+                ]}
+              >
                 {item.averageRating}
               </Text>
               <RatingTest fixedRating={item.averageRating} />
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
                 marginBottom: 5,
                 alignItems: 'center',
                 marginTop: 4,
-              }}>
+              }}
+            >
               <Text
                 numberOfLines={2}
                 style={[
@@ -155,7 +194,8 @@ export default function ShopScreen({navigation, route}) {
                     fontWeight: 'bold',
                     fontSize: 10,
                   },
-                ]}>
+                ]}
+              >
                 Open :
               </Text>
               <Text
@@ -170,19 +210,19 @@ export default function ShopScreen({navigation, route}) {
                     width: 95,
                     left: 5,
                   },
-                ]}>
-                {/* {formatDate(item.createdAt)} */}
+                ]}
+              >
                 {item.openTime}-{item.closeTime}
               </Text>
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
                 marginBottom: 5,
                 alignItems: 'center',
                 marginTop: 2,
-              }}>
+              }}
+            >
               <Image
                 source={
                   isDark
@@ -207,11 +247,11 @@ export default function ShopScreen({navigation, route}) {
                     width: Width * 0.5,
                     left: 5,
                   },
-                ]}>
+                ]}
+              >
                 {item.businessAddress}
               </Text>
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
@@ -220,7 +260,8 @@ export default function ShopScreen({navigation, route}) {
                 alignSelf: 'flex-end',
                 marginRight: 8,
                 marginTop: 5,
-              }}>
+              }}
+            >
               <Pressable
                 style={{
                   marginRight: 5,
@@ -232,7 +273,8 @@ export default function ShopScreen({navigation, route}) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                onPress={() => Linking.openURL(`tel:${item.phone}`)}>
+                onPress={() => Linking.openURL(`tel:${item.phone}`)}
+              >
                 <Ionicons name={'call'} size={16} color="rgba(7, 201, 29, 1)" />
               </Pressable>
               <Pressable
@@ -245,7 +287,8 @@ export default function ShopScreen({navigation, route}) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                onPress={() => navigation.navigate('messages', {item: null})}>
+                onPress={() => navigation.navigate('messages', { item: null })}
+              >
                 <Ionicons
                   name={'chatbubble-ellipses-outline'}
                   size={16}
@@ -260,47 +303,25 @@ export default function ShopScreen({navigation, route}) {
   };
 
   const DEFAULT_VALUE = 0;
-  function Link(props) {
-    return (
-      <Text
-        {...props}
-        accessibilityRole="link"
-        style={StyleSheet.compose(styles.link, props.style)}
-      />
-    );
-  }
 
   const SliderContainer = props => {
-    const {caption, sliderValue, trackMarks} = props;
-    const [value, setValue] = React.useState(
-      sliderValue ? sliderValue : DEFAULT_VALUE,
-    );
+    const { sliderValue, trackMarks } = props;
+    const [value, setValue] = React.useState(sliderValue || DEFAULT_VALUE);
     let renderTrackMarkComponent;
 
     if (trackMarks?.length && (!Array.isArray(value) || value?.length === 1)) {
       renderTrackMarkComponent = index => {
         const currentMarkValue = trackMarks[index];
-        const currentSliderValue =
-          value || (Array.isArray(value) && value[0]) || 0;
+        const currentSliderValue = value || (Array.isArray(value) && value[0]) || 0;
         const style = currentMarkValue > Math.max(currentSliderValue);
-        // ? trackMarkStyles.activeMark
-        // : trackMarkStyles.inactiveMark;
         return <View style={style} />;
       };
     }
 
     const renderChildren = () => {
-      const childrenArray = React.Children.toArray(props.children); // Convert children to an array
+      const childrenArray = React.Children.toArray(props.children);
       return React.Children.map(childrenArray, (child, index) => {
-        if (!!child && child.type === Slider) {
-          const isFirst = index === 0; // Check if it's the first child
-          const isLast = index === childrenArray.length - 1; // Check if it's the last child
-
-          // Update the first and last values in state
-
-          // console.log('f', value[0]);
-          // console.log('s', value[1]);
-
+        if (child && child.type === Slider) {
           return React.cloneElement(child, {
             onValueChange: setValue,
             renderTrackMarkComponent,
@@ -308,15 +329,14 @@ export default function ShopScreen({navigation, route}) {
             value,
           });
         }
-
         return child;
       });
     };
 
     return (
       <View style={styles.sliderContainer}>
-        <View style={{marginTop: 20}}>
-          <Text style={{color: isDark ? '#fff' : '#000', fontWeight: 'bold'}}>
+        <View style={{ marginTop: 20 }}>
+          <Text style={{ color: isDark ? '#fff' : '#000', fontWeight: 'bold' }}>
             {Array.isArray(value) ? value.join(' km - ') : value} km
           </Text>
         </View>
@@ -324,43 +344,10 @@ export default function ShopScreen({navigation, route}) {
       </View>
     );
   };
-  const [searchText, setSearchText] = useState('');
-
-  useEffect(() => {
-    if (Array.isArray(filteredPosts)) {
-      setFilteredLists(filteredPosts);
-    } else {
-      console.error('filteredPosts is not an array:', filteredPosts);
-    }
-  }, [filteredPosts]); // Runs whenever filteredPosts updates
-
-  const searchFilterFunction = text => {
-    setSearchText(text);
-
-    if (text.trim() === '') {
-      setFilteredLists(filteredPosts); // Reset to full list when search is empty
-      return;
-    }
-
-    const lowerCaseText = text.toLowerCase();
-
-    // Ensure filteredPosts is an array before filtering
-    if (!Array.isArray(filteredPosts)) {
-      console.error('filteredPosts is not an array:', filteredPosts);
-      return;
-    }
-
-    const filteredResults = filteredPosts.filter(item =>
-      item?.name?.toLowerCase().includes(lowerCaseText),
-    );
-
-    setFilteredLists(filteredResults);
-  };
 
   return (
     <KeyboardAvoidingContainer>
-      <View
-        style={[styles.screen, {backgroundColor: isDark ? '#000' : '#fff'}]}>
+      <View style={[styles.screen, { backgroundColor: isDark ? '#000' : '#fff' }]}>
         <View
           style={{
             alignItems: 'center',
@@ -368,13 +355,14 @@ export default function ShopScreen({navigation, route}) {
             flexDirection: 'row',
             height: Height * 0.1,
             justifyContent: 'flex-start',
-          }}>
+          }}
+        >
           <Entypo
             onPress={() => navigation.goBack()}
             name="chevron-thin-left"
             size={20}
             color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
-            style={{marginLeft: 20, padding: 5}}
+            style={{ marginLeft: 20, padding: 5 }}
           />
           <Text
             style={[
@@ -387,52 +375,32 @@ export default function ShopScreen({navigation, route}) {
                 width: Width * 0.72,
                 textAlign: 'center',
               },
-            ]}>
-            {}Shop
+            ]}
+          >
+            Shop
           </Text>
-          {/* <View
-          style={{
-            backgroundColor: 'rgba(207, 207, 207, 0.12)',
-            height: 45,
-            width: '11%',
-            alignSelf: 'center',
-            borderRadius: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Image
-            source={
-              isDark
-                ? require('../assets/locatin-dark.png')
-                : require('../assets/location.png')
-            }
-            style={{
-              width: 24,
-              height: 22,
-            }}
-            resizeMode="contain"
-          />
-        </View> */}
         </View>
-
         <View
           style={{
             width: Width,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 15,
-            }}>
+            }}
+          >
             <View
               style={[
                 styles.inputContainer,
-                {backgroundColor: isDark ? 'rgb(0, 0, 0)' : '#fff'},
-              ]}>
+                { backgroundColor: isDark ? 'rgb(0, 0, 0)' : '#fff' },
+              ]}
+            >
               <Image
                 source={require('../assets/search-icon.png')}
                 style={{
@@ -444,28 +412,20 @@ export default function ShopScreen({navigation, route}) {
                 resizeMode="contain"
               />
               <TextInput
-                // value={'text'}
                 style={[
                   styles.searchInput,
                   {
-                    color: isDark
-                      ? 'rgba(255, 255, 255, 1)'
-                      : 'rgba(94, 95, 96, 1)',
+                    color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)',
                   },
                 ]}
-                // onChangeText={setText}
-                placeholderTextColor={
-                  isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                }
+                placeholderTextColor={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
                 placeholder="Search here"
                 onChangeText={searchFilterFunction}
                 autoCorrect={false}
                 value={searchText}
                 autoCapitalize="none"
-                // onSubmitEditing={event => handleSearch(event.nativeEvent.text)}
               />
             </View>
-
             <TouchableOpacity
               onPress={() => setModalVisible(true)}
               style={{
@@ -474,14 +434,13 @@ export default function ShopScreen({navigation, route}) {
                 width: '13%',
                 alignSelf: 'center',
                 borderRadius: 10,
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.31)'
-                  : 'rgb(0, 0, 0)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.31)' : 'rgb(0, 0, 0)',
                 justifyContent: 'center',
                 alignItems: 'center',
                 borderWidth: 1,
                 marginLeft: 10,
-              }}>
+              }}
+            >
               <Image
                 source={require('../assets/category-icon.png')}
                 style={{
@@ -493,35 +452,35 @@ export default function ShopScreen({navigation, route}) {
               />
             </TouchableOpacity>
           </View>
-
           <ScrollView
             showsVerticalScrollIndicator={false}
-            style={{height: Height * 0.8, flexGrow: 1, width: Width}}>
+            style={{ height: Height * 0.8, flexGrow: 1, width: Width }}
+          >
             {filteredLists.map((item, index) => (
               <View key={item.id ?? `post-${index}`}>
-                {render2RectangleList({item, index})}
+                {render2RectangleList({ item, index })}
               </View>
             ))}
           </ScrollView>
         </View>
-
         <Modal
           visible={modalVisible}
           animationType="slide"
           transparent={true}
-          onRequestClose={() => setModalVisible(false)}>
+          onRequestClose={() => setModalVisible(false)}
+        >
           <Pressable
             style={[styles.modalContainer]}
-            onPress={() => setModalVisible(false)}>
+            onPress={() => setModalVisible(false)}
+          >
             <View
               style={[
                 styles.modalContent,
                 {
-                  backgroundColor: isDark
-                    ? 'rgb(0, 0, 0)'
-                    : 'rgb(255, 255, 255)',
+                  backgroundColor: isDark ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)',
                 },
-              ]}>
+              ]}
+            >
               <Pressable
                 style={{
                   height: 5,
@@ -540,7 +499,8 @@ export default function ShopScreen({navigation, route}) {
                   alignItems: 'center',
                   marginTop: '5%',
                   alignSelf: 'flex-start',
-                }}>
+                }}
+              >
                 <Text
                   style={[
                     styles.bigText,
@@ -548,43 +508,42 @@ export default function ShopScreen({navigation, route}) {
                       fontSize: 17,
                       fontWeight: 'bold',
                       width: Width * 0.76,
-                      color: isDark
-                        ? 'rgba(255, 255, 255, 1)'
-                        : 'rgba(0, 0, 0, 1)',
+                      color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
                     },
-                  ]}>
+                  ]}
+                >
                   Quick sort
                 </Text>
-
                 <TouchableOpacity
                   onPress={() => {
-                    setValue(''),
-                      setSelectedRating(null),
-                      setModalVisible(false);
-                  }}>
+                    setValue([0, 2]);
+                    setSelectedRating(null);
+                    setModalVisible(false);
+                    getFilteredPosts(route?.params?.selectedcategory, null);
+                  }}
+                >
                   <Text
                     style={[
                       styles.bigText,
                       {
-                        color: isDark
-                          ? 'rgba(255, 255, 255, 1)'
-                          : 'rgba(0, 0, 0, 1)',
+                        color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)',
                         fontSize: 17,
                         fontWeight: 'bold',
                       },
-                    ]}>
+                    ]}
+                  >
                     Reset
                   </Text>
                 </TouchableOpacity>
               </View>
-
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginTop: '5%',
                   alignSelf: 'flex-start',
-                }}>
+                }}
+              >
                 <TouchableOpacity
                   style={{
                     borderRadius: 15,
@@ -595,15 +554,18 @@ export default function ShopScreen({navigation, route}) {
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                     marginRight: '10%',
-                  }}>
+                  }}
+                  onPress={() => {
+                    setSelectedRating('top_rated');
+                    setModalVisible(false);
+                    getFilteredPosts(route?.params?.selectedcategory, 'top_rated');
+                  }}
+                >
                   <Octicons
                     name={'star-fill'}
                     size={22}
-                    color={
-                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                    }
+                    color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
                   />
-
                   <Text
                     style={[
                       styles.bigText,
@@ -611,15 +573,13 @@ export default function ShopScreen({navigation, route}) {
                         fontSize: 16,
                         fontWeight: 'bold',
                         marginLeft: 6,
-                        color: isDark
-                          ? 'rgba(255, 255, 255, 1)'
-                          : 'rgb(0, 0, 0)',
+                        color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                       },
-                    ]}>
+                    ]}
+                  >
                     Top Rated
                   </Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={{
                     borderRadius: 15,
@@ -629,15 +589,18 @@ export default function ShopScreen({navigation, route}) {
                     borderColor: 'rgba(228, 228, 228, 1)',
                     alignItems: 'center',
                     justifyContent: 'flex-start',
-                  }}>
+                  }}
+                  onPress={() => {
+                    setSelectedRating('quick_response');
+                    setModalVisible(false);
+                    getFilteredPosts(route?.params?.selectedcategory, 'quick_response');
+                  }}
+                >
                   <Octicons
                     name={'star-fill'}
                     size={22}
-                    color={
-                      isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'
-                    }
+                    color={isDark ? 'rgba(255, 255, 255, 1)' : 'rgba(94, 95, 96, 1)'}
                   />
-
                   <Text
                     style={[
                       styles.bigText,
@@ -645,16 +608,14 @@ export default function ShopScreen({navigation, route}) {
                         fontSize: 16,
                         fontWeight: 'bold',
                         marginLeft: 6,
-                        color: isDark
-                          ? 'rgba(255, 255, 255, 1)'
-                          : 'rgb(0, 0, 0)',
+                        color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                       },
-                    ]}>
+                    ]}
+                  >
                     Quick Response
                   </Text>
                 </TouchableOpacity>
               </View>
-
               <View
                 style={{
                   height: 1,
@@ -666,7 +627,6 @@ export default function ShopScreen({navigation, route}) {
                   marginTop: 18,
                 }}
               />
-
               <Text
                 style={[
                   styles.bigText,
@@ -676,11 +636,16 @@ export default function ShopScreen({navigation, route}) {
                     alignSelf: 'flex-start',
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
-                ]}>
+                ]}
+              >
                 Rating
               </Text>
-              <RatingButtons onSelectRating={setSelectedRating} />
-
+              <RatingButtons
+                onSelectRating={rating => {
+                  setSelectedRating(rating);
+                  getFilteredPosts(route?.params?.selectedcategory, rating);
+                }}
+              />
               <View
                 style={{
                   height: 1,
@@ -700,7 +665,8 @@ export default function ShopScreen({navigation, route}) {
                     alignSelf: 'flex-start',
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   },
-                ]}>
+                ]}
+              >
                 Distance to me
               </Text>
               <SliderContainer sliderValue={value}>
@@ -715,28 +681,27 @@ export default function ShopScreen({navigation, route}) {
                     borderWidth: 5,
                     borderColor: '#00AEEF',
                   }}
-                  minimumTrackStyle={{backgroundColor: '#00AEEF'}}
+                  minimumTrackStyle={{ backgroundColor: '#00AEEF' }}
                   minimumValue={0}
                   maximumValue={5}
                   step={1}
                   thumbTintColor="#00AEEF"
+                  onValueChange={setValue}
                 />
               </SliderContainer>
               <TouchableOpacity
                 style={styles.blueBotton}
-                onPress={() => [
-                  setModalVisible(false),
-                  getFilteredPosts(
-                    route?.params?.selectedcategory,
-                    selectedRating,
-                    value,
-                  ),
-                ]}>
+                onPress={() => {
+                  setModalVisible(false);
+                  getFilteredPosts(route?.params?.selectedcategory, selectedRating, value);
+                }}
+              >
                 <Text
                   style={[
                     styles.smallText,
-                    {color: '#fff', fontSize: 22, marginBottom: 0},
-                  ]}>
+                    { color: '#fff', fontSize: 22, marginBottom: 0 },
+                  ]}
+                >
                   Apply
                 </Text>
               </TouchableOpacity>
@@ -747,6 +712,7 @@ export default function ShopScreen({navigation, route}) {
     </KeyboardAvoidingContainer>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     width: Width,
@@ -787,7 +753,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-
   modalContent: {
     borderRadius: 60,
     padding: 20,
@@ -802,7 +767,6 @@ const styles = StyleSheet.create({
   rectangle2: {
     backgroundColor: 'rgb(255, 255, 255)',
     width: Width * 0.9,
-    // marginRight: 10,
     height: 150,
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -827,5 +791,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     height: 45,
     left: 16,
+  },
+  bigText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  smallText: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  recListText: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  sliderContainer: {
+    width: Width * 0.9,
+    alignItems: 'center',
   },
 });

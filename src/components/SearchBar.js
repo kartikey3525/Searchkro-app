@@ -4,18 +4,22 @@ import { ThemeContext } from '../context/themeContext';
 
 const Width = Dimensions.get('window').width;
 
-const SearchBar = ({placeholder, lists = [], setFilteredLists, searchKey}) => {
-  const {theme} = useContext(ThemeContext);
+const SearchBar = ({ placeholder, lists = [], setFilteredLists, searchKey, onFocus }) => {
+  const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [searchText, setSearchText] = useState('');
+
+  const getNestedValue = (obj, keyPath) => {
+    if (!obj || typeof obj !== 'object') return '';
+    const keys = keyPath.split('.');
+    return keys.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : ''), obj) || '';
+  };
 
   const searchFilterFunction = text => {
     setSearchText(text);
 
     if (typeof setFilteredLists !== 'function') {
-      console.error(
-        'setFilteredLists is not a function. Check parent component.',
-      );
+      console.error('setFilteredLists is not a function. Check parent component.');
       return;
     }
 
@@ -25,28 +29,31 @@ const SearchBar = ({placeholder, lists = [], setFilteredLists, searchKey}) => {
     }
 
     if (text.trim() === '') {
-      setFilteredLists(lists); // Reset to original lists when search is empty
+      console.log('🔍 Search cleared, resetting to original lists:', lists.length);
+      setFilteredLists(lists);
       return;
     }
 
     const lowerCaseText = text.toLowerCase();
-
-    // Check if lists is a single array or an array of arrays
     const isSingleList = !lists.every(item => Array.isArray(item));
 
     if (isSingleList) {
-      // Handle single list (e.g., fullCategorydata in CategoryScreen)
-      const filteredResults = lists.filter(item =>
-        item?.[searchKey]?.toLowerCase().includes(lowerCaseText),
-      );
+      const filteredResults = lists.filter(item => {
+        const value = getNestedValue(item, searchKey);
+        const matches = value.toLowerCase().includes(lowerCaseText);
+        console.log(`🔍 Filtering item: ${value}, matches: ${matches}`);
+        return matches;
+      });
+      console.log('🔍 Filtered single list:', filteredResults.length);
       setFilteredLists(filteredResults);
     } else {
-      // Handle multiple lists (e.g., [recentPosts, nearbyPosts] in HomeScreen)
       const filteredResults = lists.map(list =>
-        list.filter(item =>
-          item?.[searchKey]?.toLowerCase().includes(lowerCaseText),
-        ),
+        list.filter(item => {
+          const value = getNestedValue(item, searchKey);
+          return value.toLowerCase().includes(lowerCaseText);
+        }),
       );
+      console.log('🔍 Filtered nested list:', filteredResults);
       setFilteredLists(filteredResults);
     }
   };
@@ -67,11 +74,12 @@ const SearchBar = ({placeholder, lists = [], setFilteredLists, searchKey}) => {
           resizeMode="contain"
         />
         <TextInput
-          style={[styles.searchInput, {color: isDark ? '#fff' : '#000'}]}
+          style={[styles.searchInput, { color: isDark ? '#fff' : '#000' }]}
           placeholderTextColor={'rgba(94, 95, 96, 1)'}
           placeholder={placeholder}
           autoCapitalize="none"
           onChangeText={searchFilterFunction}
+          onFocus={onFocus}
           autoCorrect={false}
           value={searchText}
         />

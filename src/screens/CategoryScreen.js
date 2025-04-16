@@ -47,7 +47,7 @@ export default function CategoryScreen({navigation, route}) {
           navigation.navigate('Subcategory', {
             item: item.subCategories,
             isposting: isposting,
-            selectedcategory: [item.name],
+            selectedcategory: item.name,
           })
         }>
         <View style={styles.square}>

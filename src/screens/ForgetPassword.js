@@ -34,9 +34,7 @@ export default function ForgetPassword({navigation}) {
   const validateInputs = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
-
     
-
     if (email && phoneRegex.test(email)) {
       // phone number is valid
     } else if (email && emailRegex.test(email)) {

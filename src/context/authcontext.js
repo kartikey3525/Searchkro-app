@@ -1,6 +1,6 @@
 import {createContext, useState, useEffect} from 'react';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import {Alert, AppState, Linking} from 'react-native';
+import {Alert, AppState, Linking, PermissionsAndroid, Platform} from 'react-native';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 // let apiURL = 'http://192.168.1.20:8080';
@@ -114,7 +114,7 @@ const AuthProvider = ({children}) => {
       if (appState.match(/inactive|background/) && nextAppState === 'active') {
         // App came to foreground - reconnect socket
         initializeSocket();
-        getUserData();
+        // getUserData();
       } else if (nextAppState.match(/inactive|background/)) {
         // App went to background - disconnect socket
         if (socket) {
@@ -182,10 +182,13 @@ const AuthProvider = ({children}) => {
       webClientId: '872169733649-p0sgqghd00uij5engmlt21lr3s2me28r.apps.googleusercontent.com',
       offlineAccess: true,
     });
-
+    
     // Request location permission
     <LocationPermission setLocation={setLocation} />;
     
+    // Request camera / storage permission
+
+    // requestAndroidPermissions();
     // Get device token
     getDeviceToken();
     
@@ -258,7 +261,6 @@ const AuthProvider = ({children}) => {
             });
           }
         });
-
         return () => {
           unsubscribeOnOpen();
           unsubscribeOnMessage();
@@ -277,7 +279,34 @@ const AuthProvider = ({children}) => {
     }
   }, [navigation]);
  
-
+  const requestAndroidPermissions = async () => {
+    try {
+      const permissions = [
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+      ];
+  
+      if (Platform.Version >= 33) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES);
+      } else {
+        permissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      }
+  
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
+  
+      const cameraGranted = 
+        granted[PermissionsAndroid.PERMISSIONS.CAMERA] === PermissionsAndroid.RESULTS.GRANTED;
+      
+      const storageGranted = Platform.Version >= 33
+        ? granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] === PermissionsAndroid.RESULTS.GRANTED
+        : granted[PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED;
+  
+      return cameraGranted && storageGranted;
+  
+    } catch (err) {
+      console.warn('Permission error:', err);
+      return false;
+    }
+  };
   // Update your checkLoginStatus to use initializeSocket
   const checkLoginStatus = async () => {
     try {
@@ -703,7 +732,7 @@ const AuthProvider = ({children}) => {
       );
 
       setPostsHistory(filteredPosts);
-      console.log('Filtered Posts:', filteredPosts);
+      // console.log('Filtered Posts:', filteredPosts);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error:', error.response?.data || 'No error response');
@@ -1115,7 +1144,8 @@ const AuthProvider = ({children}) => {
         establishmentYear: establishmentYear,
         gstin: gstin,
         ownerName: ownerName,
-        name: shopName,
+        name: ownerName,
+        shopName: shopName,
         businessScale: selectedScale,
         isDeliveryAvailable: selectedAvailabity,
         openTime: openAt,
@@ -1533,7 +1563,8 @@ const signInWithGoogle = async () => {
     if (error.message) {
       errorMessage = error.message;
     }
-    
+    await GoogleSignin.signOut();
+
     // Show alert with the error message
     Alert.alert(
       'Sign-in Failed',
@@ -1640,6 +1671,9 @@ const signInWithGoogle = async () => {
       );
 
       console.log('res', response.data);
+
+    Alert.alert('OTP Sent', response.data.msg);
+
       navigation.navigate('OTPScreen', {
         emailPhone: email,
       });
@@ -1688,6 +1722,7 @@ const signInWithGoogle = async () => {
         newPassword,
       });
       console.log('res', response.data);
+    // Alert.alert('Password changed successfully', response.data.msg);
       navigation.navigate('Login', {
         //  email: email
       });

@@ -10,36 +10,6 @@ export default function useImagePicker1() {
   const [isLoading, setIsLoading] = useState(false);
   let loadingAlert = null;
 
-  const requestPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const permissions = [
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-        ];
-  
-        if (Platform.Version >= 33) {
-          permissions.push(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES);
-        } else {
-          permissions.push(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
-        }
-  
-        const granted = await PermissionsAndroid.requestMultiple(permissions);
-  
-        const cameraGranted = granted['android.permission.CAMERA'] === PermissionsAndroid.RESULTS.GRANTED;
-        const storageGranted = Platform.Version >= 33
-          ? granted['android.permission.READ_MEDIA_IMAGES'] === PermissionsAndroid.RESULTS.GRANTED
-          : granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED;
-  
-        return cameraGranted && storageGranted;
-  
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
-    }
-    return true;
-  };
-  
 
   const showLoadingAlert = () => {
     // Dismiss any existing alert first
@@ -110,14 +80,14 @@ export default function useImagePicker1() {
 
   const selectMedia = async () => {
     try {
-      const hasPermission = await requestPermission();
-      if (!hasPermission) {
-        Alert.alert(
-          'Permission Required',
-          'We need storage and camera permissions to select images',
-        );
-        return;
-      }
+      // const hasPermission = await requestPermission();
+      // if (!hasPermission) {
+      //   Alert.alert(
+      //     'Permission Required',
+      //     'We need storage and camera permissions to select images',
+      //   );
+      //   return;
+      // }
 
       const image = await ImagePicker.openPicker({
         // width: 300,

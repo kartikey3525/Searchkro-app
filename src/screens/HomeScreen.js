@@ -206,7 +206,10 @@ export default function HomeScreen({navigation}) {
     location,
     notificationList, // Ensure this is provided by AuthContext
     setLocation,
-    unreadCount,getNotification,markNotificationsAsRead,
+    unreadCount,
+    getNotification,
+    markNotificationsAsRead,
+    getUserData,
   } = useContext(AuthContext);
 
   const darkModeStyles = getStyles(isDark, notificationList); // Pass notificationList here
@@ -223,6 +226,7 @@ export default function HomeScreen({navigation}) {
       userRole === 'buyer' ? getCategories() : getSellerCategories();
       userRole === 'buyer' ? (getRecentPosts(), getNearbyPosts()) : getPosts();
       getNotification(); // Assuming this is available from your AuthContext
+      getUserData();
     }
   }, [isFocused, userRole]);
 
@@ -279,8 +283,8 @@ export default function HomeScreen({navigation}) {
       onPress={() =>
         userRole === 'buyer'
           ? item.id === 12
-            ? navigation.navigate('Categories', {item})
-            : navigation.navigate('Subcategory', {item: item.subCategories})
+            ? navigation.navigate('Categories', {item, selectedcategory: item.name,})
+            : navigation.navigate('Subcategory', {item: item.subCategories, selectedcategory: item.name,})
           : navigation.navigate('preferences', {item, category: item.name})
       }
     />

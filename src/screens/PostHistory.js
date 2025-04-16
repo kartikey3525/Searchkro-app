@@ -104,7 +104,15 @@ export default function PostHistory({navigation}) {
           justifyContent: 'center',
           marginBottom: 15,
           alignItems: 'center',
-        }}>
+        }}
+        // onPress={PostDetails}
+        onPress={() => {
+          console.log('🚀 Navigating :', item);
+          navigation.navigate('postdetails', {
+            item: item, 
+          });
+        }}
+      >
         <View
           style={[
             styles.rectangle2,

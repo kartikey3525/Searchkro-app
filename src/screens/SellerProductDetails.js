@@ -16,6 +16,7 @@ import { ThemeContext } from '../context/themeContext';
 import Header from '../components/Header';
 import { useIsFocused } from '@react-navigation/native';
 import Share from 'react-native-share';
+import { AuthContext } from '../context/authcontext';
 const { width, height } = Dimensions.get('window');
 
 export default function SellerProductDetails({ navigation, route }) {
@@ -23,7 +24,7 @@ export default function SellerProductDetails({ navigation, route }) {
   const isDark = theme === 'dark';
   const [Data, setData] = useState([]);
   const isFocused = useIsFocused();
-
+  const {    Userfulldata,} = useContext(AuthContext);
   useEffect(() => {
     // console.log('data', route.params.item.images);
     setData(route?.params?.item); 
@@ -174,7 +175,17 @@ const shareProductDeepLink = async () => {
         <TouchableOpacity
           
           onPress={() => {
-            openWhatsApp(Data.contactNumber);
+          console.log('data',Data);
+          navigation.navigate('Chatscreen', {
+            item: {
+              _id: Data.userId, // The seller's user ID
+              name: Data.contactEmail, // You should get this from user data
+              profile: Data.images, // Seller's profile image
+              isOnline: false, // Get from user status
+              Data
+            },
+            userId: Userfulldata._id,
+          });
           }}
           style={[styles.button, { backgroundColor: 'rgba(15, 92, 246, 1)' }]}>
           <Ionicons name="chatbubble-outline" size={20} color="#fff" />

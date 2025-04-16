@@ -52,9 +52,10 @@ export default function ProfileSettings({navigation, route}) {
   const isFocused = useIsFocused();
 
   // Custom hooks
-  const {media, selectMedia, isUploading, setMedia} =
-    useImagePicker();
-    {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
+  const {media, selectMedia, isUploading, setMedia} = useImagePicker();
+  {
+    isUploading && <ActivityIndicator size="large" color="#0000ff" />;
+  }
   // Context data
   const {
     getCategories,
@@ -196,10 +197,14 @@ export default function ProfileSettings({navigation, route}) {
           {renderInfoRow('Name', shopData?.name)}
           {renderInfoRow('Contact', shopData?.phone)}
           {renderInfoRow('Email Address', shopData?.email)}
-          {renderInfoRow('DOB', formatDOB_DDMMYYYY(Userfulldata?.dob))}
-          {renderInfoRow('Gender', shopData?.gender)}
-
         </>
+
+        {userdata?.roleId === 0 && (
+          <>
+            {renderInfoRow('DOB', formatDOB_DDMMYYYY(Userfulldata?.dob))}
+            {renderInfoRow('Gender', shopData?.gender)}
+          </>
+        )}
       </View>
     ),
     [shopData, location, isDark, handleEditPress, dynamicStyles],
@@ -221,8 +226,10 @@ export default function ProfileSettings({navigation, route}) {
               Business Statutory Details
             </Text>
             <View style={[styles.divider, dynamicStyles.borderColor]} />
-            {renderInfoRow('Shop name', shopData?.name)}
-            {renderInfoRow('Owner name', shopData?.ownerName)} 
+            {renderInfoRow('Shop name', shopData?.shopName)}
+            {renderInfoRow('Owner name', shopData?.ownerName)}
+            {renderInfoRow('Average rating', shopData?.averageRating)}
+
 
             {renderInfoRow(
               'Year of Establishment',

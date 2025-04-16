@@ -110,7 +110,7 @@ export default function NotificationScreen({ navigation ,route}) {
               {
                 fontWeight: 'bold',
                 fontSize: 14,
-                width: 180,
+                // width: 180,
                 color: isDark ? '#fff' : '#000',
               },
             ]}>
@@ -125,7 +125,7 @@ export default function NotificationScreen({ navigation ,route}) {
                 fontSize: 14,
                 width: 180,
                 marginTop: 5,
-                color: isDark ? '#fff' : '#000',
+                color: isDark ? '#fff' : 'grey',
               },
             ]}>
             {extractTime(item.date)}

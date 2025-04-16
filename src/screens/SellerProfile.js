@@ -103,7 +103,7 @@ export default function SellerProfile({ navigation, route }) {
       setCloseAt(shopData.closeTime || '');
       setBusinessAddress(shopData.businessAddress || '');
       setOwnerName(shopData.ownerName || '');
-      setShopName(shopData.name || '');
+      setShopName(shopData.shopName || '');
       setPhone(shopData.phone || '');
       setMedia(Array.isArray(shopData.profile) ? shopData.profile : []);
       setSelectedScale(shopData.businessScale || []);

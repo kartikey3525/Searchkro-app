@@ -7,7 +7,7 @@ import {
   ScrollView,
   ActivityIndicator, 
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {HelperText} from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -19,20 +19,35 @@ const Height = Dimensions.get('window').height;
 import {ThemeContext} from '../context/themeContext'; 
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function UploadImage({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
   const [isLoading, setIsLoading] = useState(false);
+  const post = route?.params?.item || null; 
+  const isEditMode = !!post;
+  const isFocused = useIsFocused();
 
   const [errors, setErrors] = useState({
     email: '',
     password: '',
   });
+
+    useEffect(() => { 
+      if (isEditMode) {
+        // Populate fields with existing post data
+        console.log('post', post);
+        setMedia(post.images || '');
+        
+      }
+    }, [isFocused, ]);
+  
   const {handleRegister, handleLogin, createPost} = useContext(AuthContext);
   const {media, selectMedia, requestCameraPermission, setMedia,isUploading} =
     useImagePicker();
+
   {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
 
   const validateInputs = () => {
@@ -49,15 +64,15 @@ export default function UploadImage({navigation, route}) {
   const handlePress = async () => {
     setErrors({media: ''});
     if (!validateInputs()) return;
-    console.log('media', media);
+    console.log('media',    route.params.postData,);
     try {
       await createPost(
-        route.params.name,
-        route.params.selectedCategories,
-        route.params.description,
-        route.params.phone,
-        route.params.email,
-        route.params.location,
+        route.params.postData.name,
+        route.params.postData.selectedCategories,
+        route.params.postData.description,
+        route.params.postData.phone,
+        route.params.postData.email,
+        route.params.postData.location,
         media,
       );
     } catch (error) {
@@ -211,11 +226,11 @@ export default function UploadImage({navigation, route}) {
       )}
 
       {/* Post Button */}
-      <TouchableOpacity
+     {!isEditMode&&( <TouchableOpacity
         style={[styles.blueButton, {margin: media.length > 0 ? '25%' : '60%'}]}
         onPress={() => handlePress()}>
         <Text style={[styles.buttonText, {color: '#fff'}]}>Post</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>)}
     </ScrollView>
   );
 }

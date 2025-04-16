@@ -17,6 +17,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
@@ -42,7 +43,7 @@ export default function ShopDetails({navigation, route}) {
     getSingleShop,
     getShopRating,
     PostReviewLikes,
-    RatingLiked,
+    Userfulldata,
   } = useContext(AuthContext);
 
   const userId =
@@ -50,47 +51,49 @@ export default function ShopDetails({navigation, route}) {
       ? route?.params?.item?._id
       : route?.params?.item?.userId;
 
-      const shareShopDeepLink = async () => {
-        try {
-          // Get shop ID from your data
-          const shopId = Data._id || Data.id; 
-          const shopName = Data.name || "This shop";
-          
-          // Create deep link (replace with your actual domain and path)
-          const deepLink = `https://yourdomain.com/shop/${shopId}`;
-          const playStoreLink = 'https://play.google.com/store/apps/details?id=com.yourpackage';
-          
-          // Create the share message
-          const message = `Check out ${shopName} on our app!\n\n` +
-          `⭐ Rating: ${Data.averageRating || 'Not rated yet'}\n` +
-          `📍 Location: ${Data.businessAddress || ''}\n` +
-          `🕒 Hours: ${Data.openTime}-${Data.closeTime}\n\n` +
-          `${deepLink}\n\n` +
-            `Download our app: ${playStoreLink}`;
-          
-          const encodedMessage = encodeURIComponent(message);
-          const whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
-      
-          // Check if WhatsApp is installed
-          const supported = await Linking.canOpenURL(whatsappUrl);
-          
-          if (supported) {
-            await Linking.openURL(whatsappUrl);
-          } else {
-            // Fallback to web version if WhatsApp isn't installed
-            const webUrl = `https://wa.me/?text=${encodedMessage}`;
-            await Linking.openURL(webUrl);
-          }
-        } catch (error) {
-          console.error('Error sharing shop:', error);
-          let errorMessage = 'Could not share shop';
-          if (error.message.includes('No activity found to handle intent')) {
-            errorMessage = 'WhatsApp is not installed';
-          }
-          Alert.alert('Error', errorMessage);
-        }
-      };
-  
+  const shareShopDeepLink = async () => {
+    try {
+      // Get shop ID from your data
+      const shopId = Data._id || Data.id;
+      const shopName = Data.name || 'This shop';
+
+      // Create deep link (replace with your actual domain and path)
+      const deepLink = `https://yourdomain.com/shop/${shopId}`;
+      const playStoreLink =
+        'https://play.google.com/store/apps/details?id=com.yourpackage';
+
+      // Create the share message
+      const message =
+        `Check out ${shopName} on our app!\n\n` +
+        `⭐ Rating: ${Data.averageRating || 'Not rated yet'}\n` +
+        `📍 Location: ${Data.businessAddress || ''}\n` +
+        `🕒 Hours: ${Data.openTime}-${Data.closeTime}\n\n` +
+        `${deepLink}\n\n` +
+        `Download our app: ${playStoreLink}`;
+
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
+
+      // Check if WhatsApp is installed
+      const supported = await Linking.canOpenURL(whatsappUrl);
+
+      if (supported) {
+        await Linking.openURL(whatsappUrl);
+      } else {
+        // Fallback to web version if WhatsApp isn't installed
+        const webUrl = `https://wa.me/?text=${encodedMessage}`;
+        await Linking.openURL(webUrl);
+      }
+    } catch (error) {
+      console.error('Error sharing shop:', error);
+      let errorMessage = 'Could not share shop';
+      if (error.message.includes('No activity found to handle intent')) {
+        errorMessage = 'WhatsApp is not installed';
+      }
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
   useEffect(() => {
     // console.log('userId', userId);
 
@@ -221,129 +224,103 @@ export default function ShopDetails({navigation, route}) {
     {key: 'photos', title: 'Photos'},
   ]);
 
-  // const [selectedItemId, setSelectedItemId] = useState(null);
+  const BusinessDetails = ({isDark, Data}) => {
+    // Reusable component for rendering a title
+    const Title = ({children, style}) => (
+      <Text style={[styles.title, {color: isDark ? 'white' : 'black'}, style]}>
+        {children}
+      </Text>
+    );
 
-  // const toggleModal = id => {
-  //   if (selectedItemId === id) {
-  //     setSelectedItemId(null); // Close modal if the same item is clicked again
-  //   } else {
-  //     setSelectedItemId(id); // Open modal for the clicked item
-  //   }
-  // };
+    // Reusable component for rendering a subtitle
+    const Subtitle = ({children, numberOfLines = 3}) => (
+      <Text style={styles.subtitle} numberOfLines={numberOfLines}>
+        {children}
+      </Text>
+    );
 
-  const openWhatsApp = async phoneNumber => {
-    try {
-      // Remove all non-digit characters
-      const cleanedNumber = phoneNumber.replace(/\D/g, '');
+    // Data structure for rendering sections
+    const sections = [
+      {title: 'Address', value: Data?.businessAddress},
+      {title: 'Contact', value: Data?.phone},
+      {title: 'Email', value: Data?.email},
+      {
+        title: 'Business Statutory Details',
+        isHeader: true,
+        style: {marginTop: 10, marginBottom: 5, fontSize: 18},
+      },
+      {title: 'Owner name', value: Data?.ownerName},
+      {title: 'Year of Establishment', value: Data?.establishmentYear},
+      {
+        title: 'Delivery Available',
+        value: Data?.isDeliveryAvailable === 'true' ? 'Yes' : 'No',
+      },
+      {title: 'Open at', value: Data?.openTime},
+      {title: 'Close at', value: Data?.closeTime},
+      {title: 'Social Media', value: Data?.socialMedia},
+      {title: 'Business Scale', value: Data?.businessScale},
+      {title: 'GSTIN', value: Data?.gstin},
+      {
+        title: 'Selected categories',
+        value: Array.isArray(Data?.selectedCategories)
+          ? Data.selectedCategories.join(', ')
+          : Data?.selectedCategories || 'N/A',
+      },
+    ];
 
-      // Check if WhatsApp is installed
-      const url = `whatsapp://send?phone=${cleanedNumber}`;
-      const supported = await Linking.canOpenURL(url);
+    return (
+      <View style={styles.detailsContainer}>
+        {sections.map((section, index) => (
+          <View key={index}>
+            <Title style={section.isHeader ? section.style : null}>
+              {section.title}
+            </Title>
+            {!section.isHeader && <Subtitle>{section.value || 'N/A'}</Subtitle>}
+          </View>
+        ))}
+      </View>
+    );
+  };
 
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        // If WhatsApp isn't installed, open browser version
-        const webUrl = `https://wa.me/${cleanedNumber}`;
-        await Linking.openURL(webUrl);
-      }
-    } catch (error) {
-      console.error('Error opening WhatsApp:', error);
-      Alert.alert('Error', 'Could not open WhatsApp');
-    }
+  const [showDetails, setShowDetails] = useState(false);
+
+  const toggleDetails = () => {
+    setShowDetails(prev => !prev); // Simply toggle the state
   };
 
   const Overview = () => (
     <View>
       <View style={{height: '100%', flexGrow: 1}}>
-        <Text
-          style={[
-            styles.bigText,
-            {
-              alignSelf: 'flex-start',
-              color: isDark ? 'white' : 'black',
-              fontSize: 18,
-              left: 25,
-              marginTop: 10,
-              marginBottom: 0,
-            },
-          ]}>
-          Quick information
-        </Text>
+        <TouchableOpacity
+          onPress={toggleDetails}
+          style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Text
+            style={[
+              styles.title,
+              {
+                color: isDark ? 'white' : 'black',
+                fontSize: 18,
+              },
+            ]}>
+            Quick information
+          </Text>
+          <Entypo
+            name={showDetails ? 'chevron-thin-up' : 'chevron-thin-down'}
+            size={13}
+            color={isDark ? 'rgb(255, 255, 255)' : 'rgba(94, 95, 96, 1)'}
+            style={{marginLeft: 35, marginTop: 10}}
+          />
+        </TouchableOpacity>
+        {showDetails && <BusinessDetails isDark={isDark} Data={Data} />}
 
         <Text
           style={[
-            styles.bigText,
-            {
-              alignSelf: 'flex-start',
-              fontSize: 14,
-              color: isDark ? 'white' : 'black',
-              left: 25,
-              marginTop: 5,
-              marginBottom: 0,
-            },
-          ]}>
-          Address
-        </Text>
-
-        <Text
-          numberOfLines={3}
-          style={[
-            styles.bigText,
-            {
-              alignSelf: 'flex-start',
-              fontSize: 12,
-              color: 'grey',
-              left: 25,
-              width: '95%',
-              marginTop: 5,
-              marginBottom: 0,
-            },
-          ]}>
-          {Data?.businessAddress}
-        </Text>
-
-        <Text
-          style={[
-            styles.bigText,
-            {
-              alignSelf: 'flex-start',
-              fontSize: 14,
-              color: isDark ? 'white' : 'black',
-
-              left: 25,
-              marginTop: 5,
-              marginBottom: 0,
-            },
-          ]}>
-          Contact
-        </Text>
-
-        <Text
-          numberOfLines={3}
-          style={[
-            styles.bigText,
-            {
-              alignSelf: 'flex-start',
-              fontSize: 12,
-              color: 'grey',
-              left: 25,
-              width: '95%',
-              marginTop: 5,
-              marginBottom: 0,
-            },
-          ]}>
-          {Data?.phone}
-        </Text>
-
-        <Text
-          style={[
-            styles.bigText,
             {
               alignSelf: 'flex-start',
               fontSize: 18,
               color: isDark ? 'white' : 'black',
               left: 25,
+              fontWeight: 'bold',
               marginTop: 5,
               marginBottom: 0,
             },
@@ -502,10 +479,8 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-            {sortedRatings?.length} Reviews
+              {sortedRatings?.length} Reviews
             </Text>
-
-           
 
             <Text
               numberOfLines={1}
@@ -519,7 +494,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-             {Data.averageRating<=4 ? 'Average' : 'Recommended'}
+              {Data.averageRating <= 4 ? 'Average' : 'Recommended'}
             </Text>
           </View>
         </View>
@@ -562,27 +537,29 @@ export default function ShopDetails({navigation, route}) {
         </TouchableOpacity>
 
         {sortedRatings?.length > 0 ? (
-          <View style={{height: 440}}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={{marginTop: '2%'}}>
-              {sortedRatings?.length > 0 ? (
-                sortedRatings.map((item, index) => (
-                  <View key={item?.id || index}>
-                    {render2RectangleList(item, index)}
-                  </View>
-                ))
-              ) : (
-                <Text
-                  style={[
-                    styles.smallText,
-                    {color: isDark ? 'white' : 'black', alignSelf: 'center'},
-                  ]}>
-                  No Ratings Available
-                </Text>
-              )}
-            </ScrollView>
-          </View>
+           <View style={[styles.ratingsContainer, {marginTop: '2%'}]}>
+           <ScrollView showsVerticalScrollIndicator={false}>
+             {sortedRatings?.length > 0 ? (
+               sortedRatings.map((item, index) => (
+                 <View key={item?.id || index}>
+                   {render2RectangleList(item, index)}
+                 </View>
+               ))
+             ) : (
+               <Text
+                 style={[
+                   styles.smallText,
+                   {
+                     color: isDark ? 'white' : 'black',
+                     alignSelf: 'center',
+                     paddingVertical: 20,
+                   },
+                 ]}>
+                 No Ratings Available
+               </Text>
+             )}
+           </ScrollView>
+         </View>
         ) : (
           <Text
             style={[
@@ -607,44 +584,48 @@ export default function ShopDetails({navigation, route}) {
           Photos
         </Text>
         <View style={{width: '95%', marginLeft: 10}}>
-          <View style={{marginTop: '2%', padding: 5}}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false}>
-              {Array.from(
-                {
-                  length: Math.ceil(
-                    (route?.params?.item?.profile?.length > 0
-                      ? route?.params?.item?.profile
-                      : singleShop?.profile || []
-                    ).length / 3,
-                  ),
-                },
-                (_, rowIndex) => (
-                  <View
-                    key={rowIndex}
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}>
-                    {(route?.params?.item?.profile?.length > 0
-                      ? route?.params?.item?.profile
-                      : singleShop?.profile || []
-                    )
-                      .slice(rowIndex * 3, rowIndex * 3 + 3)
-                      .map((item, index) => (
-                        <View
-                          key={item.id || `photo-${index}`}
-                          style={{flex: 1, margin: 5}}>
-                          {renderPhotosList(item, index)}
-                        </View>
-                      ))}
-                  </View>
-                ),
-              )}
-            </ScrollView>
+  <View style={{marginTop: '2%', padding: 5}}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={false}
+      style={{
+        maxHeight: 300, // Set your desired maximum height here
+      }}
+    >
+      {Array.from(
+        {
+          length: Math.ceil(
+            (route?.params?.item?.profile?.length > 0
+              ? route?.params?.item?.profile
+              : singleShop?.profile || []
+            ).length / 3,
+          ),
+        },
+        (_, rowIndex) => (
+          <View
+            key={rowIndex}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            {(route?.params?.item?.profile?.length > 0
+              ? route?.params?.item?.profile
+              : singleShop?.profile || []
+            )
+              .slice(rowIndex * 3, rowIndex * 3 + 3)
+              .map((item, index) => (
+                <View
+                  key={item.id || `photo-${index}`}
+                  style={{flex: 1, margin: 5}}>
+                  {renderPhotosList(item, index)}
+                </View>
+              ))}
           </View>
-        </View>
+        ),
+      )}
+    </ScrollView>
+  </View>
+</View>
       </View>
     </View>
   );
@@ -833,7 +814,7 @@ export default function ShopDetails({navigation, route}) {
                   marginBottom: 0,
                 },
               ]}>
-               {Data.averageRating<=4 ? '' : 'Recommended'}
+              {Data.averageRating <= 4 ? '' : 'Recommended'}
             </Text>
           </View>
         </View>
@@ -874,7 +855,7 @@ export default function ShopDetails({navigation, route}) {
           </Text>
         </TouchableOpacity>
 
-        <View style={{height: 440, marginTop: '2%'}}>
+        <View style={[styles.ratingsContainer, {marginTop: '2%'}]}>
           <ScrollView showsVerticalScrollIndicator={false}>
             {sortedRatings?.length > 0 ? (
               sortedRatings.map((item, index) => (
@@ -886,7 +867,11 @@ export default function ShopDetails({navigation, route}) {
               <Text
                 style={[
                   styles.smallText,
-                  {color: isDark ? 'white' : 'black', alignSelf: 'center'},
+                  {
+                    color: isDark ? 'white' : 'black',
+                    alignSelf: 'center',
+                    paddingVertical: 20,
+                  },
                 ]}>
                 No Ratings Available
               </Text>
@@ -913,45 +898,49 @@ export default function ShopDetails({navigation, route}) {
         ]}>
         Photos
       </Text>
-      <View style={{width: '100%', marginLeft: 14}}>
-        <View style={{marginTop: '2%', padding: 5}}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}>
-            {Array.from(
-              {
-                length: Math.ceil(
-                  (route?.params?.item?.profile?.length > 0
-                    ? route?.params?.item?.profile
-                    : singleShop?.profile || []
-                  ).length / 3,
-                ),
-              },
-              (_, rowIndex) => (
+      <View style={{width: '95%', marginLeft: 10}}>
+  <View style={{marginTop: '2%', padding: 5}}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={false}
+      style={{
+        maxHeight: 300, // Set your desired maximum height here
+      }}
+    >
+      {Array.from(
+        {
+          length: Math.ceil(
+            (route?.params?.item?.profile?.length > 0
+              ? route?.params?.item?.profile
+              : singleShop?.profile || []
+            ).length / 3,
+          ),
+        },
+        (_, rowIndex) => (
+          <View
+            key={rowIndex}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            {(route?.params?.item?.profile?.length > 0
+              ? route?.params?.item?.profile
+              : singleShop?.profile || []
+            )
+              .slice(rowIndex * 3, rowIndex * 3 + 3)
+              .map((item, index) => (
                 <View
-                  key={rowIndex}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  {(route?.params?.item?.profile?.length > 0
-                    ? route?.params?.item?.profile
-                    : singleShop?.profile || []
-                  )
-                    .slice(rowIndex * 3, rowIndex * 3 + 3)
-                    .map((item, index) => (
-                      <View
-                        key={item.id || `photo-${index}`}
-                        style={{flex: 1, margin: 5}}>
-                        {renderPhotosList(item, index)}
-                      </View>
-                    ))}
+                  key={item.id || `photo-${index}`}
+                  style={{flex: 1, margin: 5}}>
+                  {renderPhotosList(item, index)}
                 </View>
-              ),
-            )}
-          </ScrollView>
-        </View>
-      </View>
+              ))}
+          </View>
+        ),
+      )}
+    </ScrollView>
+  </View>
+</View>
     </View>
   );
 
@@ -971,6 +960,7 @@ export default function ShopDetails({navigation, route}) {
           alignItems: 'center',
         }}
         onPress={() =>
+          // console.log('first', item),
           navigation.navigate('productcategories', {
             item:
               route?.params?.item?.categoriesPost?.length > 0
@@ -1411,7 +1401,7 @@ export default function ShopDetails({navigation, route}) {
                     marginTop: 2,
                     color: isDark ? 'rgba(255, 255, 255, 1)' : 'rgb(0, 0, 0)',
                   }}>
-                  {Data?.name}
+                  {Data?.shopName?.length > 0 ? Data?.shopName : Data?.name}
                 </Text>
 
                 {/* <Text
@@ -1435,7 +1425,6 @@ export default function ShopDetails({navigation, route}) {
               alignSelf: 'flex-start',
               marginLeft: '8%',
               bottom: 35,
-
             }}>
             <View
               style={{
@@ -1543,26 +1532,21 @@ export default function ShopDetails({navigation, route}) {
             </Pressable>
 
             <Pressable
-               onPress={() => {
-                openWhatsApp(Data.phone);
-              }}
-             >
-              {/* <Ionicons
-                onPress={() => {
-                  openWhatsApp(Data.phone);
-                }}
+              style={[
+                styles.iconStyle,
+                {backgroundColor: 'rgba(15, 92, 246, 1)'},
+              ]}>
+              <Ionicons
+                onPress={() =>
+                  navigation.navigate('Chatscreen', {
+                    item: Data,
+                    userId: Userfulldata._id,
+                  })
+                }
                 name="chatbubble-ellipses-outline"
                 size={26}
                 color="rgba(255, 255, 255, 1)"
-              /> */}
-              <Image
-            source={require('../assets/whatsapp.png')}
-            style={[
-              styles.iconStyle,
-              {width: 52,height: 52,backgroundColor: 'rgb(255, 255, 255)'},
-            ]}
-            resizeMode="contain"
-          />
+              />
             </Pressable>
 
             <Pressable
@@ -1589,7 +1573,8 @@ export default function ShopDetails({navigation, route}) {
               style={[
                 styles.iconStyle,
                 {backgroundColor: 'rgba(33, 150, 243, 1)'},
-              ]} onPress={() => shareShopDeepLink()}>
+              ]}
+              onPress={() => shareShopDeepLink()}>
               <FontAwesome
                 name="share"
                 size={26}
@@ -1658,9 +1643,12 @@ export default function ShopDetails({navigation, route}) {
                 : 'rgba(15, 92, 246, 1)',
             },
           ]}
-          onPress={() => {
-            openWhatsApp(Data.phone);
-          }}>
+          onPress={() =>
+            navigation.navigate('Chatscreen', {
+              item: Data,
+              userId: Userfulldata._id,
+            })
+          }>
           <Text
             style={[
               styles.smallText,
@@ -1829,5 +1817,22 @@ const styles = StyleSheet.create({
     color: 'black',
     height: 45,
     left: 16,
+  },
+  title: {
+    alignSelf: 'flex-start',
+    fontSize: 14,
+    fontWeight: 'bold',
+    left: 25,
+    marginTop: 5,
+    marginBottom: 0,
+  },
+  subtitle: {
+    alignSelf: 'flex-start',
+    fontSize: 12,
+    color: 'grey',
+    left: 25,
+    width: '95%',
+    marginTop: 5,
+    marginBottom: 0,
   },
 });

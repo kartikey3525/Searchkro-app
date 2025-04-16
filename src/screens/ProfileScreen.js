@@ -549,7 +549,7 @@ export default function ProfileScreen({navigation}) {
                         letterSpacing: 0.5,
                       },
                     ]}>
-                    Legal Policies
+                    Privacy Policies
                   </Text>
 
                   <AntDesign

@@ -33,7 +33,7 @@ export default function OTPScreen({navigation, route}) {
   const [errors, setErrors] = useState({
     otp: '',
   });
-  const {VerifyOTP, handleRegister, handleVerifyPasswordOtp} =
+  const {VerifyOTP, handleRegister, handleVerifyPasswordOtp,handleForgetPassword} =
     useContext(AuthContext);
 
   useEffect(() => {
@@ -65,12 +65,11 @@ export default function OTPScreen({navigation, route}) {
   const handleResend = async () => {
     setIsLoading(true);
     try {
-      await handleRegister(
+      await route?.params?.password? handleRegister(
         route?.params?.emailPhone,
         route?.params?.password,
         route?.params?.name,
-      );
-      Alert.alert('Success', 'resend successful!');
+      ):handleForgetPassword(route?.params?.emailPhone,);
       setCountdown(600);
       setResendDisabled(true);
     } catch (error) {
