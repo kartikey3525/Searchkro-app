@@ -349,6 +349,7 @@ console.log('first', postData);
           ref={phoneInput}
           value={phone}
           defaultValue={phone}
+          placeholder={phone}
           containerStyle={{
             width: Width * 0.9,
             height: 60,

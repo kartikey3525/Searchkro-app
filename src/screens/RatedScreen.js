@@ -46,7 +46,8 @@ export default function RatedScreen({navigation, route}) {
   {isUploading && <ActivityIndicator size="large" color="#0000ff" />}
 
   useEffect(() => {
-    // console.log('route?.params?.item', route?.params?.item?._id);
+    // console.log('route?.params?.item', route?.params?.item);
+    // setMedia(route?.params?.item?.profile);
   }, [useIsFocused()]);
 
   const validateInputs = () => {
@@ -78,7 +79,7 @@ export default function RatedScreen({navigation, route}) {
 
   const handlePress = async () => {
     setErrors({rating: '', description: '', media: ''});
-    console.log('rating, media, description', rating, media, description);
+    // console.log('rating, media, description', rating, media, description);
     if (!validateInputs()) return;
 
     try {
@@ -417,6 +418,7 @@ export default function RatedScreen({navigation, route}) {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     alignItems: 'center',
     width: '100%',
   },

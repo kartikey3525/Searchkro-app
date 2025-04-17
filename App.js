@@ -11,12 +11,7 @@ const App = () => {
     <SafeAreaProvider>
       <ThemeProvider>
         <NavigationContainer>
-          <AuthProvider>
-            <StatusBar
-              barStyle="default" // Adjust based on theme later
-              backgroundColor="transparent" // Prevent solid color overlap
-              translucent={true} // Allow UI to render under status bar
-            />
+          <AuthProvider> 
             <MainScreens />
           </AuthProvider>
         </NavigationContainer>

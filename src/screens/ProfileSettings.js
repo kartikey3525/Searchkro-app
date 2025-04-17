@@ -207,7 +207,7 @@ export default function ProfileSettings({navigation, route}) {
         )}
       </View>
     ),
-    [shopData, location, isDark, handleEditPress, dynamicStyles],
+    [shopData, isDark, handleEditPress, dynamicStyles],
   );
 
   const renderBusinessDetailsSection = useCallback(
@@ -251,7 +251,7 @@ export default function ProfileSettings({navigation, route}) {
             )}
             {renderInfoRow(
               'Location',
-              `Lat: ${location.latitude}, Long: ${location.longitude}`,
+              location&& `Lat: ${location.latitude}, Long: ${location.longitude}`,
               true,
             )}
             {renderInfoRow('Shop About', shopData?.description, true)}

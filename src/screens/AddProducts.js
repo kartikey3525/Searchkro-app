@@ -24,7 +24,7 @@ import Dropdown from '../components/Dropdown';
 import {useIsFocused} from '@react-navigation/native';
 
 export default function AddProducts({navigation, route}) {
-  const {productData, isEditMode} = route.params || {};
+  const {productData, isEditMode, isShowMode} = route.params || {};
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [name, setName] = useState('');
@@ -66,7 +66,7 @@ export default function AddProducts({navigation, route}) {
       // );
 
       // console.log('filteredResults',filteredResults[0].subCategories[0].name)
-      if (!Userfulldata?.shopName) {
+      if (!Userfulldata?.shopName && !isShowMode) {
         Alert.alert(
           'Shop Details Required',
           'Please fill your shop details first , before adding a product.',
@@ -91,6 +91,12 @@ export default function AddProducts({navigation, route}) {
       setSelectedCategories(productData.categories || []);
       setMedia(productData.images?.[0] || null);
     }
+    if (isShowMode && productData) {
+      setName(productData.title || '');
+      setSelectedCategories(productData.categories || []);
+      setMedia(productData.images?.[0] || null);
+    }
+    
   }, [isFocused]);
 
   useEffect(() => {
@@ -240,7 +246,7 @@ export default function AddProducts({navigation, route}) {
         styles.screen,
         {backgroundColor: isDark ? '#000' : '#FFFFFF'},
       ]}>
-      <Header header={isEditMode ? 'Edit Product' : 'Add Product'} />
+      <Header header={isEditMode ? 'Edit Product' :isShowMode ? 'Product Details' : 'Add Product'} />
 
       <Text
         style={[
@@ -258,11 +264,11 @@ export default function AddProducts({navigation, route}) {
               source={{uri: media}}
               style={[styles.mediaSelector, {borderWidth: 0}]}
             />
-            <TouchableOpacity
+           {!isShowMode &&( <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setMedia(null)}>
               <Entypo name="cross" size={25} color={'black'} />
-            </TouchableOpacity>
+            </TouchableOpacity>)}
           </>
         ) : (
           <TouchableOpacity onPress={selectMedia}>
@@ -373,7 +379,7 @@ export default function AddProducts({navigation, route}) {
       </HelperText>
 
       {/* Sticky Add Button */}
-      {!isEditMode && (
+      {!isEditMode &&!isShowMode &&   (
         <View
           style={{
             position: 'sticky',
@@ -497,7 +503,7 @@ export default function AddProducts({navigation, route}) {
         {errors.products}
       </HelperText>
 
-      <TouchableOpacity
+     {!isShowMode &&(   <TouchableOpacity
         style={[styles.blueButton, {margin: '20%'}]}
         onPress={handlePress}
         disabled={isLoading2}>
@@ -510,7 +516,7 @@ export default function AddProducts({navigation, route}) {
             'Submit Products'
           )}
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity>)}
     </ScrollView>
   );
 }
@@ -556,6 +562,7 @@ const styles = StyleSheet.create({
   },
   screen: {
     alignItems: 'center',
+    flex: 1,
     paddingBottom: 20,
   },
   title: {

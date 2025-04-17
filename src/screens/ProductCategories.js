@@ -116,7 +116,13 @@ export default function ProductCategories({navigation,route}) {
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={() => navigation.navigate('sellerProductDetail', { item })}
+            // onPress={() => navigation.navigate('sellerProductDetail', { item })}
+            onPress={() => navigation.navigate('AddProducts', { 
+              productData: item,
+              isShowMode: true 
+            })}
+
+            
           >
             <View
               style={{

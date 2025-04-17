@@ -25,7 +25,7 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {BarChart, YAxis, Grid} from 'react-native-svg-charts';
-import {G, Rect} from 'react-native-svg'; // Use G and Rect for custom SVG if necessary
+import {G, Rect} from 'react-native-svg';
 import * as scale from 'd3-scale';
 import HorizontalRatingButtons from '../components/HorizontalRating';
 import Header from '../components/Header';
@@ -53,16 +53,11 @@ export default function ShopDetails({navigation, route}) {
 
   const shareShopDeepLink = async () => {
     try {
-      // Get shop ID from your data
       const shopId = Data._id || Data.id;
       const shopName = Data.name || 'This shop';
-
-      // Create deep link (replace with your actual domain and path)
       const deepLink = `https://yourdomain.com/shop/${shopId}`;
       const playStoreLink =
         'https://play.google.com/store/apps/details?id=com.yourpackage';
-
-      // Create the share message
       const message =
         `Check out ${shopName} on our app!\n\n` +
         `⭐ Rating: ${Data.averageRating || 'Not rated yet'}\n` +
@@ -70,17 +65,12 @@ export default function ShopDetails({navigation, route}) {
         `🕒 Hours: ${Data.openTime}-${Data.closeTime}\n\n` +
         `${deepLink}\n\n` +
         `Download our app: ${playStoreLink}`;
-
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `whatsapp://send?text=${encodedMessage}`;
-
-      // Check if WhatsApp is installed
       const supported = await Linking.canOpenURL(whatsappUrl);
-
       if (supported) {
         await Linking.openURL(whatsappUrl);
       } else {
-        // Fallback to web version if WhatsApp isn't installed
         const webUrl = `https://wa.me/?text=${encodedMessage}`;
         await Linking.openURL(webUrl);
       }
@@ -95,77 +85,58 @@ export default function ShopDetails({navigation, route}) {
   };
 
   useEffect(() => {
-    // console.log('userId', userId);
-
     if (userId) {
-      // If categoriesPost is missing or empty, fetch the single shop
       if (
         !route?.params?.item?.categoriesPost ||
         route?.params?.item?.categoriesPost.length === 0
       ) {
         getSingleShop(userId);
       }
-
-      // Always fetch shop ratings
       getShopRating(userId);
     }
-  }, [isFocused]); // Run only when screen is focused
+  }, [isFocused]);
 
-  // Separate useEffect to update data when singleShop is fetched
   useEffect(() => {
     if (route?.params?.item?.categoriesPost?.length > 0) {
       setData(route.params.item);
     } else if (singleShop && Object.keys(singleShop).length > 0) {
       setData(singleShop);
     }
-
-    // console.log(
-    //   'route?.params?.item',
-    //   route.params.item,
-    //   'singleShop:',
-    //   singleShop,
-    // );
-  }, [singleShop]); // Runs again when `singleShop` is updated
+  }, [singleShop]);
 
   const handleLike = postId => {
-    PostReviewLikes(postId, route?.params?.item?.userId, 'liketrue');
+    // console.log('postId,userId', postId,userId);
+    PostReviewLikes(postId, userId, 'liketrue');
     if (userId) {
-      // If categoriesPost is missing or empty, fetch the single shop
       if (
         !route?.params?.item?.categoriesPost ||
         route?.params?.item?.categoriesPost.length === 0
       ) {
         getSingleShop(userId);
       }
-
-      // Always fetch shop ratings
       getShopRating(userId);
     }
   };
 
   const handleDislike = postId => {
-    PostReviewLikes(postId, route?.params?.item?.userId, 'disliketrue');
+    PostReviewLikes(postId, userId, 'disliketrue');
     if (userId) {
-      // If categoriesPost is missing or empty, fetch the single shop
       if (
         !route?.params?.item?.categoriesPost ||
         route?.params?.item?.categoriesPost.length === 0
       ) {
         getSingleShop(userId);
       }
-
-      // Always fetch shop ratings
       getShopRating(userId);
     }
   };
 
   const sortedRatings = shopRating?.rating?.length
-    ? [...shopRating.rating] // Clone array properly
-        .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by latest date
+    ? [...shopRating.rating]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
         .map(review => ({
           likeCount: review.likeCount,
           dislikeCount: review.disLikeCount,
-
           id: review._id,
           name: review.name,
           rate: review.rate,
@@ -176,24 +147,14 @@ export default function ShopDetails({navigation, route}) {
         }))
     : [];
 
-  // console.log("Sorted Ratings:", sortedRatings);
-
   const data = shopRating?.result?.map(item => ({
-    value: item.count, // Use count as bar height
-    label: `${item.rate}`, // Label with star rating
+    value: item.count,
+    label: `${item.rate}`,
   }));
 
   const maxValue = Math.max(
     ...(shopRating?.result?.map(item => item.count) || [1]),
   );
-
-  // const highestRatedNumber =
-  //   shopRating?.result?.length > 0
-  //     ? shopRating.result.find(
-  //         item =>
-  //           item.count === Math.max(...shopRating.result.map(i => i.count), 0),
-  //       )?.rate || 0 // Ensure default to 0
-  //     : 0;
 
   const [recentPostList, setrecentPostList] = useState([
     {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
@@ -204,16 +165,9 @@ export default function ShopDetails({navigation, route}) {
     {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
   ]);
 
-  // const dynamicRatings = [
-  //   {label: '3.5', value: '3.5'},
-  //   {label: '4.0', value: '4.0'},
-  //   {label: '4.5', value: '4.5'},
-  //   {label: '5.0', value: '5.0'},
-  //   {label: '4.0', value: '4.0'},
-  // ];
   const dynamicRatings = sortedRatings?.map(item => ({
-    value: item.rate, // Use rate for bar height
-    label: `${item.rate}`, // Label with star rating
+    value: item.rate,
+    label: `${item.rate}`,
   }));
 
   const [index, setIndex] = useState(0);
@@ -225,21 +179,16 @@ export default function ShopDetails({navigation, route}) {
   ]);
 
   const BusinessDetails = ({isDark, Data}) => {
-    // Reusable component for rendering a title
     const Title = ({children, style}) => (
       <Text style={[styles.title, {color: isDark ? 'white' : 'black'}, style]}>
         {children}
       </Text>
     );
-
-    // Reusable component for rendering a subtitle
     const Subtitle = ({children, numberOfLines = 3}) => (
       <Text style={styles.subtitle} numberOfLines={numberOfLines}>
         {children}
       </Text>
     );
-
-    // Data structure for rendering sections
     const sections = [
       {title: 'Address', value: Data?.businessAddress},
       {title: 'Contact', value: Data?.phone},
@@ -267,7 +216,6 @@ export default function ShopDetails({navigation, route}) {
           : Data?.selectedCategories || 'N/A',
       },
     ];
-
     return (
       <View style={styles.detailsContainer}>
         {sections.map((section, index) => (
@@ -282,10 +230,42 @@ export default function ShopDetails({navigation, route}) {
     );
   };
 
-  const [showDetails, setShowDetails] = useState(false);
-
+  const [showDetails, setShowDetails] = useState(true);
   const toggleDetails = () => {
-    setShowDetails(prev => !prev); // Simply toggle the state
+    setShowDetails(prev => !prev);
+  };
+
+  // Calculate dynamic heights for each tab
+  const getDynamicTabHeight = () => {
+    const categories =
+      route?.params?.item?.categoriesPost?.length > 0
+        ? route.params.item.categoriesPost
+        : singleShop?.categoriesPost || [];
+    const ratings = sortedRatings || [];
+    const photos =
+      route?.params?.item?.profile?.length > 0
+        ? route.params.item.profile
+        : singleShop?.profile || [];
+
+    switch (index) {
+      case 0: // Overview
+        let overviewHeight = 320; // Reduced base height for static elements
+        if (showDetails) {
+          overviewHeight += 250; // Reduced height for BusinessDetails
+        }
+        overviewHeight += categories.length * 130; // Categories (120px height + 10px margin)
+        overviewHeight += ratings.length * 100; // Ratings (100px height + 0px margin)
+        overviewHeight += Math.min(Math.ceil(photos.length / 3) * 130, 300); // Photos capped at 300px
+        return overviewHeight;
+      case 1: // Category
+        return 150 + categories.length * 30; // Reduced base height + categories
+      case 2: // Review
+        return 400 + ratings.length * 100; // Reduced base height + ratings
+      case 3: // Photos
+        return 150 + Math.min(Math.ceil(photos.length / 3) * 140, 400); // Base height + capped photos
+      default:
+        return 400; // Reduced fallback
+    }
   };
 
   const Overview = () => (
@@ -312,7 +292,6 @@ export default function ShopDetails({navigation, route}) {
           />
         </TouchableOpacity>
         {showDetails && <BusinessDetails isDark={isDark} Data={Data} />}
-
         <Text
           style={[
             {
@@ -346,14 +325,12 @@ export default function ShopDetails({navigation, route}) {
                 </View>
               ))
             ) : (
-              <Text>No categories available</Text> // Handle empty case gracefully
+              <Text>No categories available</Text>
             )}
           </ScrollView>
         </View>
-
         <TouchableOpacity
           style={styles.blueBotton}
-          // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('productcategories', {
               item:
@@ -370,7 +347,6 @@ export default function ShopDetails({navigation, route}) {
             Categories
           </Text>
         </TouchableOpacity>
-
         <Text
           style={[
             styles.bigText,
@@ -395,7 +371,7 @@ export default function ShopDetails({navigation, route}) {
                 width: Width * 0.7,
               }}>
               <YAxis
-                key={isDark ? 'dark' : 'light'} // Forces re-render when theme changes
+                key={isDark ? 'dark' : 'light'}
                 data={data}
                 yAccessor={({index}) => index}
                 scale={scale.scaleBand}
@@ -407,7 +383,6 @@ export default function ShopDetails({navigation, route}) {
                   fontWeight: 'bold',
                 }}
               />
-
               <BarChart
                 style={{flex: 1, marginLeft: 8}}
                 data={data}
@@ -417,18 +392,17 @@ export default function ShopDetails({navigation, route}) {
                 gridMin={0}
                 contentInset={{top: 5, bottom: 10}}>
                 <Grid direction={Grid.Direction.VERTICAL} />
-
                 <G>
                   {data?.map((item, index) => (
                     <Rect
                       key={index}
                       x={0}
                       y={index * 36 + 20}
-                      width={(item.value / maxValue) * 100} // Normalize width
-                      height={10} // Height of each bar
-                      rx={4} // Rounded corners (radius)
-                      ry={4} // Rounded corners (radius)
-                      fill="rgba(255, 180, 0, 1)" // Custom fill
+                      width={(item.value / maxValue) * 100}
+                      height={10}
+                      rx={4}
+                      ry={4}
+                      fill="rgba(255, 180, 0, 1)"
                     />
                   ))}
                 </G>
@@ -443,7 +417,6 @@ export default function ShopDetails({navigation, route}) {
               No enough data to show Ratings Graph
             </Text>
           )}
-
           <View style={{marginTop: '10%'}}>
             <View style={{flexDirection: 'row'}}>
               <Text
@@ -466,7 +439,6 @@ export default function ShopDetails({navigation, route}) {
                 style={{marginTop: 8, marginLeft: 5, alignSelf: 'center'}}
               />
             </View>
-
             <Text
               numberOfLines={1}
               style={[
@@ -481,7 +453,6 @@ export default function ShopDetails({navigation, route}) {
               ]}>
               {sortedRatings?.length} Reviews
             </Text>
-
             <Text
               numberOfLines={1}
               style={[
@@ -498,7 +469,6 @@ export default function ShopDetails({navigation, route}) {
             </Text>
           </View>
         </View>
-
         <Text
           style={[
             styles.bigText,
@@ -513,12 +483,9 @@ export default function ShopDetails({navigation, route}) {
           ]}>
           Recent rating review
         </Text>
-
         <HorizontalRatingButtons ratings={dynamicRatings} />
-
         <TouchableOpacity
           style={styles.blueBotton}
-          // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('ratedscreen', {
               item:
@@ -535,31 +502,30 @@ export default function ShopDetails({navigation, route}) {
             Write a review
           </Text>
         </TouchableOpacity>
-
         {sortedRatings?.length > 0 ? (
-           <View style={[styles.ratingsContainer, {marginTop: '2%'}]}>
-           <ScrollView showsVerticalScrollIndicator={false}>
-             {sortedRatings?.length > 0 ? (
-               sortedRatings.map((item, index) => (
-                 <View key={item?.id || index}>
-                   {render2RectangleList(item, index)}
-                 </View>
-               ))
-             ) : (
-               <Text
-                 style={[
-                   styles.smallText,
-                   {
-                     color: isDark ? 'white' : 'black',
-                     alignSelf: 'center',
-                     paddingVertical: 20,
-                   },
-                 ]}>
-                 No Ratings Available
-               </Text>
-             )}
-           </ScrollView>
-         </View>
+          <View style={[styles.ratingsContainer, {marginTop: '2%'}]}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {sortedRatings?.length > 0 ? (
+                sortedRatings.map((item, index) => (
+                  <View key={item?.id || index}>
+                    {render2RectangleList(item, index)}
+                  </View>
+                ))
+              ) : (
+                <Text
+                  style={[
+                    styles.smallText,
+                    {
+                      color: isDark ? 'white' : 'black',
+                      alignSelf: 'center',
+                      paddingVertical: 20,
+                    },
+                  ]}>
+                  No Ratings Available
+                </Text>
+              )}
+            </ScrollView>
+          </View>
         ) : (
           <Text
             style={[
@@ -584,48 +550,47 @@ export default function ShopDetails({navigation, route}) {
           Photos
         </Text>
         <View style={{width: '95%', marginLeft: 10}}>
-  <View style={{marginTop: '2%', padding: 5}}>
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      scrollEnabled={false}
-      style={{
-        maxHeight: 300, // Set your desired maximum height here
-      }}
-    >
-      {Array.from(
-        {
-          length: Math.ceil(
-            (route?.params?.item?.profile?.length > 0
-              ? route?.params?.item?.profile
-              : singleShop?.profile || []
-            ).length / 3,
-          ),
-        },
-        (_, rowIndex) => (
-          <View
-            key={rowIndex}
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
-            {(route?.params?.item?.profile?.length > 0
-              ? route?.params?.item?.profile
-              : singleShop?.profile || []
-            )
-              .slice(rowIndex * 3, rowIndex * 3 + 3)
-              .map((item, index) => (
-                <View
-                  key={item.id || `photo-${index}`}
-                  style={{flex: 1, margin: 5}}>
-                  {renderPhotosList(item, index)}
-                </View>
-              ))}
+          <View style={{marginTop: '2%', padding: 5}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              style={{
+                maxHeight: 300,
+              }}>
+              {Array.from(
+                {
+                  length: Math.ceil(
+                    (route?.params?.item?.profile?.length > 0
+                      ? route?.params?.item?.profile
+                      : singleShop?.profile || []
+                    ).length / 3,
+                  ),
+                },
+                (_, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    {(route?.params?.item?.profile?.length > 0
+                      ? route?.params?.item?.profile
+                      : singleShop?.profile || []
+                    )
+                      .slice(rowIndex * 3, rowIndex * 3 + 3)
+                      .map((item, index) => (
+                        <View
+                          key={item.id || `photo-${index}`}
+                          style={{flex: 1, margin: 5}}>
+                          {renderPhotosList(item, index)}
+                        </View>
+                      ))}
+                  </View>
+                ),
+              )}
+            </ScrollView>
           </View>
-        ),
-      )}
-    </ScrollView>
-  </View>
-</View>
+        </View>
       </View>
     </View>
   );
@@ -664,10 +629,8 @@ export default function ShopDetails({navigation, route}) {
             ))}
           </ScrollView>
         </View>
-
         <TouchableOpacity
           style={styles.blueBotton}
-          // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('productcategories', {
               item:
@@ -687,6 +650,7 @@ export default function ShopDetails({navigation, route}) {
       </View>
     </View>
   );
+
   const Review = () => (
     <View>
       <View style={{height: '75%', flexGrow: 1}}>
@@ -714,7 +678,7 @@ export default function ShopDetails({navigation, route}) {
                 width: Width * 0.7,
               }}>
               <YAxis
-                key={isDark ? 'dark' : 'light'} // Forces re-render when theme changes
+                key={isDark ? 'dark' : 'light'}
                 data={data}
                 yAccessor={({index}) => index}
                 scale={scale.scaleBand}
@@ -726,7 +690,6 @@ export default function ShopDetails({navigation, route}) {
                   fontWeight: 'bold',
                 }}
               />
-
               <BarChart
                 style={{flex: 1, marginLeft: 8}}
                 data={data}
@@ -736,18 +699,17 @@ export default function ShopDetails({navigation, route}) {
                 gridMin={0}
                 contentInset={{top: 5, bottom: 10}}>
                 <Grid direction={Grid.Direction.VERTICAL} />
-
                 <G>
                   {data?.map((item, index) => (
                     <Rect
                       key={index}
                       x={0}
                       y={index * 36 + 20}
-                      width={(item.value / maxValue) * 100} // Normalize width
-                      height={10} // Height of each bar
-                      rx={4} // Rounded corners (radius)
-                      ry={4} // Rounded corners (radius)
-                      fill="rgba(255, 180, 0, 1)" // Custom fill
+                      width={(item.value / maxValue) * 100}
+                      height={10}
+                      rx={4}
+                      ry={4}
+                      fill="rgba(255, 180, 0, 1)"
                     />
                   ))}
                 </G>
@@ -762,7 +724,6 @@ export default function ShopDetails({navigation, route}) {
               No enough data to show Ratings Graph
             </Text>
           )}
-
           <View style={{marginTop: '10%'}}>
             <View style={{flexDirection: 'row'}}>
               <Text
@@ -785,7 +746,6 @@ export default function ShopDetails({navigation, route}) {
                 style={{marginTop: 8, marginLeft: 5, alignSelf: 'center'}}
               />
             </View>
-
             <Text
               numberOfLines={1}
               style={[
@@ -793,7 +753,6 @@ export default function ShopDetails({navigation, route}) {
                 {
                   alignSelf: 'flex-start',
                   fontSize: 12,
-                  color: isDark ? 'white' : 'black',
                   color: 'grey',
                   marginTop: 10,
                   marginBottom: 0,
@@ -801,7 +760,6 @@ export default function ShopDetails({navigation, route}) {
               ]}>
               {sortedRatings?.length} Reviews
             </Text>
-
             <Text
               numberOfLines={1}
               style={[
@@ -832,12 +790,9 @@ export default function ShopDetails({navigation, route}) {
           ]}>
           Recent rating review
         </Text>
-
         <HorizontalRatingButtons ratings={dynamicRatings} />
-
         <TouchableOpacity
           style={styles.blueBotton}
-          // onPress={() => setModalVisible(true)}
           onPress={() =>
             navigation.navigate('ratedscreen', {
               item:
@@ -854,7 +809,6 @@ export default function ShopDetails({navigation, route}) {
             Write a review
           </Text>
         </TouchableOpacity>
-
         <View style={[styles.ratingsContainer, {marginTop: '2%'}]}>
           <ScrollView showsVerticalScrollIndicator={false}>
             {sortedRatings?.length > 0 ? (
@@ -899,48 +853,47 @@ export default function ShopDetails({navigation, route}) {
         Photos
       </Text>
       <View style={{width: '95%', marginLeft: 10}}>
-  <View style={{marginTop: '2%', padding: 5}}>
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      scrollEnabled={false}
-      style={{
-        maxHeight: 300, // Set your desired maximum height here
-      }}
-    >
-      {Array.from(
-        {
-          length: Math.ceil(
-            (route?.params?.item?.profile?.length > 0
-              ? route?.params?.item?.profile
-              : singleShop?.profile || []
-            ).length / 3,
-          ),
-        },
-        (_, rowIndex) => (
-          <View
-            key={rowIndex}
+        <View style={{marginTop: '2%', padding: 5}}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
+              maxHeight: 300,
             }}>
-            {(route?.params?.item?.profile?.length > 0
-              ? route?.params?.item?.profile
-              : singleShop?.profile || []
-            )
-              .slice(rowIndex * 3, rowIndex * 3 + 3)
-              .map((item, index) => (
+            {Array.from(
+              {
+                length: Math.ceil(
+                  (route?.params?.item?.profile?.length > 0
+                    ? route?.params?.item?.profile
+                    : singleShop?.profile || []
+                  ).length / 3,
+                ),
+              },
+              (_, rowIndex) => (
                 <View
-                  key={item.id || `photo-${index}`}
-                  style={{flex: 1, margin: 5}}>
-                  {renderPhotosList(item, index)}
+                  key={rowIndex}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  {(route?.params?.item?.profile?.length > 0
+                    ? route?.params?.item?.profile
+                    : singleShop?.profile || []
+                  )
+                    .slice(rowIndex * 3, rowIndex * 3 + 3)
+                    .map((item, index) => (
+                      <View
+                        key={item.id || `photo-${index}`}
+                        style={{flex: 1, margin: 5}}>
+                        {renderPhotosList(item, index)}
+                      </View>
+                    ))}
                 </View>
-              ))}
-          </View>
-        ),
-      )}
-    </ScrollView>
-  </View>
-</View>
+              ),
+            )}
+          </ScrollView>
+        </View>
+      </View>
     </View>
   );
 
@@ -960,7 +913,6 @@ export default function ShopDetails({navigation, route}) {
           alignItems: 'center',
         }}
         onPress={() =>
-          // console.log('first', item),
           navigation.navigate('productcategories', {
             item:
               route?.params?.item?.categoriesPost?.length > 0
@@ -983,7 +935,6 @@ export default function ShopDetails({navigation, route}) {
             style={{width: '100%', height: '100%'}}
           />
         </View>
-
         <Text
           numberOfLines={1}
           style={[styles.recListText, {color: isDark ? '#fff' : '#000'}]}>
@@ -1022,91 +973,10 @@ export default function ShopDetails({navigation, route}) {
               marginBottom: 0,
             }}>
             <Image
-              // source={item.img}
-
               source={{uri: item.profile[0]}}
               style={{width: '100%', height: '100%'}}
             />
           </View>
-          {/* <Entypo
-            name={'dots-three-vertical'}
-            size={16}
-            color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-            style={{position: 'absolute', right: 10, top: 20}}
-            onPress={() => toggleModal(item._id)}
-          />
-          {selectedItemId === item._id && (
-            <Pressable
-              style={{
-                position: 'absolute',
-                alignSelf: 'flex-end',
-                top: 10,
-                right: 24,
-              }}
-              onPress={() => {}}>
-              <View
-                style={[
-                  styles.modalContent,
-                  {
-                    backgroundColor: isDark ? '#121212' : 'white',
-                  },
-                ]}>
-                <TouchableOpacity
-                  style={{
-                    padding: 4,
-
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: 20,
-                  }}
-                  onPress={() => {}}>
-                  <Text
-                    style={[
-                      {
-                        fontSize: 16,
-                        marginLeft: 5,
-                        fontWeight: '500',
-                        color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-                      },
-                    ]}>
-                    Edit
-                  </Text>
-                </TouchableOpacity>
-
-                <View
-                  style={{
-                    height: 1,
-                    backgroundColor: 'lightgrey',
-                    width: 120,
-                    alignSelf: 'center',
-                    borderRadius: 10,
-                  }}
-                />
-
-                <TouchableOpacity
-                  style={{
-                    padding: 4,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: 20,
-                  }}
-                  onPress={() => {}}>
-                  <Text
-                    style={[
-                      {
-                        fontSize: 16,
-                        marginLeft: 5,
-                        fontWeight: '500',
-                        color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-                      },
-                    ]}>
-                    Delete
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </Pressable>
-          )} */}
-          <View></View>
           <View>
             <Text
               numberOfLines={1}
@@ -1120,7 +990,6 @@ export default function ShopDetails({navigation, route}) {
               ]}>
               {item.name}
             </Text>
-
             <View
               style={{
                 flexDirection: 'row',
@@ -1140,20 +1009,14 @@ export default function ShopDetails({navigation, route}) {
                     width: '80%',
                   },
                 ]}>
-                {/* 12 reviews */}
                 {item.feedback}
               </Text>
             </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-              }}>
+            <View style={{flexDirection: 'row'}}>
               <RatingTest fixedRating={item.rate} />
             </View>
           </View>
         </View>
-
         <View
           style={{
             flexDirection: 'row',
@@ -1175,7 +1038,6 @@ export default function ShopDetails({navigation, route}) {
             ]}>
             {item.timeAgo}
           </Text>
-
           <Pressable
             style={{
               marginRight: 15,
@@ -1205,7 +1067,6 @@ export default function ShopDetails({navigation, route}) {
               {item.likeCount}
             </Text>
           </Pressable>
-
           <Pressable
             style={{
               marginRight: 15,
@@ -1235,64 +1096,6 @@ export default function ShopDetails({navigation, route}) {
               {item.dislikeCount}
             </Text>
           </Pressable>
-
-          {/* <Pressable
-            style={{
-              marginRight: 15,
-              borderRadius: 5,
-              borderWidth: 1,
-              padding: 5,
-              flexDirection: 'row',
-              borderColor: 'rgba(228, 228, 228, 1)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onPress={() => navigation.navigate('messages', {item: item})}>
-            <FontAwesome
-              name={'commenting-o'}
-              size={16}
-              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-            />
-            <Text
-              style={[
-                {
-                  marginLeft: 5,
-                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-                  fontWeight: '500',
-                  fontSize: 12,
-                },
-              ]}>
-              comment
-            </Text>
-          </Pressable> */}
-
-          {/* <View
-            style={{
-              borderRadius: 5,
-              borderWidth: 1,
-              padding: 5,
-              flexDirection: 'row',
-              borderColor: 'rgba(228, 228, 228, 1)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Feather
-              name={'send'}
-              size={16}
-              color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-            />
-            <Text
-              style={[
-                {
-                  marginLeft: 5,
-                  color: isDark ? '#fff' : 'rgba(94, 95, 96, 1)',
-                  fontWeight: '500',
-                  fontSize: 12,
-                },
-              ]}>
-              share
-            </Text>
-          </View> */}
         </View>
       </Pressable>
     );
@@ -1313,21 +1116,6 @@ export default function ShopDetails({navigation, route}) {
     );
   };
 
-  const getTabHeight = () => {
-    switch (index) {
-      case 0:
-        return 1680; // Height for Tab 1
-      case 1:
-        return 430; // Height for Tab 2
-      case 2:
-        return 950; // Height for Tab 3
-      case 3:
-        return 600; // Height for Tab 3
-      default:
-        return 200;
-    }
-  };
-
   return (
     <View style={{flex: 1}}>
       <ScrollView
@@ -1341,7 +1129,6 @@ export default function ShopDetails({navigation, route}) {
             alignItems: 'center',
           }}>
           <Header header={'Shop Details'} />
-
           {route?.params?.item?.profile?.length > 0 ? (
             <Image
               source={{uri: route?.params?.item?.profile[0]}}
@@ -1356,7 +1143,7 @@ export default function ShopDetails({navigation, route}) {
               source={
                 singleShop?.profile?.[0]
                   ? {uri: singleShop.profile[0]}
-                  : require('../assets/shop-pic.png') // Replace with your local placeholder image
+                  : require('../assets/shop-pic.png')
               }
               style={{
                 width: Width * 0.9,
@@ -1365,7 +1152,6 @@ export default function ShopDetails({navigation, route}) {
               resizeMode="contain"
             />
           )}
-
           <View
             style={{
               flexDirection: 'row',
@@ -1403,23 +1189,9 @@ export default function ShopDetails({navigation, route}) {
                   }}>
                   {Data?.shopName?.length > 0 ? Data?.shopName : Data?.name}
                 </Text>
-
-                {/* <Text
-                  numberOfLines={1}
-                  style={{
-                    fontSize: 13,
-                    fontWeight: '500',
-                    marginTop: 0,
-                    color: isDark
-                      ? 'rgba(255, 255, 255, 1)'
-                      : 'rgba(0, 0, 0, 0.4)',
-                  }}>
-                  {Data?.name}
-                </Text> */}
               </View>
             </View>
           </View>
-
           <View
             style={{
               alignSelf: 'flex-start',
@@ -1446,7 +1218,6 @@ export default function ShopDetails({navigation, route}) {
               </Text>
               <RatingTest fixedRating={Data.averageRating} />
             </View>
-
             <View
               style={[
                 styles.inputContainer,
@@ -1486,7 +1257,6 @@ export default function ShopDetails({navigation, route}) {
                     {Data.openTime}-{Data.closeTime}
                   </Text>
                 </View>
-
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <Text
                     style={{
@@ -1515,7 +1285,6 @@ export default function ShopDetails({navigation, route}) {
               </View>
             </View>
           </View>
-
           <View
             style={{
               flexDirection: 'row',
@@ -1530,7 +1299,6 @@ export default function ShopDetails({navigation, route}) {
                 color="rgba(255, 255, 255, 1)"
               />
             </Pressable>
-
             <Pressable
               style={[
                 styles.iconStyle,
@@ -1548,7 +1316,6 @@ export default function ShopDetails({navigation, route}) {
                 color="rgba(255, 255, 255, 1)"
               />
             </Pressable>
-
             <Pressable
               style={[
                 styles.iconStyle,
@@ -1568,7 +1335,6 @@ export default function ShopDetails({navigation, route}) {
                 color="rgba(255, 255, 255, 1)"
               />
             </Pressable>
-
             <Pressable
               style={[
                 styles.iconStyle,
@@ -1582,8 +1348,7 @@ export default function ShopDetails({navigation, route}) {
               />
             </Pressable>
           </View>
-
-          <View style={[styles.tabContainer, {height: getTabHeight()}]}>
+          <View style={[styles.tabContainer, {height: getDynamicTabHeight()}]}>
             <TabView
               swipeEnabled={false}
               navigationState={{index, routes}}
@@ -1593,19 +1358,19 @@ export default function ShopDetails({navigation, route}) {
               renderTabBar={props => (
                 <TabBar
                   {...props}
-                  indicatorStyle={{backgroundColor: isDark ? 'white' : 'black'}} // Active tab indicator
+                  indicatorStyle={{backgroundColor: isDark ? 'white' : 'black'}}
                   style={{
-                    backgroundColor: isDark ? 'black' : 'white', // Tab bar background color
-                    borderTopWidth: 1, // Top border
-                    borderBottomWidth: 1, // Bottom border
+                    backgroundColor: isDark ? 'black' : 'white',
+                    borderTopWidth: 1,
+                    borderBottomWidth: 1,
                     borderColor: isDark
                       ? 'rgba(0, 0, 0, 0.1)'
-                      : 'rgba(0, 0, 0, 0.1)', // Border color
+                      : 'rgba(0, 0, 0, 0.1)',
                   }}
                   labelStyle={{
-                    fontWeight: 'bold', // Ensure bold label
-                    color: isDark ? 'white' : 'black', // Force black color for labels
-                    textTransform: 'none', // Disable any text transformation (like uppercase)
+                    fontWeight: 'bold',
+                    color: isDark ? 'white' : 'black',
+                    textTransform: 'none',
                   }}
                   activeColor={isDark ? 'white' : 'black'}
                   inactiveColor="grey"
@@ -1697,7 +1462,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   tabContainer: {
-    height: Height * 1.8,
     marginTop: 20,
     marginBottom: 10,
     width: '100%',
@@ -1742,7 +1506,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(255, 255, 255)',
     width: Width,
     marginRight: 10,
-
     height: 100,
     justifyContent: 'flex-start',
     alignItems: 'center',

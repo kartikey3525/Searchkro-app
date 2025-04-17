@@ -442,14 +442,14 @@ const ChatScreen = ({ navigation, route }) => {
               {item.isOnline ? 'Active' : 'offline'}
             </Text>
           </View>
-          <Entypo
+          {/* <Entypo
             onPress={() => toggleModal('item.id')}
             name="dots-three-vertical"
             size={24}
             color={isDark ? '#fff' : '#000'}
             style={{ alignSelf: 'flex-start', marginTop: 10 }}
-          />
-          {selectedItemId === 'item.id' && (
+          /> */}
+          {/* {selectedItemId === 'item.id' && (
             <Pressable
               style={{
                 position: 'absolute',
@@ -557,7 +557,7 @@ const ChatScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
               </View>
             </Pressable>
-          )}
+          )} */}
         </View>
 
         <FlatList

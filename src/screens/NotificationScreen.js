@@ -32,7 +32,7 @@ export default function NotificationScreen({ navigation ,route}) {
 
   useEffect(() => {
     if (isFocused) {
-      console.log('Fetching notifications...');
+      // console.log('Fetching notifications...');
       getNotification();
       markNotificationsAsRead();
     }
@@ -77,7 +77,15 @@ export default function NotificationScreen({ navigation ,route}) {
         borderColor: isDark ? '#ccc' : '#fff',
         borderBottomWidth: 1,
       }}
-      onPress={() => [userRole==='buyer'?navigation.navigate('shopdetails', {item:item.data.userId}):navigation.navigate('sellerProductDetail', {item:item.data})]}
+      onPress={() => {
+        if (!item?.dataPayload) return; // Don't navigate if dataPayload is null/undefined
+        
+        if (userRole === 'buyer') {
+          navigation.navigate('shopdetails', {item: item.dataPayload});
+        } else {
+          navigation.navigate('sellerProductDetail', {item: item.dataPayload});
+        }
+      }}
       onLongPress={() => handleLongPress(item)}>
       <View
         style={[
@@ -90,9 +98,11 @@ export default function NotificationScreen({ navigation ,route}) {
         <Image
           // source={require('../assets/User-image.png')} // Replace with dynamic image if available
           source={
-            item?.data?.images?.[0] 
-              ? { uri: item.data.images[0] } 
-              : require('../assets/User-image.png')
+            item?.dataPayload?.image 
+              ? { uri: item.dataPayload.image } 
+              : item?.dataPayload?.images?.[0]
+                ? { uri: item.dataPayload.images[0] } 
+                : require('../assets/User-image.png')
           }
           style={{
             width: 66,
