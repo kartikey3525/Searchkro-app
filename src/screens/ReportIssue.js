@@ -5,8 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Modal,
+  ScrollView, 
   ActivityIndicator, 
 } from 'react-native';
 import React, {useContext, useEffect} from 'react';
@@ -18,6 +17,7 @@ import {AuthContext} from '../context/authcontext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'react-native-image-picker';
 import {ThemeContext} from '../context/themeContext';
+import { Modal } from 'react-native-paper';
 
 import {Dimensions} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';

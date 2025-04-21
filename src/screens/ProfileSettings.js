@@ -5,8 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Pressable,
-  Modal,
+  Pressable, 
   ActivityIndicator,
 } from 'react-native';
 import React, {
@@ -26,6 +25,7 @@ import DatePicker from 'react-native-date-picker';
 import Header from '../components/Header';
 import useImagePicker from '../hooks/useImagePicker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Modal } from 'react-native-paper';
 
 const {width: Width, height: Height} = Dimensions.get('window');
 

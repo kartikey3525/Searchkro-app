@@ -7,9 +7,9 @@ import {
   FlatList,
   Image,
   StyleSheet,
-  Pressable,
-  Modal, // Added for image modal
+  Pressable, 
 } from 'react-native';
+import { Modal } from 'react-native-paper';
 import io from 'socket.io-client';
 import { launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';

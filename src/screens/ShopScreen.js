@@ -6,8 +6,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  Pressable,
-  Modal,
+  Pressable, 
   Linking,
 } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -24,6 +23,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { AuthContext } from '../context/authcontext';
 import RatingTest from '../components/RatingTest';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
+import { Modal } from 'react-native-paper';
 
 export default function ShopScreen({ navigation, route }) {
   const { theme } = useContext(ThemeContext);

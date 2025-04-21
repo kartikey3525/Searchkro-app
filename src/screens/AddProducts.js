@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   },
   screen: {
     alignItems: 'center',
-    flex: 1,
+    // flex: 1,
     paddingBottom: 20,
   },
   title: {

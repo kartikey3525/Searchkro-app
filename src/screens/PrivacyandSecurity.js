@@ -3,8 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
-  Modal,
+  Dimensions, 
   TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -13,6 +12,7 @@ import {ThemeContext} from '../context/themeContext';
 import Header from '../components/Header';
 import { AuthContext } from '../context/authcontext';
 import { useIsFocused } from '@react-navigation/native';
+import { Modal } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;

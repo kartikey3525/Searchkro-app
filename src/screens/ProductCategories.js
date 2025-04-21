@@ -1,35 +1,32 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
   Text,
-  FlatList,
   TouchableOpacity,
   Image,
   ScrollView,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
+import { AnimatedTabView, TabBar } from 'reanimated-tab-view'; // Import reanimated-tab-view
+import { Dimensions } from 'react-native';
+import { AuthContext } from '../context/authcontext';
+import { ThemeContext } from '../context/themeContext';
 
-import {Dimensions} from 'react-native';
-import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-import {ThemeContext} from '../context/themeContext';
 
-export default function ProductCategories({navigation,route}) {
-  const [numColumns, setNumColumns] = useState(4);
-  const isFocused = useIsFocused(); 
-  const {theme} = useContext(ThemeContext);
+export default function ProductCategories({ navigation, route }) {
+  const isFocused = useIsFocused();
+  const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const {VerifyOTP, handleLogin, getCategories, userdata, categorydata} =
-    useContext(AuthContext);
+  const { getCategories } = useContext(AuthContext);
 
   useEffect(() => {
-    // getCategories();
-    console.log('route data', route.params.item)
+    // getCategories(); // Uncomment if needed
+    console.log('route data', route.params?.item);
   }, [isFocused]);
 
   const [categories, setCategories] = useState([]);
@@ -43,14 +40,14 @@ export default function ProductCategories({navigation,route}) {
 
       // Extract unique categories
       const categorySet = new Set();
-      allItems.forEach(item => {
-        item.categories.forEach(category => categorySet.add(category));
+      allItems.forEach((item) => {
+        item.categories.forEach((category) => categorySet.add(category));
       });
 
       const uniqueCategories = Array.from(categorySet);
 
-      // Create routes for TabView
-      const categoryRoutes = uniqueCategories.map(category => ({
+      // Create routes for AnimatedTabView
+      const categoryRoutes = uniqueCategories.map((category) => ({
         key: category.toLowerCase(),
         title: category,
       }));
@@ -60,42 +57,8 @@ export default function ProductCategories({navigation,route}) {
 
       // Organize items by category
       const categorizedData = {};
-      uniqueCategories.forEach(category => {
-        categorizedData[category] = allItems.filter(item =>
-          item.categories.includes(category)
-        );
-      });
-
-      setFilteredData(categorizedData);
-    }
-  }, [isFocused]);
-
- 
-  useEffect(() => {
-    if (route?.params?.item) {
-      const allItems = route.params.item;
-
-      // Extract unique categories
-      const categorySet = new Set();
-      allItems.forEach(item => {
-        item.categories.forEach(category => categorySet.add(category));
-      });
-
-      const uniqueCategories = Array.from(categorySet);
-
-      // Create routes for TabView
-      const categoryRoutes = uniqueCategories.map(category => ({
-        key: category.toLowerCase(),
-        title: category,
-      }));
-
-      setCategories(uniqueCategories);
-      setRoutes(categoryRoutes);
-
-      // Organize items by category
-      const categorizedData = {};
-      uniqueCategories.forEach(category => {
-        categorizedData[category] = allItems.filter(item =>
+      uniqueCategories.forEach((category) => {
+        categorizedData[category] = allItems.filter((item) =>
           item.categories.includes(category)
         );
       });
@@ -112,17 +75,16 @@ export default function ProductCategories({navigation,route}) {
             key={item._id}
             style={{
               width: Width * 0.295, // 3 items per row
-              margin: 5, // Added margin for spacing
+              margin: 5,
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            // onPress={() => navigation.navigate('sellerProductDetail', { item })}
-            onPress={() => navigation.navigate('AddProducts', { 
-              productData: item,
-              isShowMode: true 
-            })}
-
-            
+            onPress={() =>
+              navigation.navigate('AddProducts', {
+                productData: item,
+                isShowMode: true,
+              })
+            }
           >
             <View
               style={{
@@ -133,11 +95,18 @@ export default function ProductCategories({navigation,route}) {
                 overflow: 'hidden',
               }}
             >
-              <Image source={{ uri: item.images[0] }} style={{ width: '100%', height: '100%' }} />
+              <Image
+                source={{ uri: item.images[0] }}
+                style={{ width: '100%', height: '100%' }}
+              />
             </View>
             <Text
               numberOfLines={1}
-              style={{ color: isDark ? '#fff' : '#000', marginTop: 5 ,width: Width * 0.26,}}
+              style={{
+                color: isDark ? '#fff' : '#000',
+                marginTop: 5,
+                width: Width * 0.26,
+              }}
             >
               {item.title}
             </Text>
@@ -147,61 +116,56 @@ export default function ProductCategories({navigation,route}) {
     );
   };
 
-  const renderScene = routes.reduce((scenes, route) => {
-    scenes[route.key] = () => (
+  const renderScene = ({ route }) => {
+    return (
       <ScrollView>
-        {filteredData[route.title] ? renderRectangleList(filteredData[route.title]) : null}
+        {filteredData[route.title]
+          ? renderRectangleList(filteredData[route.title])
+          : null}
       </ScrollView>
     );
-    return scenes;
-  }, {});
+  };
 
- 
-  const [recentPostList, setrecentPostList] = useState([
-    {id: 1, title: 'Samsung phone', img: require('../assets/sam-phone.png')},
-    {id: 2, title: 'smart watch', img: require('../assets/watch.png')},
-    {id: 3, title: 'Medicine', img: require('../assets/packagedfood.png')},
-    {id: 4, title: 'packaged food', img: require('../assets/clothes.png')},
-    {id: 5, title: 'Groceries', img: require('../assets/groceries.png')},
-    {id: 6, title: 'Furniture', img: require('../assets/furniture.png')},
-    {id: 8, title: 'Food', img: require('../assets/food.png')},
-    {id: 7, title: 'Shoes', img: require('../assets/shoes.png')},
-    {id: 9, title: 'Home service', img: require('../assets/home-service.png')},
-    {id: 10, title: 'Hospital', img: require('../assets/hospital.png')},
-    {id: 11, title: 'Jwellery', img: require('../assets/jwelery.png')},
-    {id: 12, title: 'See more', img: require('../assets/see-more.png')},
-  ]);
- 
+  const renderTabBar = (props) => (
+    <TabBar
+      {...props}
+      indicatorStyle={{
+        backgroundColor: isDark ? 'white' : 'black',
+      }}
+      style={{
+        backgroundColor: isDark ? 'black' : 'white',
+        borderBottomWidth: 1,
+        borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)',
+      }}
+      labelStyle={{
+        fontWeight: 'bold',
+        color: isDark ? 'white' : 'black',
+      }}
+      activeColor={isDark ? 'white' : 'black'}
+      inactiveColor="grey"
+      scrollEnabled={true}
+      tabStyle={{ width: 'auto' }}
+    />
+  );
 
-  const flatListKey = `flat-list-${numColumns}`;
- 
   const getTabHeight = () => {
-    switch (index) {
-      case 0:
-        return 550; // Height for Tab 1
-      case 1:
-        return 550; // Height for Tab 2
-      case 2:
-        return 550; // Height for Tab 3
-      case 3:
-        return 550; // Height for Tab 3
-      default:
-        return 550;
-    }
+    return 550; // Simplified, as all cases return 550
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <ScrollView
-        style={[styles.container, {backgroundColor: isDark ? '#000' : '#fff'}]}
-        showsVerticalScrollIndicator={false}>
+        style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View
           style={{
             marginTop: '2%',
             width: '100%',
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+        >
           <View
             style={{
               alignItems: 'center',
@@ -209,73 +173,38 @@ export default function ProductCategories({navigation,route}) {
               flexDirection: 'row',
               height: 60,
               justifyContent: 'flex-start',
-            }}>
+            }}
+          >
             <Entypo
               onPress={() => navigation.goBack()}
               name="chevron-thin-left"
               size={20}
               color={isDark ? '#fff' : 'rgba(94, 95, 96, 1)'}
-              style={{marginLeft: 20, padding: 5}}
+              style={{ marginLeft: 20, padding: 5 }}
             />
             <Text
-              style={[
-                {
-                  fontSize: 20,
-                  fontWeight: 'bold',
-                  alignSelf: 'center',
-                  marginLeft: '25%',
-                  width: Width * 0.5,
-                  color: isDark ? '#fff' : '#000',
-                },
-              ]}>
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                alignSelf: 'center',
+                marginLeft: '25%',
+                width: Width * 0.5,
+                color: isDark ? '#fff' : '#000',
+              }}
+            >
               Categories
             </Text>
-            {/* <Image
-              source={
-                isDark
-                  ? require('../assets/search-icon-dark.png')
-                  : require('../assets/search-icon.png')
-              }
-              style={{
-                width: 20,
-                height: 20,
-                alignSelf: 'center',
-                left: 10,
-              }}
-              resizeMode="contain"
-            /> */}
           </View>
 
-          <View style={[styles.tabContainer, {height: getTabHeight()}]}>
+          <View style={[styles.tabContainer, { height: getTabHeight() }]}>
             {routes.length > 0 && (
-              <TabView
-                swipeEnabled={false}
-                navigationState={{index, routes}}
-                renderScene={SceneMap(renderScene)}
+              <AnimatedTabView
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
                 onIndexChange={setIndex}
-                initialLayout={{width: Width}}
-                renderTabBar={props => (
-                  <TabBar
-                    {...props}
-                    indicatorStyle={{
-                      backgroundColor: isDark ? 'white' : 'black',
-                    }}
-                    style={{
-                      backgroundColor: isDark ? 'black' : 'white',
-                      borderBottomWidth: 1,
-                      borderColor: isDark ? 'grey' : 'rgba(0, 0, 0, 0.1)',
-                    }}
-                    labelStyle={{
-                      fontWeight: 'bold',
-                      // fontSize: 16,
-                      color: isDark ? 'white' : 'black',
-                    }}
-                    activeColor={isDark ? 'white' : 'black'}
-                    inactiveColor="grey"
-                    scrollEnabled={true} // Enables horizontal scrolling for tabs
-                    tabStyle={{width: 'auto'}} // Prevents tabs from breaking ont
-                  />
-                )}
+                renderTabBar={renderTabBar}
+                initialLayout={{ width: Width }}
+                swipeEnabled={false}
               />
             )}
           </View>

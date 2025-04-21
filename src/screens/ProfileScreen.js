@@ -5,8 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  Pressable,
-  Modal,
+  Pressable, 
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -16,6 +15,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 
 import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
+import { Modal } from 'react-native-paper';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 export default function ProfileScreen({navigation}) {

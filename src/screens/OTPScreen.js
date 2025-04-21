@@ -3,8 +3,7 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableOpacity,
-  Modal,
+  TouchableOpacity, 
   Alert,
   Dimensions,
   ScrollView,
@@ -17,6 +16,7 @@ import {HelperText} from 'react-native-paper';
 import {OtpInput} from 'react-native-otp-entry';
 import {useEffect} from 'react';
 import {ThemeContext} from '../context/themeContext';
+import { Modal } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;

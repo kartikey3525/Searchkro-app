@@ -7,8 +7,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Pressable,
-  Modal,
+  Pressable, 
   BackHandler,
   ToastAndroid,
 } from 'react-native';
@@ -19,6 +18,7 @@ import {Dimensions} from 'react-native';
 import SearchBar from '../components/SearchBar';
 import LocationPermission from '../hooks/uselocation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Modal } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;

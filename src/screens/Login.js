@@ -10,14 +10,14 @@ import {
   Pressable,
   ActivityIndicator,
   Alert,
-  Dimensions,
-  Modal,
+  Dimensions, 
 } from 'react-native';
 import { HelperText } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AuthContext } from '../context/authcontext';
 import { ThemeContext } from '../context/themeContext';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { Modal } from 'react-native-paper';
 
 const { width: Width, height: Height } = Dimensions.get('window');
 

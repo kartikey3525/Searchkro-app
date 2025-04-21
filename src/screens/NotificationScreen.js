@@ -6,8 +6,7 @@ import {
   ScrollView,
   Pressable,
   Image,
-  Dimensions,
-  Modal,
+  Dimensions, 
   TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -16,6 +15,7 @@ import Header from '../components/Header';
 import { AuthContext } from '../context/authcontext';
 import { useIsFocused } from '@react-navigation/native';
 import moment from 'moment';
+import { Modal } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;

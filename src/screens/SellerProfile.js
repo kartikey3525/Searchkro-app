@@ -5,8 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Modal,
+  ScrollView, 
   Keyboard,
   KeyboardAvoidingView,
   Animated,
@@ -31,6 +30,7 @@ import useImagePicker from '../hooks/useImagePicker';
 import KeyboardAvoidingContainer from '../components/KeyboardAvoided';
 import * as ImagePicker from 'react-native-image-crop-picker';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Added DateTimePicker
+import { Modal } from 'react-native-paper';
 
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;

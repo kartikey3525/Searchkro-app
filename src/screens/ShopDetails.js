@@ -13,7 +13,6 @@ import {
 import Octicons from 'react-native-vector-icons/Octicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useIsFocused} from '@react-navigation/native';
 import {ThemeContext} from '../context/themeContext';
@@ -23,14 +22,18 @@ import {Dimensions} from 'react-native';
 import {AuthContext} from '../context/authcontext';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+// import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {BarChart, YAxis, Grid} from 'react-native-svg-charts';
 import {G, Rect} from 'react-native-svg';
 import * as scale from 'd3-scale';
 import HorizontalRatingButtons from '../components/HorizontalRating';
 import Header from '../components/Header';
 import RatingTest from '../components/RatingTest';
-
+// import ScrollableTabView from 'react-native-scrollable-tab-view';
+// import {TabView, TabBar} from 'reanimated-tab-view';
+// import ScrollableTabView from 'react-native-scrollable-tab-view';
+// import { AnimatedTabBar } from 'react-native-animated-tabbar';
+// import { CollapsibleTabView } from 'react-native-collapsible-tab-view';
 export default function ShopDetails({navigation, route}) {
   const {theme} = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -897,13 +900,14 @@ export default function ShopDetails({navigation, route}) {
     </View>
   );
 
-  const renderScene = SceneMap({
-    overview: Overview,
-    category: Category,
-    review: Review,
-    photos: Photos,
-  });
+  // const renderScene = SceneMap({
+  //   overview: Overview,
+  //   category: Category,
+  //   review: Review,
+  //   photos: Photos,
+  // });
 
+ 
   const renderRectangleList = (item, index) => {
     return (
       <TouchableOpacity
@@ -1348,7 +1352,7 @@ export default function ShopDetails({navigation, route}) {
               />
             </Pressable>
           </View>
-          <View style={[styles.tabContainer, {height: getDynamicTabHeight()}]}>
+          {/* <View style={[styles.tabContainer, {height: getDynamicTabHeight()}]}>
             <TabView
               swipeEnabled={false}
               navigationState={{index, routes}}
@@ -1380,7 +1384,8 @@ export default function ShopDetails({navigation, route}) {
                 />
               )}
             />
-          </View>
+          </View> */}
+ 
         </View>
       </ScrollView>
       <View

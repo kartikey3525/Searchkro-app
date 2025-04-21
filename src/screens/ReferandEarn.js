@@ -6,8 +6,7 @@ import {
   ScrollView,
   Pressable,
   Image,
-  Dimensions,
-  Modal,
+  Dimensions, 
   TouchableOpacity,
 } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -17,6 +16,7 @@ import Header from '../components/Header';
 import RNShare from 'react-native-share';
 const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
+import { Modal } from 'react-native-paper';
 
 export default function ReferandEarn({navigation}) {
   const [recentPostList, setRecentPostList] = useState([
